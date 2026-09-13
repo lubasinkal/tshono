@@ -96,7 +96,7 @@
       <li v-for="j in closingSoon" :key="j.id" class="card">
         <NuxtLink :to="`/jobs/${j.id}`" class="cardlink">
           <strong>{{ j.title }}</strong>
-          <span class="co">{{ j.company }} · closes {{ j.closing || 'soon' }} · {{ daysLeft(j.closing, nowDate) }}d left</span>
+          <span class="co">{{ j.company }} · {{ j.closing ? `closes ${j.closing} · ${daysLeft(j.closing, nowDate)}d left` : 'fresh this week' }}</span>
         </NuxtLink>
       </li>
     </ul>
@@ -210,15 +210,21 @@ function companyBase(name: string): string {
   return (j?.location ?? '').toLowerCase()
 }
 
-const closingSoon = computed(() =>
-  allDocs.value
+const closingSoon = computed(() => {
+  const dated = allDocs.value
     .filter((j) => j.closing)
     .map((j) => ({ j, d: daysLeft(j.closing, nowDate) }))
     .filter((x) => x.d >= 0)
     .sort((a, b) => a.d - b.d)
-    .slice(0, 6)
-    .map((x) => x.j),
-)
+    .map((x) => x.j)
+  if (dated.length >= 6) return dated.slice(0, 6)
+  const seen = new Set(dated.map((j) => j.id))
+  const freshTop = [...allDocs.value]
+    .sort((a, b) => epoch(b.posted) - epoch(a.posted))
+    .filter((j) => !seen.has(j.id))
+    .slice(0, 6 - dated.length)
+  return [...dated, ...freshTop]
+})
 
 const palette = ['#4ade80', '#38bdf8', '#f472b6', '#fbbf24', '#a78bfa', '#34d399', '#fb7185', '#22d3ee']
 function sectorColor(name: string): string {
