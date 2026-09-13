@@ -19,4 +19,7 @@ export default defineNuxtConfig({
     '/': { prerender: true },
     '/insights': { prerender: true },
   },
+  typescript: {
+    typeCheck: true,
+  },
 })
