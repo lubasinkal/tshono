@@ -11,7 +11,15 @@
         <span><b>posted</b> {{ postedLabel }}</span>
         <span><b>closes</b> {{ job.closing || 'not stated' }}</span>
       </div>
-      <p class="jobbody">{{ bodyText }}</p>
+      <div class="jobbody">
+        <template v-for="(b, i) in bodyBlocks" :key="i">
+          <h3 v-if="b.kind === 'h'">{{ b.text }}</h3>
+          <ul v-else-if="b.kind === 'ul'">
+            <li v-for="(it, k) in b.items" :key="k">{{ it }}</li>
+          </ul>
+          <p v-else>{{ b.text }}</p>
+        </template>
+      </div>
       <p class="applyrow">
         <a :href="job.url" target="_blank" rel="noopener">apply at source ↗</a>
       </p>
@@ -56,6 +64,45 @@ const bodyText = computed(() => {
   const j = job.value as (SampleJob & { content?: string }) | null | undefined
   if (!j) return ''
   return j.content || j.blurb || 'No further detail captured. Open the source link to read the full advert.'
+})
+
+interface BodyBlock {
+  kind: 'h' | 'ul' | 'p'
+  text: string
+  items: string[]
+}
+
+function isHeading(line: string): boolean {
+  const t = line.trim()
+  if (!t || t.length > 70) return false
+  if (/[:：]$/.test(t)) return true
+  const letters = t.replace(/[^A-Za-z]/g, '')
+  if (letters.length >= 4 && letters === letters.toUpperCase()) return true
+  return /^(job summary|key responsibilities|requirements|qualifications|duties|how to apply|remuneration|competencies|experience|education|closing date|duty station|job type)$/i.test(t.replace(/[:：]$/, '').trim())
+}
+
+const bodyBlocks = computed<BodyBlock[]>(() => {
+  const lines = bodyText.value.split('\n')
+  const blocks: BodyBlock[] = []
+  let list: string[] = []
+  const flush = () => {
+    if (list.length) {
+      blocks.push({ kind: 'ul', text: '', items: list })
+      list = []
+    }
+  }
+  for (const raw of lines) {
+    const line = raw.trim()
+    if (!line) continue
+    if (line.startsWith('•')) {
+      list.push(line.replace(/^•\s*/, ''))
+      continue
+    }
+    flush()
+    blocks.push(isHeading(line) ? { kind: 'h', text: line.replace(/[:：]$/, ''), items: [] } : { kind: 'p', text: line, items: [] })
+  }
+  flush()
+  return blocks.length ? blocks : [{ kind: 'p', text: bodyText.value || 'No detail.', items: [] }]
 })
 const similar = ref<SampleJob[]>([])
 watch(
