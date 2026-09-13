@@ -133,7 +133,12 @@ onMounted(async () => {
     return
   }
   try {
-    const r = (await liveRaw({ q: '', query_by: 'title', per_page: '100' })) as {
+    const r = (await liveRaw({
+      q: '',
+      query_by: 'title',
+      per_page: '100',
+      include_fields: 'title,company,sector,location,url,closing,posted,min_years',
+    })) as {
       hits?: Array<{ document: RawDoc }>
     }
     liveDocs.value =
