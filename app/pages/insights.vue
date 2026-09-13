@@ -1,14 +1,22 @@
 <template>
   <section class="wrap">
     <div class="dhead">
-      <span class="chip">◉ {{ total }} roles tracked</span>
-      <span class="chip">{{ liveDocs ? '● live aggregates' : live ? '○ loading live…' : '○ sample data' }}</span>
+      <span class="chip">◉ {{ loadState === 'loading' ? '…' : total }} roles tracked</span>
+      <span class="chip">{{ loadState === 'ready' && live ? '● live aggregates' : loadState === 'fallback' ? '○ sample data' : live ? '○ loading live…' : '○ sample data' }}</span>
       <span class="updated">updated {{ updated }}</span>
     </div>
 
     <h1 class="title">Hiring Data</h1>
     <p class="sub">See who is hiring in Botswana, where demand sits, and which roles close soon.</p>
 
+    <div v-if="loadState === 'loading'" class="skel">
+      <div class="grid">
+        <div v-for="i in 4" :key="i" class="stat pulse"><b>…</b><span>loading live index</span></div>
+      </div>
+      <div v-for="i in 6" :key="'r' + i" class="row pulse-row"><span></span></div>
+    </div>
+
+    <div v-else>
     <div class="grid">
       <div class="stat"><b>{{ total }}</b><span>roles tracked</span></div>
       <div class="stat"><b>{{ fresh }}</b><span>fresh this week</span></div>
@@ -92,6 +100,7 @@
         </NuxtLink>
       </li>
     </ul>
+    </div>
   </section>
 </template>
 
@@ -116,17 +125,23 @@ const live = isRemote()
 const nowDate = new Date()
 const updated = 'Sep 13, live'
 const liveDocs = ref<SampleJob[] | null>(null)
+const loadState = ref<'loading' | 'ready' | 'fallback'>('loading')
 
 onMounted(async () => {
-  if (!live) return
+  if (!live) {
+    loadState.value = 'ready'
+    return
+  }
   try {
     const r = (await liveRaw({ q: '', query_by: 'title', per_page: '100' })) as {
       hits?: Array<{ document: RawDoc }>
     }
     liveDocs.value =
       (r.hits ?? []).map((h) => toJobHit(h.document as unknown as Record<string, unknown>)) ?? []
+    loadState.value = 'ready'
   } catch {
     liveDocs.value = null
+    loadState.value = 'fallback'
   }
 })
 

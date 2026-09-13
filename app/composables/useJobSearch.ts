@@ -47,7 +47,7 @@ export async function remoteSearch(
   maxYears: number | null,
   page = 1,
   perPage = 20,
-): Promise<{ hits: JobHit[]; found: number }> {
+): Promise<{ hits: JobHit[]; found: number; took: number }> {
   const res = await liveRaw({
     q: query.trim() || '',
     query_by: 'title,company,sector,location,blurb',
@@ -64,8 +64,8 @@ export async function remoteSearch(
         }
       : {}),
   })
-  const r = res as { hits?: Array<{ document: Record<string, unknown> }>; found?: number }
-  return { hits: (r.hits ?? []).map((h) => toJobHit(h.document)), found: r.found ?? 0 }
+  const r = res as { hits?: Array<{ document: Record<string, unknown> }>; found?: number; search_time_ms?: number }
+  return { hits: (r.hits ?? []).map((h) => toJobHit(h.document)), found: r.found ?? 0, took: r.search_time_ms ?? 0 }
 }
 
 export async function liveRaw(params: Record<string, string>): Promise<unknown> {

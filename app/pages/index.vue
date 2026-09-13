@@ -34,7 +34,7 @@
     </div>
 
     <p class="stats">
-      <span>{{ totalCount }} roles{{ ms !== null ? ` in ${ms}ms` : '' }}{{ pages > 1 ? ` · page ${page} of ${pages}` : '' }}</span>
+      <span :title="live && ms !== null ? `round trip ${ms}ms` : ''">{{ totalCount }} roles{{ showMs !== null ? ` · index ${showMs}ms` : '' }}{{ pages > 1 ? ` · page ${page} of ${pages}` : '' }}</span>
       <span class="live-dot">{{ live ? '● live index' : '○ sample data' }}</span>
     </p>
 
@@ -83,7 +83,9 @@ const locations = LOCATIONS
 const live = isRemote()
 const remoteHits = ref<SampleJob[]>([])
 const remoteFound = ref(0)
+const remoteTook = ref<number | null>(null)
 const ms = ref<number | null>(null)
+const showMs = computed(() => (live ? remoteTook.value : ms.value))
 
 const maxYears = computed(() => (exp.value === '' ? null : Number(exp.value)))
 
@@ -136,9 +138,11 @@ async function queueRemote() {
       const r = await remoteSearch(query.value, sector.value, location.value, maxYears.value, page.value, PER_PAGE)
       remoteHits.value = r.hits
       remoteFound.value = r.found
+      remoteTook.value = r.took
     } catch {
       remoteHits.value = []
       remoteFound.value = 0
+      remoteTook.value = null
     }
     ms.value = Math.max(1, Math.round(performance.now() - t0))
   }, 160)
