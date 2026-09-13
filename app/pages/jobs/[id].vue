@@ -5,7 +5,7 @@
       <h1 class="title">{{ job.title }}</h1>
       <p class="sub">{{ job.company }} · {{ job.location }} · {{ job.sector }}</p>
       <p class="meta">
-        Posted {{ job.posted }} · Closes {{ job.closing }} ·
+        Posted {{ postedLabel }} · Closes {{ job.closing }} ·
         {{ job.minYears === 0 ? 'Entry level' : job.minYears + ' years plus' }}
       </p>
       <p>{{ job.blurb }}</p>
@@ -27,11 +27,28 @@
 </template>
 
 <script setup lang="ts">
-import { sampleJobs } from '~/data/sampleJobs'
+import { sampleJobs, type SampleJob } from '~/data/sampleJobs'
+import { remoteGet, isRemote } from '~/composables/useJobSearch'
 
 const route = useRoute()
 const id = String(route.params.id)
-const job = computed(() => sampleJobs.find((j) => j.id === id))
+const live = isRemote()
+
+const { data: remoteJob } = await useAsyncData(`job-${id}`, async () => {
+  if (!live) return null
+  return remoteGet(id)
+}, { server: false })
+
+const job = computed<SampleJob | null | undefined>(
+  () => remoteJob.value ?? sampleJobs.find((j) => j.id === id),
+)
+const postedLabel = computed(() => {
+  const j = job.value
+  if (!j) return ''
+  const p = (j as unknown as Record<string, unknown>).posted
+  if (typeof p === 'number') return new Date(p * 1000).toISOString().slice(0, 10)
+  return String(p ?? '')
+})
 const similar = computed(() =>
   sampleJobs.filter((j) => job.value && j.id !== job.value.id && (j.sector === job.value.sector || j.location === job.value.location)).slice(0, 5),
 )

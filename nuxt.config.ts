@@ -11,6 +11,17 @@ export default defineNuxtConfig({
       ],
     },
   },
+  runtimeConfig: {
+    public: {
+      // Overridden by NUXT_PUBLIC_* env vars on Cloudflare Pages.
+      // Search key must be the scoped search only key, never admin.
+      searchHost: '',
+      searchPort: '443',
+      searchProtocol: 'https',
+      searchKey: '',
+      searchCollection: 'jobs',
+    },
+  },
   nitro: {
     // Static friendly output for Cloudflare Pages. Typesense stays on the VPS.
     preset: 'cloudflare_pages',

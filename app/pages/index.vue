@@ -27,7 +27,7 @@
       </select>
     </div>
 
-    <p class="meta">{{ results.length }} roles found · updated 13 Sep 2026</p>
+    <p class="meta">{{ results.length }} roles found · {{ live ? 'live index' : 'sample data' }} · updated 13 Sep 2026</p>
 
     <ul class="list">
       <li v-for="j in results" :key="j.id" class="card">
@@ -48,8 +48,8 @@
 </template>
 
 <script setup lang="ts">
-import { SECTORS, LOCATIONS } from '~/data/sampleJobs'
-import { searchJobsLocal, daysLeft } from '~/composables/useJobSearch'
+import { SECTORS, LOCATIONS, type SampleJob } from '~/data/sampleJobs'
+import { searchJobsLocal, remoteSearch, isRemote, daysLeft } from '~/composables/useJobSearch'
 
 const route = useRoute()
 const router = useRouter()
@@ -62,10 +62,13 @@ const exp = ref(String(route.query.exp ?? ''))
 
 const sectors = SECTORS
 const locations = LOCATIONS
+const live = isRemote()
+const remoteHits = ref<SampleJob[]>([])
 
-const results = computed(() =>
+const localResults = computed(() =>
   searchJobsLocal(query.value, sector.value, location.value, exp.value === '' ? null : Number(exp.value)),
 )
+const results = computed(() => (live ? remoteHits.value : localResults.value))
 const left = (j: { closing: string }) => daysLeft(j.closing)
 
 // Keep every view shareable through the URL.
@@ -78,16 +81,30 @@ watch([query, sector, location, exp], () => {
       ...(exp.value ? { exp: exp.value } : {}),
     },
   })
+  queueRemote()
 })
 
-// Debounce URL churn while typing fast.
+// Debounced live fetch against Typesense.
 let t: ReturnType<typeof setTimeout> | null = null
-watch(query, () => {
+async function queueRemote() {
+  if (!live) return
   if (t) clearTimeout(t)
-  t = setTimeout(() => {}, 120)
-})
+  t = setTimeout(async () => {
+    try {
+      remoteHits.value = await remoteSearch(
+        query.value,
+        sector.value,
+        location.value,
+        exp.value === '' ? null : Number(exp.value),
+      )
+    } catch {
+      remoteHits.value = []
+    }
+  }, 160)
+}
 
 onMounted(() => {
+  queueRemote()
   window.addEventListener('keydown', (e) => {
     if (e.key === '/' && document.activeElement?.tagName !== 'INPUT') {
       e.preventDefault()
