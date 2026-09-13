@@ -2,7 +2,7 @@
   <section class="wrap">
     <div class="dhead">
       <span class="chip">◉ {{ total }} roles tracked</span>
-      <span class="chip">{{ live ? '● live index' : '○ sample data' }}</span>
+      <span class="chip">{{ liveDocs ? '● live aggregates' : live ? '○ loading live…' : '○ sample data' }}</span>
       <span class="updated">updated {{ updated }}</span>
     </div>
 
@@ -41,7 +41,7 @@
           <td class="rank">{{ String(i + 1).padStart(2, '0') }}</td>
           <td>{{ r.name.toLowerCase() }}</td>
           <td>{{ r.count }}</td>
-          <td>{{ Math.round((r.count / total) * 100) }}%</td>
+          <td>{{ total ? Math.round((r.count / total) * 100) : 0 }}%</td>
           <td :class="r.delta === null ? 'flat' : r.delta >= 0 ? 'up' : 'down'">
             {{ r.delta === null ? 'new' : (r.delta >= 0 ? '+' : '') + r.delta + '%' }}
           </td>
@@ -62,6 +62,20 @@
       </tbody>
     </table>
 
+    <h2 class="sect"><span>#</span> Entry Access. Where beginners get in.</h2>
+    <p class="sub">Roles needing zero years, ranked by sector with a live example.</p>
+    <table class="dtable">
+      <thead><tr><th>rank</th><th>sector</th><th>entry roles</th><th>example</th></tr></thead>
+      <tbody>
+        <tr v-for="(r, i) in entryBySector" :key="r.name">
+          <td class="rank">{{ String(i + 1).padStart(2, '0') }}</td>
+          <td>{{ r.name.toLowerCase() }}</td>
+          <td>{{ r.count }}</td>
+          <td><NuxtLink :to="`/jobs/${r.exampleId}`">{{ r.example.toLowerCase().slice(0, 42) }}</NuxtLink></td>
+        </tr>
+      </tbody>
+    </table>
+
     <h2 class="sect"><span>#</span> Demand by Place. Where the roles sit.</h2>
     <div v-for="r in byPlace" :key="r.name" class="row">
       <span class="rname">{{ r.name.toLowerCase() }}</span>
@@ -74,7 +88,7 @@
       <li v-for="j in closingSoon" :key="j.id" class="card">
         <NuxtLink :to="`/jobs/${j.id}`" class="cardlink">
           <strong>{{ j.title }}</strong>
-          <span class="co">{{ j.company }} · closes {{ j.closing }} · {{ daysLeft(j.closing, nowDate) }}d left</span>
+          <span class="co">{{ j.company }} · closes {{ j.closing || 'soon' }} · {{ daysLeft(j.closing, nowDate) }}d left</span>
         </NuxtLink>
       </li>
     </ul>
@@ -82,64 +96,133 @@
 </template>
 
 <script setup lang="ts">
-import { sampleJobs } from '~/data/sampleJobs'
-import { daysLeft, isRemote } from '~/composables/useJobSearch'
+import { sampleJobs, type SampleJob } from '~/data/sampleJobs'
+import { daysLeft, isRemote, liveRaw } from '~/composables/useJobSearch'
+
+interface RawDoc {
+  id: string
+  title: string
+  company: string
+  sector: string
+  location: string
+  blurb: string
+  url: string
+  closing: string
+  posted: number
+  min_years: number
+}
 
 const live = isRemote()
-const nowDate = new Date('2026-09-13')
-const updated = 'Sep 13, 08:28 PM CAT'
-const total = sampleJobs.length
-const weekAgo = new Date('2026-09-06')
+const nowDate = new Date()
+const updated = 'Sep 13, live'
+const liveDocs = ref<SampleJob[] | null>(null)
 
-const fresh = sampleJobs.filter((j) => new Date(j.posted) >= weekAgo).length
-const urgent = sampleJobs.filter((j) => {
-  const d = daysLeft(j.closing, nowDate)
-  return d >= 0 && d <= 7
-}).length
-const entryShare = Math.round((sampleJobs.filter((j) => j.minYears === 0).length / total) * 100)
+onMounted(async () => {
+  if (!live) return
+  try {
+    const r = (await liveRaw({ q: '', query_by: 'title', per_page: '100' })) as {
+      hits?: Array<{ document: RawDoc }>
+    }
+    liveDocs.value =
+      (r.hits ?? []).map((h) => ({
+        id: h.document.id,
+        title: h.document.title || 'Untitled role',
+        company: h.document.company || 'Hiring firm',
+        sector: h.document.sector || 'General',
+        location: h.document.location || 'Botswana',
+        blurb: h.document.blurb || '',
+        url: h.document.url || '',
+        closing: h.document.closing || '',
+        posted: new Date((h.document.posted || 0) * 1000).toISOString().slice(0, 10),
+        minYears: h.document.min_years ?? 0,
+      })) ?? []
+  } catch {
+    liveDocs.value = null
+  }
+})
+
+const allDocs = computed<SampleJob[]>(() => liveDocs.value ?? sampleJobs)
+const epoch = (iso: string) => new Date(iso + 'T00:00:00').getTime()
+const maxPosted = computed(() => Math.max(...allDocs.value.map((j) => epoch(j.posted)), 0))
+const weekStart = computed(() => maxPosted.value - 6 * 86400000)
+const prevStart = computed(() => maxPosted.value - 13 * 86400000)
+
+const total = computed(() => allDocs.value.length)
+const fresh = computed(() => allDocs.value.filter((j) => epoch(j.posted) >= weekStart.value).length)
+const urgent = computed(
+  () =>
+    allDocs.value.filter((j) => {
+      if (!j.closing) return false
+      const d = daysLeft(j.closing, nowDate)
+      return d >= 0 && d <= 7
+    }).length,
+)
+const entryShare = computed(() =>
+  total.value ? Math.round((allDocs.value.filter((j) => j.minYears === 0).length / total.value) * 100) : 0,
+)
 
 function countBy(key: 'sector' | 'location' | 'company') {
   const m = new Map<string, number>()
-  for (const j of sampleJobs) m.set(j[key], (m.get(j[key]) ?? 0) + 1)
+  for (const j of allDocs.value) m.set(j[key], (m.get(j[key]) ?? 0) + 1)
   return [...m.entries()].map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count)
 }
 
-const bySectorRaw = countBy('sector')
-const byPlace = countBy('location')
-const topCompanies = countBy('company').slice(0, 10)
+const bySectorRaw = computed(() => countBy('sector'))
+const byPlace = computed(() => countBy('location'))
+const topCompanies = computed(() => countBy('company').slice(0, 10))
 
-// Week over week change per sector: this week (Sep 7+) vs prior sample window.
-const bySector = bySectorRaw.map((r) => {
-  const thisW = sampleJobs.filter((j) => j.sector === r.name && new Date(j.posted) >= new Date('2026-09-07')).length
-  const prevW = r.count - thisW
-  const delta = prevW === 0 ? null : Math.round(((thisW - prevW) / prevW) * 100)
-  return { ...r, delta }
+const bySector = computed(() =>
+  bySectorRaw.value.map((r) => {
+    const thisW = allDocs.value.filter((j) => j.sector === r.name && epoch(j.posted) >= weekStart.value).length
+    const prevW = allDocs.value.filter(
+      (j) => j.sector === r.name && epoch(j.posted) >= prevStart.value && epoch(j.posted) < weekStart.value,
+    ).length
+    const delta = prevW === 0 ? null : Math.round(((thisW - prevW) / prevW) * 100)
+    return { ...r, delta }
+  }),
+)
+
+const entryBySector = computed(() => {
+  const m = new Map<string, { count: number; example: string; exampleId: string }>()
+  for (const j of allDocs.value) {
+    if (j.minYears !== 0) continue
+    const e = m.get(j.sector) ?? { count: 0, example: j.title, exampleId: j.id }
+    e.count += 1
+    m.set(j.sector, e)
+  }
+  return [...m.entries()]
+    .map(([name, v]) => ({ name, ...v }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 8)
 })
 
-const closingSoon = [...sampleJobs]
-  .map((j) => ({ j, d: daysLeft(j.closing, nowDate) }))
-  .filter((x) => x.d >= 0)
-  .sort((a, b) => a.d - b.d)
-  .slice(0, 6)
-  .map((x) => x.j)
-
 function companyBase(name: string): string {
-  const j = sampleJobs.find((x) => x.company === name)
+  const j = allDocs.value.find((x) => x.company === name)
   return (j?.location ?? '').toLowerCase()
 }
 
-// Daily stacked flow for the last 9 days, opencode chart feel in pure CSS.
-const axis = ['sep 4', 'sep 6', 'sep 8', 'sep 10', 'sep 12']
+const closingSoon = computed(() =>
+  allDocs.value
+    .filter((j) => j.closing)
+    .map((j) => ({ j, d: daysLeft(j.closing, nowDate) }))
+    .filter((x) => x.d >= 0)
+    .sort((a, b) => a.d - b.d)
+    .slice(0, 6)
+    .map((x) => x.j),
+)
+
 const palette = ['#4ade80', '#38bdf8', '#f472b6', '#fbbf24', '#a78bfa', '#34d399', '#fb7185', '#22d3ee']
 function sectorColor(name: string): string {
-  const i = bySectorRaw.findIndex((r) => r.name === name)
+  const i = bySectorRaw.value.findIndex((r) => r.name === name)
   return palette[Math.max(0, i) % palette.length] ?? palette[0] ?? '#4ade80'
 }
-const daily = (() => {
+
+const daily = computed(() => {
   const days: Array<{ label: string; total: number; segs: Array<{ name: string; count: number }> }> = []
-  for (let d = 4; d <= 12; d++) {
-    const key = `2026-09-${String(d).padStart(2, '0')}`
-    const inDay = sampleJobs.filter((j) => j.posted <= key)
+  for (let back = 8; back >= 0; back--) {
+    const dayMs = maxPosted.value - back * 86400000
+    const key = new Date(dayMs).toISOString().slice(0, 10)
+    const inDay = allDocs.value.filter((j) => epoch(j.posted) <= dayMs + 86399999)
     const m = new Map<string, number>()
     for (const j of inDay) m.set(j.sector, (m.get(j.sector) ?? 0) + 1)
     const segs = [...m.entries()]
@@ -149,10 +232,17 @@ const daily = (() => {
     days.push({ label: key, total: inDay.length, segs })
   }
   return days
-})()
-const maxDay = Math.max(...daily.map((d) => d.total), 1)
-const max = Math.max(...bySectorRaw.map((r) => r.count))
-const pct = (n: number) => Math.round((n / max) * 100)
+})
+const axis = computed(() => {
+  const labels = daily.value.filter((_, i) => i % 2 === 0).map((d) => {
+    const dt = new Date(d.label + 'T00:00:00')
+    return dt.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }).toLowerCase()
+  })
+  return labels
+})
+const maxDay = computed(() => Math.max(...daily.value.map((d) => d.total), 1))
+const max = computed(() => Math.max(...bySectorRaw.value.map((r) => r.count), 1))
+const pct = (n: number) => Math.round((n / max.value) * 100)
 
 useHead({ title: 'tshono data. botswana hiring live' })
 </script>

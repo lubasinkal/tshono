@@ -27,23 +27,30 @@ export async function remoteSearch(
   location: string,
   maxYears: number | null,
 ): Promise<JobHit[]> {
-  const { base, key } = remoteBase()
-  const filters: string[] = []
-  if (sector) filters.push(`sector:=${sector}`)
-  if (location) filters.push(`location:=${location}`)
-  if (maxYears !== null) filters.push(`min_years:<=${maxYears}`)
-  const params: Record<string, string> = {
-    q: query.trim() || '*',
+  const res = await liveRaw({
+    q: query.trim() || '',
     query_by: 'title,company,sector,location,blurb',
     sort_by: 'posted:desc',
     per_page: '50',
-  }
-  if (filters.length) params.filter_by = filters.join(' && ')
-  const res = await $fetch<{ hits?: Array<{ document: JobHit }> }>(`${base}/search`, {
+    ...(sector || location || maxYears !== null
+      ? {
+          filter_by: [
+            ...(sector ? [`sector:=${sector}`] : []),
+            ...(location ? [`location:=${location}`] : []),
+            ...(maxYears !== null ? [`min_years:<=${maxYears}`] : []),
+          ].join(' && '),
+        }
+      : {}),
+  })
+  return ((res as { hits?: Array<{ document: JobHit }> }).hits ?? []).map((h) => h.document)
+}
+
+export async function liveRaw(params: Record<string, string>): Promise<unknown> {
+  const { base, key } = remoteBase()
+  return $fetch(`${base}/search`, {
     params,
     headers: { 'X-TYPESENSE-API-KEY': key },
   })
-  return (res.hits ?? []).map((h) => h.document)
 }
 
 export async function remoteGet(id: string): Promise<JobHit | null> {

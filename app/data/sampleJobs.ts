@@ -20,6 +20,7 @@ export const SECTORS = [
   'Tourism',
   'Mining',
   'NGO',
+  'General',
 ] as const
 
 export const LOCATIONS = [
@@ -32,6 +33,7 @@ export const LOCATIONS = [
   'Kasane',
   'Serowe',
   'Remote',
+  'Botswana',
 ] as const
 
 export const sampleJobs: SampleJob[] = [
