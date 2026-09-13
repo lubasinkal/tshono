@@ -31,7 +31,7 @@
 
 <script setup lang="ts">
 import { sampleJobs, type SampleJob } from '~/data/sampleJobs'
-import { remoteGet, isRemote, type JobHit } from '~/composables/useJobSearch'
+import { remoteGet, isRemote, liveRaw, toJobHit, type JobHit } from '~/composables/useJobSearch'
 
 const route = useRoute()
 const id = String(route.params.id)
@@ -57,8 +57,36 @@ const bodyText = computed(() => {
   if (!j) return ''
   return j.content || j.blurb || 'No further detail captured. Open the source link to read the full advert.'
 })
-const similar = computed(() =>
-  sampleJobs.filter((j) => job.value && j.id !== job.value.id && (j.sector === job.value.sector || j.location === job.value.location)).slice(0, 5),
+const similar = ref<SampleJob[]>([])
+watch(
+  job,
+  async (j) => {
+    if (!j) {
+      similar.value = []
+      return
+    }
+    if (live) {
+      try {
+        const r = (await liveRaw({
+          q: '',
+          query_by: 'title',
+          filter_by: `sector:=${j.sector}`,
+          per_page: '6',
+        })) as { hits?: Array<{ document: Record<string, unknown> }> }
+        similar.value = (r.hits ?? [])
+          .map((h) => toJobHit(h.document))
+          .filter((d) => d.id !== j.id)
+          .slice(0, 5)
+        if (similar.value.length) return
+      } catch {
+        // fall through to sample list below
+      }
+    }
+    similar.value = sampleJobs
+      .filter((s) => s.id !== j.id && (s.sector === j.sector || s.location === j.location))
+      .slice(0, 5)
+  },
+  { immediate: true },
 )
 
 useHead({ title: job.value ? `${job.value.title} · tshono` : 'role · tshono' })
