@@ -137,7 +137,7 @@ onMounted(async () => {
       q: '',
       query_by: 'title',
       per_page: '100',
-      include_fields: 'title,company,sector,location,url,closing,posted,min_years',
+      include_fields: 'id,title,company,sector,location,url,closing,posted,min_years',
     })) as {
       hits?: Array<{ document: RawDoc }>
     }

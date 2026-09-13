@@ -54,7 +54,7 @@ export async function remoteSearch(
     sort_by: 'posted:desc',
     page: String(page),
     per_page: String(perPage),
-    include_fields: 'title,company,sector,location,blurb,url,closing,posted,min_years',
+    include_fields: 'id,title,company,sector,location,blurb,url,closing,posted,min_years',
     ...(sector || location || maxYears !== null
       ? {
           filter_by: [
