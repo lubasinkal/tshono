@@ -4,6 +4,23 @@ export interface JobHit extends SampleJob {
   content?: string
 }
 
+// Typesense stores snake_case. UI reads camelCase. Normalize every live doc here.
+export function toJobHit(d: Record<string, unknown>): JobHit {
+  return {
+    id: String(d.id ?? ''),
+    title: String(d.title ?? 'Untitled role'),
+    company: String(d.company ?? 'Hiring firm'),
+    sector: String(d.sector ?? 'General'),
+    location: String(d.location ?? 'Botswana'),
+    blurb: String(d.blurb ?? ''),
+    url: String(d.url ?? ''),
+    closing: String(d.closing ?? ''),
+    posted: typeof d.posted === 'number' ? new Date(d.posted * 1000).toISOString().slice(0, 10) : String(d.posted ?? ''),
+    minYears: typeof d.min_years === 'number' ? d.min_years : 0,
+    content: typeof d.content === 'string' ? d.content : undefined,
+  }
+}
+
 // Single swap point. Remote Typesense when a search key is configured,
 // otherwise the local sample file. UI code never talks to Typesense directly.
 export function isRemote(): boolean {
@@ -47,8 +64,8 @@ export async function remoteSearch(
         }
       : {}),
   })
-  const r = res as { hits?: Array<{ document: JobHit }>; found?: number }
-  return { hits: (r.hits ?? []).map((h) => h.document), found: r.found ?? 0 }
+  const r = res as { hits?: Array<{ document: Record<string, unknown> }>; found?: number }
+  return { hits: (r.hits ?? []).map((h) => toJobHit(h.document)), found: r.found ?? 0 }
 }
 
 export async function liveRaw(params: Record<string, string>): Promise<unknown> {
@@ -67,8 +84,8 @@ export async function remoteGet(id: string): Promise<JobHit | null> {
       query_by: 'title',
       filter_by: `id:=${id}`,
       per_page: '1',
-    })) as { hits?: Array<{ document: JobHit }> }
-    return res.hits?.[0]?.document ?? null
+    })) as { hits?: Array<{ document: Record<string, unknown> }> }
+    return res.hits?.[0]?.document ? toJobHit(res.hits[0].document) : null
   } catch {
     return null
   }

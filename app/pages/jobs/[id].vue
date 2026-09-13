@@ -62,4 +62,9 @@ const similar = computed(() =>
 )
 
 useHead({ title: job.value ? `${job.value.title} · tshono` : 'role · tshono' })
+useSeoMeta({
+  ogTitle: () => (job.value ? `${job.value.title} · tshono` : 'tshono. find work. fast.'),
+  ogDescription: () => (job.value ? `${job.value.company} · ${job.value.location} · ${job.value.sector}` : 'Every opportunity in Botswana in one instant search.'),
+  ogImage: 'https://tshono.pages.dev/og.png',
+})
 </script>

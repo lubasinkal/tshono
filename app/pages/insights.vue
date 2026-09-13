@@ -97,7 +97,7 @@
 
 <script setup lang="ts">
 import { sampleJobs, type SampleJob } from '~/data/sampleJobs'
-import { daysLeft, isRemote, liveRaw } from '~/composables/useJobSearch'
+import { daysLeft, isRemote, liveRaw, toJobHit } from '~/composables/useJobSearch'
 
 interface RawDoc {
   id: string
@@ -124,18 +124,7 @@ onMounted(async () => {
       hits?: Array<{ document: RawDoc }>
     }
     liveDocs.value =
-      (r.hits ?? []).map((h) => ({
-        id: h.document.id,
-        title: h.document.title || 'Untitled role',
-        company: h.document.company || 'Hiring firm',
-        sector: h.document.sector || 'General',
-        location: h.document.location || 'Botswana',
-        blurb: h.document.blurb || '',
-        url: h.document.url || '',
-        closing: h.document.closing || '',
-        posted: new Date((h.document.posted || 0) * 1000).toISOString().slice(0, 10),
-        minYears: h.document.min_years ?? 0,
-      })) ?? []
+      (r.hits ?? []).map((h) => toJobHit(h.document as unknown as Record<string, unknown>)) ?? []
   } catch {
     liveDocs.value = null
   }
@@ -245,4 +234,9 @@ const max = computed(() => Math.max(...bySectorRaw.value.map((r) => r.count), 1)
 const pct = (n: number) => Math.round((n / max.value) * 100)
 
 useHead({ title: 'tshono data. botswana hiring live' })
+useSeoMeta({
+  ogTitle: 'tshono data. botswana hiring live',
+  ogDescription: 'See who is hiring in Botswana, where demand sits, and which roles close soon.',
+  ogImage: 'https://tshono.pages.dev/og.png',
+})
 </script>
