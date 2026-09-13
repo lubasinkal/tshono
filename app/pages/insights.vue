@@ -133,7 +133,7 @@ const axis = ['sep 4', 'sep 6', 'sep 8', 'sep 10', 'sep 12']
 const palette = ['#4ade80', '#38bdf8', '#f472b6', '#fbbf24', '#a78bfa', '#34d399', '#fb7185', '#22d3ee']
 function sectorColor(name: string): string {
   const i = bySectorRaw.findIndex((r) => r.name === name)
-  return palette[Math.max(0, i) % palette.length]
+  return palette[Math.max(0, i) % palette.length] ?? palette[0] ?? '#4ade80'
 }
 const daily = (() => {
   const days: Array<{ label: string; total: number; segs: Array<{ name: string; count: number }> }> = []
