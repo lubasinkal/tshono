@@ -1,75 +1,50 @@
-# Nuxt Minimal Starter
+# Tshono
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+Every opportunity in Botswana in one fast search.
 
-## Setup
+Public look first build. Search plus job pages plus insights run on local sample
+data. Private engine (n8n scrapers, Postgres, Typesense on VPS) plugs in later
+through one file: `app/composables/useJobSearch.ts`.
 
-Make sure to install dependencies:
+## Stack
+
+Nuxt 4 + Bun. No UI framework on purpose for speed and cheap data.
+
+## Run it
 
 ```bash
-# npm
-npm install
-
-# pnpm
-pnpm install
-
-# yarn
-yarn install
-
-# bun
 bun install
-```
-
-## Development Server
-
-Start the development server on `http://localhost:3000`:
-
-```bash
-# npm
-npm run dev
-
-# pnpm
-pnpm dev
-
-# yarn
-yarn dev
-
-# bun
 bun run dev
 ```
 
-## Production
+Open http://localhost:3000
 
-Build the application for production:
+## Build for Cloudflare Pages
 
 ```bash
-# npm
-npm run build
-
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
-# bun
 bun run build
 ```
 
-Locally preview production build:
+Output uses the `cloudflare_pages` Nitro preset. Point Pages at this repo,
+build command `bun run build`, output dir `.output/public`.
 
-```bash
-# npm
-npm run preview
+Set these Pages env vars later when Typesense goes live on the VPS:
 
-# pnpm
-pnpm preview
+- `NUXT_PUBLIC_SEARCH_HOST`
+- `NUXT_PUBLIC_SEARCH_PORT`
+- `NUXT_PUBLIC_SEARCH_PROTOCOL`
+- `NUXT_PUBLIC_SEARCH_KEY` (search only key, never admin)
+- `NUXT_PUBLIC_TYPESENSE_COLLECTION`
 
-# yarn
-yarn preview
+## Repo split
 
-# bun
-bun run preview
-```
+Public here: UI, docs, sample data, insights queries.
+Private elsewhere: scraper selectors, n8n flows with keys, subscriber data,
+Typesense admin key, Postgres creds.
 
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+## Roadmap
+
+1. Look (now): instant local search, shareable URLs, insights mock
+2. Engine: n8n lake to Postgres, index to Typesense on VPS
+3. Swap: `useJobSearch.ts` calls Typesense, UI untouched
+4. Money: employer posts, featured roles, labour reports

@@ -1,8 +1,38 @@
-
-@font-face {
-  font-family: 'SpaceMono';
-  src: url('/fonts/SpaceMono-Regular.ttf') format('tff');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
+:root { color-scheme: dark; }
+* { box-sizing: border-box; }
+body { background: #0a0c10; color: #eef2f6; font-family: ui-sans-serif, system-ui, Segoe UI, Roboto, sans-serif; }
+a { color: #7dd3a8; }
+.shell { max-width: 880px; margin: 0 auto; padding: 0 16px 48px; }
+.topbar { display: flex; align-items: center; justify-content: space-between; padding: 18px 0; border-bottom: 1px solid #1c2330; }
+.brand { font-weight: 800; font-size: 22px; color: #fff; text-decoration: none; letter-spacing: 0.5px; }
+.nav { display: flex; gap: 16px; }
+.nav a { color: #aeb9c7; text-decoration: none; }
+.nav a.router-link-active { color: #fff; }
+.wrap { padding: 28px 0; }
+.title { font-size: clamp(26px, 5vw, 40px); line-height: 1.1; margin: 0 0 8px; }
+.sub { color: #aeb9c7; margin: 0 0 20px; }
+.bar { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 8px; }
+.bar input, .bar select { background: #121826; border: 1px solid #243049; color: #fff; border-radius: 10px; padding: 12px; font-size: 15px; }
+.meta { color: #8b96a8; font-size: 13px; }
+.list { list-style: none; padding: 0; display: grid; gap: 10px; }
+.card { background: #101623; border: 1px solid #1e2a44; border-radius: 12px; }
+.cardlink { display: grid; gap: 4px; padding: 14px; text-decoration: none; color: inherit; }
+.co { color: #9fb0c7; font-size: 14px; }
+.tags { display: flex; gap: 8px; font-size: 12px; }
+.tags em { font-style: normal; background: #182134; padding: 3px 8px; border-radius: 20px; color: #b9c6da; }
+.tags .hot { background: #3a1f1f; color: #ffb4a8; }
+.blurb { color: #c3cedd; font-size: 14px; }
+.empty { color: #9fb0c7; }
+.grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 18px 0; }
+.stat { background: #101623; border: 1px solid #1e2a44; border-radius: 12px; padding: 14px; display: grid; }
+.stat b { font-size: 26px; }
+.stat span { color: #8b96a8; font-size: 12px; }
+.row { display: grid; grid-template-columns: 140px 1fr 40px; gap: 10px; align-items: center; margin: 6px 0; }
+.rbar { background: #141c2e; border-radius: 8px; height: 10px; display: block; overflow: hidden; }
+.rbar i { display: block; height: 100%; background: #4ade80; }
+.foot { border-top: 1px solid #1c2330; padding-top: 16px; color: #8b96a8; font-size: 13px; }
+@media (max-width: 720px) {
+  .bar { grid-template-columns: 1fr 1fr; }
+  .grid { grid-template-columns: 1fr 1fr; }
+  .row { grid-template-columns: 110px 1fr 32px; }
 }

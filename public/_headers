@@ -1,0 +1,7 @@
+/*
+  Cloudflare Pages cache headers. Fast repeat views, fresh search pages.
+*/
+/insights
+  Cache-Control: public, max-age=300
+/jobs/*
+  Cache-Control: public, max-age=300
