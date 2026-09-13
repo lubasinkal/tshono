@@ -16,7 +16,7 @@ function remoteBase(): { base: string; key: string; collection: string } {
   const c = useRuntimeConfig().public as Record<string, string>
   return {
     base: `${c.searchProtocol || 'https'}://${c.searchHost}/collections/${c.searchCollection || 'jobs'}/documents`,
-    key: c.searchKey,
+    key: c.searchKey ?? '',
     collection: c.searchCollection || 'jobs',
   }
 }
