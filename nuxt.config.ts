@@ -12,6 +12,8 @@ export default defineNuxtConfig({
       link: [
         { rel: 'icon', type: 'image/png', href: '/tshono.png' },
         { rel: 'apple-touch-icon', href: '/tshono.png' },
+        { rel: 'dns-prefetch', href: 'https://ts.lubasiverse.com' },
+        { rel: 'preconnect', href: 'https://ts.lubasiverse.com', crossorigin: '' },
       ],
     },
   },

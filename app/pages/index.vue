@@ -127,32 +127,37 @@ watch(page, () => {
   queueRemote()
 })
 
-// Debounced live fetch against Typesense.
+// Live fetch against Typesense. First paint fires at once, typing waits 160ms.
 let t: ReturnType<typeof setTimeout> | null = null
-async function queueRemote() {
+async function runRemote() {
+  const t0 = performance.now()
+  try {
+    const r = await remoteSearch(query.value, sector.value, location.value, maxYears.value, page.value, PER_PAGE)
+    remoteHits.value = r.hits
+    remoteFound.value = r.found
+    remoteTook.value = r.took
+  } catch {
+    remoteHits.value = []
+    remoteFound.value = 0
+    remoteTook.value = null
+  }
+  ms.value = Math.max(1, Math.round(performance.now() - t0))
+}
+function queueRemote(immediate = false) {
   if (!live) return
   if (t) clearTimeout(t)
-  t = setTimeout(async () => {
-    const t0 = performance.now()
-    try {
-      const r = await remoteSearch(query.value, sector.value, location.value, maxYears.value, page.value, PER_PAGE)
-      remoteHits.value = r.hits
-      remoteFound.value = r.found
-      remoteTook.value = r.took
-    } catch {
-      remoteHits.value = []
-      remoteFound.value = 0
-      remoteTook.value = null
-    }
-    ms.value = Math.max(1, Math.round(performance.now() - t0))
-  }, 160)
+  if (immediate) {
+    runRemote()
+    return
+  }
+  t = setTimeout(runRemote, 160)
 }
 
 onMounted(() => {
   const t0 = performance.now()
   localAll.value
   if (!live) ms.value = Math.max(1, Math.round(performance.now() - t0))
-  queueRemote()
+  queueRemote(true)
   window.addEventListener('keydown', (e) => {
     if (e.key === '/' && document.activeElement?.tagName !== 'INPUT') {
       e.preventDefault()
