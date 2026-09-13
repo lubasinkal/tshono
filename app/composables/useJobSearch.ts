@@ -1,6 +1,8 @@
 import { sampleJobs, type SampleJob } from '~/data/sampleJobs'
 
-export interface JobHit extends SampleJob {}
+export interface JobHit extends SampleJob {
+  content?: string
+}
 
 // Single swap point. Remote Typesense when a search key is configured,
 // otherwise the local sample file. UI code never talks to Typesense directly.
@@ -26,12 +28,15 @@ export async function remoteSearch(
   sector: string,
   location: string,
   maxYears: number | null,
-): Promise<JobHit[]> {
+  page = 1,
+  perPage = 20,
+): Promise<{ hits: JobHit[]; found: number }> {
   const res = await liveRaw({
     q: query.trim() || '',
     query_by: 'title,company,sector,location,blurb',
     sort_by: 'posted:desc',
-    per_page: '50',
+    page: String(page),
+    per_page: String(perPage),
     ...(sector || location || maxYears !== null
       ? {
           filter_by: [
@@ -42,7 +47,8 @@ export async function remoteSearch(
         }
       : {}),
   })
-  return ((res as { hits?: Array<{ document: JobHit }> }).hits ?? []).map((h) => h.document)
+  const r = res as { hits?: Array<{ document: JobHit }>; found?: number }
+  return { hits: (r.hits ?? []).map((h) => h.document), found: r.found ?? 0 }
 }
 
 export async function liveRaw(params: Record<string, string>): Promise<unknown> {

@@ -9,6 +9,10 @@ export default defineNuxtConfig({
       meta: [
         { name: 'description', content: 'Every opportunity in Botswana in one fast search. Filter by sector, place and experience.' },
       ],
+      link: [
+        { rel: 'icon', type: 'image/png', href: '/tshono.png' },
+        { rel: 'apple-touch-icon', href: '/tshono.png' },
+      ],
     },
   },
   runtimeConfig: {

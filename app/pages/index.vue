@@ -34,7 +34,7 @@
     </div>
 
     <p class="stats">
-      <span>{{ results.length }} roles{{ ms !== null ? ` in ${ms}ms` : '' }}</span>
+      <span>{{ totalCount }} roles{{ ms !== null ? ` in ${ms}ms` : '' }}{{ pages > 1 ? ` · page ${page} of ${pages}` : '' }}</span>
       <span class="live-dot">{{ live ? '● live index' : '○ sample data' }}</span>
     </p>
 
@@ -46,19 +46,27 @@
           <span class="tags">
             <em>{{ j.sector }}</em>
             <em>{{ j.minYears === 0 ? 'entry' : j.minYears + ' yrs+' }}</em>
-            <em :class="{ hot: left(j) <= 7 }">{{ left(j) <= 0 ? 'closed' : left(j) + 'd left' }}</em>
+            <em :class="{ hot: j.closing !== '' && left(j) <= 7 }">{{ j.closing === '' ? 'open' : left(j) <= 0 ? 'closed' : left(j) + 'd left' }}</em>
           </span>
           <span class="blurb">{{ j.blurb }}</span>
         </NuxtLink>
       </li>
     </ul>
     <p v-if="!results.length" class="empty">no match. loosen a filter or try one word like nurse.</p>
+
+    <div v-if="pages > 1" class="pager">
+      <button :disabled="page <= 1" @click="goPage(page - 1)">← newer</button>
+      <span>{{ page }} / {{ pages }}</span>
+      <button :disabled="page >= pages" @click="goPage(page + 1)">older →</button>
+    </div>
   </section>
 </template>
 
 <script setup lang="ts">
 import { SECTORS, LOCATIONS, type SampleJob } from '~/data/sampleJobs'
 import { searchJobsLocal, remoteSearch, isRemote, daysLeft } from '~/composables/useJobSearch'
+
+const PER_PAGE = 20
 
 const route = useRoute()
 const router = useRouter()
@@ -68,32 +76,52 @@ const query = ref(String(route.query.q ?? ''))
 const sector = ref(String(route.query.sector ?? ''))
 const location = ref(String(route.query.location ?? ''))
 const exp = ref(String(route.query.exp ?? ''))
+const page = ref(Number(route.query.page ?? 1) || 1)
 
 const sectors = SECTORS
 const locations = LOCATIONS
 const live = isRemote()
 const remoteHits = ref<SampleJob[]>([])
+const remoteFound = ref(0)
 const ms = ref<number | null>(null)
 
-const localResults = computed(() => {
-  const t0 = performance.now()
-  const r = searchJobsLocal(query.value, sector.value, location.value, exp.value === '' ? null : Number(exp.value))
-  if (!live) ms.value = Math.max(1, Math.round(performance.now() - t0))
-  return r
-})
-const results = computed(() => (live ? remoteHits.value : localResults.value))
-const left = (j: { closing: string }) => daysLeft(j.closing)
+const maxYears = computed(() => (exp.value === '' ? null : Number(exp.value)))
 
-// Keep every view shareable through the URL.
-watch([query, sector, location, exp], () => {
+const localAll = computed(() => searchJobsLocal(query.value, sector.value, location.value, maxYears.value))
+const localPage = computed(() => localAll.value.slice((page.value - 1) * PER_PAGE, page.value * PER_PAGE))
+
+const results = computed(() => (live ? remoteHits.value : localPage.value))
+const totalCount = computed(() => (live ? remoteFound.value : localAll.value.length))
+const pages = computed(() => Math.max(1, Math.ceil(totalCount.value / PER_PAGE)))
+const left = (j: { closing: string }) => (j.closing ? daysLeft(j.closing) : 9999)
+
+function syncUrl() {
   router.replace({
     query: {
       ...(query.value ? { q: query.value } : {}),
       ...(sector.value ? { sector: sector.value } : {}),
       ...(location.value ? { location: location.value } : {}),
       ...(exp.value ? { exp: exp.value } : {}),
+      ...(page.value > 1 ? { page: String(page.value) } : {}),
     },
   })
+}
+
+function goPage(p: number) {
+  page.value = Math.min(Math.max(1, p), pages.value)
+  syncUrl()
+  queueRemote()
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+// Keep every view shareable through the URL. Filter edits reset to page one.
+watch([query, sector, location, exp], () => {
+  page.value = 1
+  syncUrl()
+  queueRemote()
+})
+watch(page, () => {
+  syncUrl()
   queueRemote()
 })
 
@@ -105,20 +133,21 @@ async function queueRemote() {
   t = setTimeout(async () => {
     const t0 = performance.now()
     try {
-      remoteHits.value = await remoteSearch(
-        query.value,
-        sector.value,
-        location.value,
-        exp.value === '' ? null : Number(exp.value),
-      )
+      const r = await remoteSearch(query.value, sector.value, location.value, maxYears.value, page.value, PER_PAGE)
+      remoteHits.value = r.hits
+      remoteFound.value = r.found
     } catch {
       remoteHits.value = []
+      remoteFound.value = 0
     }
     ms.value = Math.max(1, Math.round(performance.now() - t0))
   }, 160)
 }
 
 onMounted(() => {
+  const t0 = performance.now()
+  localAll.value
+  if (!live) ms.value = Math.max(1, Math.round(performance.now() - t0))
   queueRemote()
   window.addEventListener('keydown', (e) => {
     if (e.key === '/' && document.activeElement?.tagName !== 'INPUT') {
