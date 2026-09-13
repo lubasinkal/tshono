@@ -1,7 +1,7 @@
 <template>
   <div class="shell">
     <header class="topbar">
-      <NuxtLink to="/" class="brand">Tshono</NuxtLink>
+      <NuxtLink to="/" class="brand">tshono<b>.</b></NuxtLink>
       <nav class="nav">
         <NuxtLink to="/">Search</NuxtLink>
         <NuxtLink to="/insights">Insights</NuxtLink>
@@ -11,7 +11,8 @@
       <NuxtPage />
     </main>
     <footer class="foot">
-      <span>Tshono. Every opportunity in Botswana in one fast search.</span>
+      <span>tshono. every opportunity in bw, one fast search.</span>
+      <span>built in gaborone</span>
     </footer>
   </div>
 </template>

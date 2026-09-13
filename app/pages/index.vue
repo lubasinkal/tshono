@@ -1,33 +1,42 @@
 <template>
-  <section class="wrap">
-    <h1 class="title">Every opportunity in Botswana in one fast search.</h1>
-    <p class="sub">Instant results as you type. Filter by sector, place and experience. Share any view with a link.</p>
-
-    <div class="bar">
-      <input
-        ref="box"
-        v-model="query"
-        type="search"
-        placeholder="Try nurse, driver, analyst, remote…  (press / to focus)"
-        aria-label="Search jobs"
-      />
-      <select v-model="sector" aria-label="Sector">
-        <option value="">All sectors</option>
-        <option v-for="s in sectors" :key="s" :value="s">{{ s }}</option>
-      </select>
-      <select v-model="location" aria-label="Location">
-        <option value="">All places</option>
-        <option v-for="l in locations" :key="l" :value="l">{{ l }}</option>
-      </select>
-      <select v-model="exp" aria-label="Experience">
-        <option value="">Any experience</option>
-        <option value="0">Entry (0 yrs)</option>
-        <option value="2">Up to 2 yrs</option>
-        <option value="5">Up to 5 yrs</option>
-      </select>
+  <section>
+    <div class="hero">
+      <h1>Find work<span class="dot">.</span> Fast<span class="dot">.</span></h1>
+      <p>Every opportunity in Botswana in one instant search. No accounts, no noise.</p>
+      <div class="cmdbar">
+        <input
+          ref="box"
+          v-model="query"
+          type="search"
+          placeholder="search roles, companies, places…"
+          aria-label="Search jobs"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <span class="kbd"><span>/</span></span>
+      </div>
+      <div class="filters">
+        <select v-model="sector" aria-label="Sector">
+          <option value="">all sectors</option>
+          <option v-for="s in sectors" :key="s" :value="s">{{ s.toLowerCase() }}</option>
+        </select>
+        <select v-model="location" aria-label="Location">
+          <option value="">all places</option>
+          <option v-for="l in locations" :key="l" :value="l">{{ l.toLowerCase() }}</option>
+        </select>
+        <select v-model="exp" aria-label="Experience">
+          <option value="">any experience</option>
+          <option value="0">entry · 0 yrs</option>
+          <option value="2">up to 2 yrs</option>
+          <option value="5">up to 5 yrs</option>
+        </select>
+      </div>
     </div>
 
-    <p class="meta">{{ results.length }} roles found · {{ live ? 'live index' : 'sample data' }} · updated 13 Sep 2026</p>
+    <p class="stats">
+      <span>{{ results.length }} roles{{ ms !== null ? ` in ${ms}ms` : '' }}</span>
+      <span class="live-dot">{{ live ? '● live index' : '○ sample data' }}</span>
+    </p>
 
     <ul class="list">
       <li v-for="j in results" :key="j.id" class="card">
@@ -36,14 +45,14 @@
           <span class="co">{{ j.company }} · {{ j.location }}</span>
           <span class="tags">
             <em>{{ j.sector }}</em>
-            <em>{{ j.minYears === 0 ? 'Entry' : j.minYears + ' yrs+' }}</em>
-            <em :class="{ hot: left(j) <= 7 }">{{ left(j) <= 0 ? 'Closed' : left(j) + ' days left' }}</em>
+            <em>{{ j.minYears === 0 ? 'entry' : j.minYears + ' yrs+' }}</em>
+            <em :class="{ hot: left(j) <= 7 }">{{ left(j) <= 0 ? 'closed' : left(j) + 'd left' }}</em>
           </span>
           <span class="blurb">{{ j.blurb }}</span>
         </NuxtLink>
       </li>
     </ul>
-    <p v-if="!results.length" class="empty">No roles match. Loosen a filter or try one word like nurse.</p>
+    <p v-if="!results.length" class="empty">no match. loosen a filter or try one word like nurse.</p>
   </section>
 </template>
 
@@ -64,10 +73,14 @@ const sectors = SECTORS
 const locations = LOCATIONS
 const live = isRemote()
 const remoteHits = ref<SampleJob[]>([])
+const ms = ref<number | null>(null)
 
-const localResults = computed(() =>
-  searchJobsLocal(query.value, sector.value, location.value, exp.value === '' ? null : Number(exp.value)),
-)
+const localResults = computed(() => {
+  const t0 = performance.now()
+  const r = searchJobsLocal(query.value, sector.value, location.value, exp.value === '' ? null : Number(exp.value))
+  if (!live) ms.value = Math.max(1, Math.round(performance.now() - t0))
+  return r
+})
 const results = computed(() => (live ? remoteHits.value : localResults.value))
 const left = (j: { closing: string }) => daysLeft(j.closing)
 
@@ -90,6 +103,7 @@ async function queueRemote() {
   if (!live) return
   if (t) clearTimeout(t)
   t = setTimeout(async () => {
+    const t0 = performance.now()
     try {
       remoteHits.value = await remoteSearch(
         query.value,
@@ -100,6 +114,7 @@ async function queueRemote() {
     } catch {
       remoteHits.value = []
     }
+    ms.value = Math.max(1, Math.round(performance.now() - t0))
   }, 160)
 }
 
@@ -113,5 +128,5 @@ onMounted(() => {
   })
 })
 
-useHead({ title: 'Tshono. Fast Botswana jobs search' })
+useHead({ title: 'tshono. fast botswana jobs search' })
 </script>
