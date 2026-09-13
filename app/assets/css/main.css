@@ -147,6 +147,30 @@ kbd, .kbd span {
   font-size: 12px; font-family: var(--mono); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
 }
 
+.dhead { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+.chip {
+  font-family: var(--mono); font-size: 12px; color: var(--text);
+  background: var(--panel); border: 1px solid var(--line2);
+  border-radius: 8px; padding: 5px 11px;
+}
+.updated { font-family: var(--mono); font-size: 12px; color: var(--faint); margin-left: auto; }
+.sect { font-size: 19px; letter-spacing: -0.4px; margin: 34px 0 12px; font-weight: 700; }
+.sect span { color: var(--faint); font-family: var(--mono); font-weight: 400; margin-right: 6px; }
+.weekaxis { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 10px; color: var(--faint); text-transform: uppercase; margin-bottom: 6px; }
+.stack { display: flex; gap: 5px; align-items: flex-end; height: 150px; padding: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; }
+.stackcol { flex: 1; display: flex; flex-direction: column-reverse; gap: 1px; height: 100%; min-width: 0; }
+.stackcol i { display: block; width: 100%; border-radius: 1px; min-height: 2px; }
+.legend { display: flex; gap: 12px; flex-wrap: wrap; font-family: var(--mono); font-size: 11px; color: var(--muted); margin: 10px 0 4px; }
+.legend i { display: inline-block; width: 9px; height: 9px; border-radius: 3px; margin-right: 5px; }
+.dtable { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 13px; margin: 6px 0 4px; }
+.dtable th { text-align: left; color: var(--faint); font-weight: 400; font-size: 11px; text-transform: uppercase; padding: 8px 10px; border-bottom: 1px solid var(--line2); }
+.dtable td { padding: 10px; border-bottom: 1px solid var(--line); }
+.dtable tr:hover td { background: var(--panel); }
+.dtable .rank { color: var(--faint); }
+.dtable .up { color: var(--accent); }
+.dtable .down { color: var(--warn); }
+.dtable .flat { color: var(--muted); }
+
 @media (max-width: 720px) {
   .hero { padding: 36px 0 4px; }
   .grid { grid-template-columns: 1fr 1fr; }
