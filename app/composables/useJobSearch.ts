@@ -60,11 +60,15 @@ export async function liveRaw(params: Record<string, string>): Promise<unknown> 
 }
 
 export async function remoteGet(id: string): Promise<JobHit | null> {
-  const { base, key } = remoteBase()
   try {
-    return await $fetch<JobHit>(`${base}/${id}`, {
-      headers: { 'X-TYPESENSE-API-KEY': key },
-    })
+    // Scoped browser keys allow search only, so look up by id filter.
+    const res = (await liveRaw({
+      q: '',
+      query_by: 'title',
+      filter_by: `id:=${id}`,
+      per_page: '1',
+    })) as { hits?: Array<{ document: JobHit }> }
+    return res.hits?.[0]?.document ?? null
   } catch {
     return null
   }
