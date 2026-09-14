@@ -135,7 +135,7 @@ onMounted(async () => {
     const r = (await liveRaw({
       q: '',
       query_by: 'title',
-      per_page: '100',
+      per_page: '500',
       include_fields: 'id,title,company,sector,location,url,closing,posted,min_years',
     })) as {
       hits?: Array<{ document: RawDoc }>
