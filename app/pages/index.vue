@@ -34,7 +34,7 @@
     </div>
 
     <p class="stats">
-      <span :title="live && remoteTook !== null && ms !== null ? `Typesense ${remoteTook}ms` : ''">{{ totalCount }} roles{{ showMs !== null ? ` · search ${showMs}ms` : '' }}{{ pages > 1 ? ` · page ${page} of ${pages}` : '' }}</span>
+      <span :title="live && remoteTook !== null && ms !== null ? `round trip ${ms}ms` : ''">{{ totalCount }} roles{{ showMs !== null ? ` · search ${showMs}ms` : '' }}{{ pages > 1 ? ` · page ${page} of ${pages}` : '' }}</span>
       <span class="live-dot">{{ live ? '● live index' : '○ sample data' }}</span>
     </p>
 
@@ -85,7 +85,7 @@ const remoteHits = ref<SampleJob[]>([])
 const remoteFound = ref(0)
 const remoteTook = ref<number | null>(null)
 const ms = ref<number | null>(null)
-const showMs = computed(() => (ms.value ?? remoteTook.value))
+const showMs = computed(() => (remoteTook.value ?? ms.value))
 
 const maxYears = computed(() => (exp.value === '' ? null : Number(exp.value)))
 
