@@ -123,7 +123,6 @@ interface RawDoc {
 
 const live = isRemote()
 const nowDate = new Date()
-const updated = 'Sep 13, live'
 const liveDocs = ref<SampleJob[] | null>(null)
 const loadState = ref<'loading' | 'ready' | 'fallback'>('loading')
 
@@ -157,6 +156,11 @@ const weekStart = computed(() => maxPosted.value - 6 * 86400000)
 const prevStart = computed(() => maxPosted.value - 13 * 86400000)
 
 const total = computed(() => allDocs.value.length)
+const updated = computed(() => {
+  const d = new Date(maxPosted.value || nowDate.getTime())
+  const s = d.toLocaleDateString('en-GB', { month: 'short', day: 'numeric' })
+  return live && loadState.value !== 'fallback' ? `${s}, live` : `${s}, sample`
+})
 const fresh = computed(() => allDocs.value.filter((j) => epoch(j.posted) >= weekStart.value).length)
 const urgent = computed(
   () =>
