@@ -34,7 +34,7 @@
     </div>
 
     <p class="stats">
-      <span :title="live && ms !== null ? `round trip ${ms}ms` : ''">{{ totalCount }} roles{{ showMs !== null ? ` · index ${showMs}ms` : '' }}{{ pages > 1 ? ` · page ${page} of ${pages}` : '' }}</span>
+      <span :title="live && remoteTook !== null && ms !== null ? `Typesense ${remoteTook}ms` : ''">{{ totalCount }} roles{{ showMs !== null ? ` · search ${showMs}ms` : '' }}{{ pages > 1 ? ` · page ${page} of ${pages}` : '' }}</span>
       <span class="live-dot">{{ live ? '● live index' : '○ sample data' }}</span>
     </p>
 
@@ -85,7 +85,7 @@ const remoteHits = ref<SampleJob[]>([])
 const remoteFound = ref(0)
 const remoteTook = ref<number | null>(null)
 const ms = ref<number | null>(null)
-const showMs = computed(() => (live ? remoteTook.value : ms.value))
+const showMs = computed(() => (ms.value ?? remoteTook.value))
 
 const maxYears = computed(() => (exp.value === '' ? null : Number(exp.value)))
 
@@ -141,7 +141,7 @@ async function runRemote() {
     remoteFound.value = 0
     remoteTook.value = null
   }
-  ms.value = Math.max(1, Math.round(performance.now() - t0))
+  ms.value = Math.round((performance.now() - t0) * 10) / 10
 }
 function queueRemote(immediate = false) {
   if (!live) return
@@ -156,7 +156,7 @@ function queueRemote(immediate = false) {
 onMounted(() => {
   const t0 = performance.now()
   localAll.value
-  if (!live) ms.value = Math.max(1, Math.round(performance.now() - t0))
+  if (!live) ms.value = Math.round((performance.now() - t0) * 10) / 10
   queueRemote(true)
   window.addEventListener('keydown', (e) => {
     if (e.key === '/' && document.activeElement?.tagName !== 'INPUT') {
