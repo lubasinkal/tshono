@@ -276,12 +276,29 @@ const closingSoon = computed(() => {
   return [...dated, ...freshTop]
 })
 
+const PALETTE = [
+  '#4ade80', '#38bdf8', '#f472b6', '#fbbf24', '#a78bfa', '#22d3ee', '#fb7185', '#34d399',
+  '#f97316', '#e879f9', '#2dd4bf', '#facc15', '#818cf8', '#fb923c', '#4adeff', '#c084fc',
+  '#f43f5e', '#a3e635', '#eab308', '#5eead4', '#ff6b6b', '#51cf66', '#fcc419', '#9775fa',
+] as const
+const SECTOR_COLOR = new Map<string, string>()
 function sectorColor(name: string): string {
-  // Stable hash → golden-angle hue so every sector gets a distinct colour, no modulo collisions.
-  let h = 0
-  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0
-  const hue = (h * 137.5) % 360
-  return `hsl(${hue.toFixed(1)} 72% 62%)`
+  const cached = SECTOR_COLOR.get(name)
+  if (cached) return cached
+  // assign next palette slot by global frequency rank so #1..#N never collide
+  const rank = bySectorRaw.value.findIndex((r) => r.name === name)
+  let c: string
+  if (rank !== -1 && rank < PALETTE.length) c = PALETTE[rank]!
+  else {
+    // overflow beyond palette: hash -> golden angle with distinct S/L tiers
+    let h = 0; for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0
+    const tier = h % 3
+    const sat = [78, 68, 88][tier]!
+    const lig = [60, 65, 55][tier]!
+    c = `hsl(${((h * 137.5) % 360).toFixed(1)} ${sat}% ${lig}%)`
+  }
+  SECTOR_COLOR.set(name, c)
+  return c
 }
 
 const hoverDay = ref<number | null>(null)
@@ -311,13 +328,19 @@ function barPct(day: { total: number }): number {
 }
 const daily = computed(() => {
   const dm = derived.value.dayMap
+  // opencode.ai/data style: global frequency order — #1 most frequent at bottom
+  const rank = new Map(derived.value.bySectorRaw.map((r, i) => [r.name, i]))
   const days: Array<{ label: string; total: number; segs: Array<{ name: string; count: number; share: number }> }> = []
   for (let back = 59; back >= 0; back--) {
     const key = new Date(maxPosted.value - back * 86400000).toISOString().slice(0, 10)
     const m = dm.get(key)
     if (!m) { days.push({ label: key, total: 0, segs: [] }); continue }
     let tot = 0; for (const c of m.values()) tot += c
-    const segs = [...m.entries()].map(([name, count]) => ({ name, count, share: tot ? (count / tot) * 100 : 0 })).sort((a, b) => b.count - a.count).slice(0, 8)
+    const segs = [...m.entries()]
+      .map(([name, count]) => ({ name, count, share: tot ? (count / tot) * 100 : 0 }))
+      .sort((a, b) => (rank.get(a.name) ?? 999) - (rank.get(b.name) ?? 999))
+      .slice(0, 8)
+    // slice(-8) keeps globally top-relevant sectors, still rendered bottom=#1 with column-reverse
     days.push({ label: key, total: tot, segs })
   }
   return days

@@ -212,7 +212,7 @@ kbd, .kbd span {
 .stackbar, .stackcol { position: relative; z-index: 1; }
 .chartscroll { min-width: 0; }
 .sheet { display: none; }
-.stack { position: relative; display: flex; gap: 3px; align-items: stretch; height: 190px; padding: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; }
+.stack { position: relative; display: flex; gap: 3px; align-items: stretch; height: clamp(340px, 52vh, 520px); padding: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; }
 .stackcol { position: relative; flex: 1; display: flex; flex-direction: column; justify-content: flex-end; min-width: 0; min-height: 0; border-radius: 3px; cursor: pointer; background: rgba(255, 255, 255, 0.028); }
 .stackcol:hover, .stackcol.hot { background: rgba(255, 255, 255, 0.07); }
 .stackbar { width: 100%; display: flex; flex-direction: column-reverse; gap: 1px; min-height: 0; }
@@ -246,15 +246,15 @@ kbd, .kbd span {
   .row { grid-template-columns: 110px 1fr 32px; }
   .cmdbar input { font-size: 16px; padding-right: 20px; }
   .cmdbar .kbd { display: none; }
-  .stack { height: 170px; gap: 2px; }
+  .stack { height: clamp(260px, 48vh, 380px); gap: 2px; }
   .weekaxis { gap: 2px; }
   .tick--minor { display: none; }
   .tip { display: none; }
   .chartscroll { overflow-x: auto; margin: 0 -20px; padding: 0 20px 6px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
   .chartscroll::-webkit-scrollbar { display: none; }
   .chartscroll .stack { min-width: max-content; }
-  .chartscroll .stackcol { flex: 0 0 44px; }
-  .chartscroll .weekaxis span { flex: 0 0 44px; }
+  .chartscroll .stackcol { flex: 0 0 48px; }
+  .chartscroll .weekaxis span { flex: 0 0 48px; }
   .yline, .ymax, .ymid { display: none; }
   .sheet { display: block; position: fixed; left: 12px; right: 12px; bottom: 12px; z-index: 60; }
   .sheetcard { position: relative; background: var(--panel2); border: 1px solid var(--line2); border-radius: 14px; padding: 14px 16px; font-family: var(--mono); font-size: 12px; box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6); max-height: 46vh; overflow-y: auto; }
