@@ -24,20 +24,31 @@
       <div class="stat"><b>{{ entryShare }}%</b><span>entry level share</span></div>
     </div>
 
-    <h2 class="sect"><span>#</span> Top Sectors. Share of tracked roles by sector.</h2>
-    <div class="weekaxis"><span v-for="d in axis" :key="d">{{ d }}</span></div>
-    <div class="stack">
+    <h2 class="sect"><span>#</span> Top Sectors. Daily postings by sector, last 60 days.</h2>
+    <div class="weekaxis"><span v-for="(day, i) in daily" :key="day.label">{{ isTick(i) ? fmtDay(day.label) : '' }}</span></div>
+    <div class="stack" @mouseleave="hoverDay = null">
       <div
         v-for="(day, i) in daily"
-        :key="i"
+        :key="day.label"
         class="stackcol"
-        :title="day.label + ': ' + day.total + ' roles'"
+        :class="{ hot: hoverDay === i }"
+        @mouseenter="hoverDay = i"
+        @click="hoverDay = hoverDay === i ? null : i"
       >
-        <i
-          v-for="s in day.segs"
-          :key="s.name"
-          :style="{ height: s.share + '%', background: sectorColor(s.name) }"
-        />
+        <div class="stackbar" :style="{ height: barPct(day) + '%' }">
+          <i
+            v-for="s in day.segs"
+            :key="s.name"
+            :style="{ height: s.share + '%', background: sectorColor(s.name) }"
+          />
+        </div>
+        <div v-if="hoverDay === i" class="tip" :class="tipAlign(i)">
+          <div class="tipdate">{{ fmtDay(day.label) }}</div>
+          <div class="tiptotal">{{ day.total }} total</div>
+          <div v-for="s in day.segs" :key="s.name" class="tiprow">
+            <i :style="{ background: sectorColor(s.name) }" />{{ s.name.toLowerCase() }}<b>{{ s.count }}</b>
+          </div>
+        </div>
       </div>
     </div>
     <div class="legend"><span v-for="s in bySector.slice(0, 8)" :key="s.name"><i :style="{ background: sectorColor(s.name) }" />{{ s.name.toLowerCase() }}</span></div>
@@ -249,9 +260,27 @@ function sectorColor(name: string): string {
   return palette[Math.max(0, i) % palette.length] ?? palette[0] ?? '#4ade80'
 }
 
+const hoverDay = ref<number | null>(null)
+const MON = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
+function fmtDay(iso: string): string {
+  const dt = new Date(iso + 'T00:00:00')
+  return `${MON[dt.getMonth()] ?? ''} ${dt.getDate()}`
+}
+function isTick(i: number): boolean {
+  return i % 7 === 3
+}
+function tipAlign(i: number): string {
+  if (i < 5) return 'tip--l'
+  if (i > daily.value.length - 6) return 'tip--r'
+  return ''
+}
+const maxTotal = computed(() => Math.max(...daily.value.map((d) => d.total), 1))
+function barPct(day: { total: number }): number {
+  return day.total ? (day.total / maxTotal.value) * 100 : 0
+}
 const daily = computed(() => {
   const days: Array<{ label: string; total: number; segs: Array<{ name: string; count: number; share: number }> }> = []
-  for (let back = 8; back >= 0; back--) {
+  for (let back = 59; back >= 0; back--) {
     const dayMs = maxPosted.value - back * 86400000
     const key = new Date(dayMs).toISOString().slice(0, 10)
     const inDay = allDocs.value.filter((j) => j.posted === key)
@@ -264,13 +293,6 @@ const daily = computed(() => {
     days.push({ label: key, total: inDay.length, segs })
   }
   return days
-})
-const axis = computed(() => {
-  const labels = daily.value.filter((_, i) => i % 2 === 0).map((d) => {
-    const dt = new Date(d.label + 'T00:00:00')
-    return dt.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }).toLowerCase()
-  })
-  return labels
 })
 const max = computed(() => Math.max(...bySectorRaw.value.map((r) => r.count), 1))
 const pct = (n: number) => Math.round((n / max.value) * 100)
