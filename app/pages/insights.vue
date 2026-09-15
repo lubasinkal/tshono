@@ -2,7 +2,7 @@
   <section class="wrap">
     <div class="dhead">
       <span class="chip">◉ {{ loadState === 'loading' ? '…' : total }} roles tracked</span>
-      <span class="chip">{{ loadState === 'ready' && live ? '● live aggregates' : loadState === 'fallback' ? '○ sample data' : live ? '○ loading live…' : '○ sample data' }}</span>
+      <span class="chip">{{ loadState === 'ready' ? '● live aggregates' : '○ loading live…' }}</span>
       <span class="updated">updated {{ updated }}</span>
     </div>
 
@@ -16,7 +16,8 @@
       <div v-for="i in 6" :key="'r' + i" class="row pulse-row"><span></span></div>
     </div>
 
-    <div v-else>
+    <div v-else-if="liveDocs && liveDocs.length">
+
     <div class="grid">
       <div class="stat"><b>{{ total }}</b><span>roles tracked</span></div>
       <div class="stat"><b>{{ fresh }}</b><span>fresh this week</span></div>
@@ -127,12 +128,13 @@
       </li>
     </ul>
     </div>
+    <p v-else-if="loadState === 'error'" class="empty">couldn't load live data. try again.</p>
   </section>
 </template>
 
 <script setup lang="ts">
-import { sampleJobs, type SampleJob } from '~/data/sampleJobs'
-import { daysLeft, isRemote, liveRaw, toJobHit } from '~/composables/useJobSearch'
+import type { SampleJob } from '~/data/sampleJobs'
+import { daysLeft, liveRaw, toJobHit } from '~/composables/useJobSearch'
 
 interface RawDoc {
   id: string
@@ -147,14 +149,12 @@ interface RawDoc {
   min_years: number
 }
 
-const live = isRemote()
 const nowDate = new Date()
 const liveDocs = ref<SampleJob[] | null>(null)
-const loadState = ref<'loading' | 'ready' | 'fallback'>('loading')
+const loadState = ref<'loading' | 'ready' | 'error'>('loading')
 
 const LS_KEY = 'tshono:insights:v1'
 onMounted(async () => {
-  if (!live) { loadState.value = 'ready'; return }
   // hydrate from localStorage instantly — perceived 0ms
   try {
     const cached = localStorage.getItem(LS_KEY)
@@ -188,11 +188,11 @@ onMounted(async () => {
     loadState.value = 'ready'
     try { localStorage.setItem(LS_KEY, JSON.stringify({ at: Date.now(), docs })) } catch {}
   } catch {
-    if (!liveDocs.value) { liveDocs.value = null; loadState.value = 'fallback' }
+    if (!liveDocs.value) loadState.value = 'error'
   }
 })
 
-const allDocs = computed<SampleJob[]>(() => liveDocs.value ?? sampleJobs)
+const allDocs = computed<SampleJob[]>(() => liveDocs.value ?? [])
 const epoch = (iso: string) => new Date(iso + 'T00:00:00').getTime()
 const maxPosted = computed(() => Math.max(...allDocs.value.map((j) => epoch(j.posted)), 0))
 const weekStart = computed(() => maxPosted.value - 6 * 86400000)
@@ -249,7 +249,7 @@ const total = computed(() => derived.value.total)
 const updated = computed(() => {
   const d = new Date(maxPosted.value || nowDate.getTime())
   const s = d.toLocaleDateString('en-GB', { month: 'short', day: 'numeric' })
-  return live && loadState.value !== 'fallback' ? `${s}, live` : `${s}, sample`
+  return `${s}, live`
 })
 const fresh = computed(() => derived.value.fresh)
 const urgent = computed(() => derived.value.urgent)

@@ -38,21 +38,15 @@
 </template>
 
 <script setup lang="ts">
-import { sampleJobs, type SampleJob } from '~/data/sampleJobs'
-import { remoteGet, isRemote, liveRaw, toJobHit, type JobHit } from '~/composables/useJobSearch'
+import type { SampleJob } from '~/data/sampleJobs'
+import { remoteGet, liveRaw, toJobHit, type JobHit } from '~/composables/useJobSearch'
 
 const route = useRoute()
 const id = String(route.params.id)
-const live = isRemote()
 
-const { data: remoteJob } = await useAsyncData(`job-${id}`, async () => {
-  if (!live) return null
-  return remoteGet(id)
-}, { server: false })
+const { data: remoteJob } = await useAsyncData(`job-${id}`, async () => remoteGet(id), { server: false })
 
-const job = computed<SampleJob | JobHit | null | undefined>(
-  () => remoteJob.value ?? sampleJobs.find((j) => j.id === id),
-)
+const job = computed<SampleJob | JobHit | null | undefined>(() => remoteJob.value)
 const postedLabel = computed(() => {
   const j = job.value
   if (!j) return ''
@@ -108,30 +102,11 @@ const similar = ref<SampleJob[]>([])
 watch(
   job,
   async (j) => {
-    if (!j) {
-      similar.value = []
-      return
-    }
-    if (live) {
-      try {
-        const r = (await liveRaw({
-          q: '',
-          query_by: 'title',
-          filter_by: `sector:=${j.sector}`,
-          per_page: '6',
-        })) as { hits?: Array<{ document: Record<string, unknown> }> }
-        similar.value = (r.hits ?? [])
-          .map((h) => toJobHit(h.document))
-          .filter((d) => d.id !== j.id)
-          .slice(0, 5)
-        if (similar.value.length) return
-      } catch {
-        // fall through to sample list below
-      }
-    }
-    similar.value = sampleJobs
-      .filter((s) => s.id !== j.id && (s.sector === j.sector || s.location === j.location))
-      .slice(0, 5)
+    if (!j) { similar.value = []; return }
+    try {
+      const r = (await liveRaw({ q: '', query_by: 'title', filter_by: `sector:=${j.sector}`, per_page: '6' })) as { hits?: Array<{ document: Record<string, unknown> }> }
+      similar.value = (r.hits ?? []).map((h) => toJobHit(h.document)).filter((d) => d.id !== j.id).slice(0, 5)
+    } catch { similar.value = [] }
   },
   { immediate: true },
 )

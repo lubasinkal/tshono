@@ -1,4 +1,4 @@
-import { sampleJobs, type SampleJob } from '~/data/sampleJobs'
+import type { SampleJob } from '~/data/sampleJobs'
 
 export interface JobHit extends SampleJob {
   content?: string
@@ -108,18 +108,6 @@ export async function remoteGet(id: string): Promise<JobHit | null> {
   } catch {
     return null
   }
-}
-
-export function searchJobsLocal(query: string, sector: string, location: string, maxYears: number | null) {
-  const q = query.trim().toLowerCase()
-  return sampleJobs.filter((j) => {
-    if (sector && j.sector !== sector) return false
-    if (location && j.location !== location) return false
-    if (maxYears !== null && j.minYears > maxYears) return false
-    if (!q) return true
-    const hay = `${j.title} ${j.company} ${j.sector} ${j.location} ${j.blurb}`.toLowerCase()
-    return q.split(/\s+/).every((w) => hay.includes(w))
-  })
 }
 
 export function daysLeft(closing: string, now = new Date()): number {

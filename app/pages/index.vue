@@ -36,8 +36,8 @@
     </div>
 
     <p class="stats">
-      <span :title="live && remoteTook !== null && ms !== null ? `round trip ${ms}ms` : ''">{{ totalCount }} roles{{ showMs !== null ? ` · search ${showMs}ms` : '' }}{{ pages > 1 ? ` · page ${page} of ${pages}` : '' }}</span>
-      <span class="live-dot">{{ live ? '● live index' : '○ sample data' }}</span>
+      <span :title="remoteTook !== null && ms !== null ? `round trip ${ms}ms` : ''">{{ totalCount }} roles{{ showMs !== null ? ` · search ${showMs}ms` : '' }}{{ pages > 1 ? ` · page ${page} of ${pages}` : '' }}</span>
+      <span class="live-dot">● live index</span>
     </p>
 
     <ul class="list">
@@ -66,7 +66,7 @@
 
 <script setup lang="ts">
 import { SECTORS, LOCATIONS, type SampleJob } from '~/data/sampleJobs'
-import { searchJobsLocal, remoteSearch, isRemote, daysLeft, liveRawCached } from '~/composables/useJobSearch'
+import { remoteSearch, daysLeft, liveRawCached } from '~/composables/useJobSearch'
 
 const PER_PAGE = 20
 
@@ -84,7 +84,6 @@ const page = ref(Number(route.query.page ?? 1) || 1)
 
 const sectors = SECTORS
 const locations = LOCATIONS
-const live = isRemote()
 const remoteHits = ref<SampleJob[]>([])
 const remoteFound = ref(0)
 const remoteTook = ref<number | null>(null)
@@ -93,11 +92,8 @@ const showMs = computed(() => (remoteTook.value ?? ms.value))
 
 const maxYears = computed(() => (exp.value === '' ? null : Number(exp.value)))
 
-const localAll = computed(() => searchJobsLocal(query.value, sector.value, location.value, maxYears.value))
-const localPage = computed(() => localAll.value.slice((page.value - 1) * PER_PAGE, page.value * PER_PAGE))
-
-const results = computed(() => (live ? remoteHits.value : localPage.value))
-const totalCount = computed(() => (live ? remoteFound.value : localAll.value.length))
+const results = computed(() => remoteHits.value)
+const totalCount = computed(() => remoteFound.value)
 const pages = computed(() => Math.max(1, Math.ceil(totalCount.value / PER_PAGE)))
 const left = (j: { closing: string }) => (j.closing ? daysLeft(j.closing) : 9999)
 
@@ -155,7 +151,6 @@ async function runRemote() {
   ms.value = Math.round((performance.now() - t0) * 10) / 10
 }
 function queueRemote(immediate = false) {
-  if (!live) return
   if (t) clearTimeout(t)
   if (immediate) {
     runRemote()
@@ -165,9 +160,6 @@ function queueRemote(immediate = false) {
 }
 
 onMounted(() => {
-  const t0 = performance.now()
-  localAll.value
-  if (!live) ms.value = Math.round((performance.now() - t0) * 10) / 10
   queueRemote(true)
   window.addEventListener('keydown', (e) => {
     if (e.key === '/' && document.activeElement?.tagName !== 'INPUT') {
