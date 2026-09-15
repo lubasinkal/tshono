@@ -194,63 +194,70 @@ const maxPosted = computed(() => Math.max(...allDocs.value.map((j) => epoch(j.po
 const weekStart = computed(() => maxPosted.value - 6 * 86400000)
 const prevStart = computed(() => maxPosted.value - 13 * 86400000)
 
-const total = computed(() => allDocs.value.length)
+// Single-pass derived aggregates — O(N) instead of O(S*N + 60*N).
+const derived = computed(() => {
+  const docs = allDocs.value
+  const total = docs.length
+  const maxP = maxPosted.value
+  const wStart = maxP - 6 * 86400000
+  const pStart = maxP - 13 * 86400000
+  let fresh = 0
+  let urgent = 0
+  let entryCnt = 0
+  const sec = new Map<string, number>()
+  const loc = new Map<string, number>()
+  const comp = new Map<string, { count: number; loc: string }>()
+  const secWeek = new Map<string, number>()
+  const secPrev = new Map<string, number>()
+  const entry = new Map<string, { count: number; example: string; exampleId: string }>()
+  const dayMap = new Map<string, Map<string, number>>()
+  for (const j of docs) {
+    const ep = epoch(j.posted)
+    if (ep >= wStart) fresh++
+    if (j.minYears === 0) entryCnt++
+    if (j.closing) { const d = daysLeft(j.closing, nowDate); if (d >= 0 && d <= 7) urgent++ }
+    sec.set(j.sector, (sec.get(j.sector) ?? 0) + 1)
+    loc.set(j.location, (loc.get(j.location) ?? 0) + 1)
+    const ce = comp.get(j.company)
+    if (!ce) comp.set(j.company, { count: 1, loc: j.location })
+    else ce.count++
+    if (ep >= wStart) secWeek.set(j.sector, (secWeek.get(j.sector) ?? 0) + 1)
+    else if (ep >= pStart) secPrev.set(j.sector, (secPrev.get(j.sector) ?? 0) + 1)
+    if (j.minYears === 0) {
+      const e = entry.get(j.sector)
+      if (!e) entry.set(j.sector, { count: 1, example: j.title, exampleId: j.id })
+      else e.count++
+    }
+    let dm = dayMap.get(j.posted)
+    if (!dm) { dm = new Map(); dayMap.set(j.posted, dm) }
+    dm.set(j.sector, (dm.get(j.sector) ?? 0) + 1)
+  }
+  const toSorted = (m: Map<string, number>) => [...m.entries()].map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count)
+  const bySectorRaw = toSorted(sec)
+  const bySector = bySectorRaw.map((r) => {
+    const thisW = secWeek.get(r.name) ?? 0
+    const prevW = secPrev.get(r.name) ?? 0
+    return { ...r, delta: prevW === 0 ? null : Math.round(((thisW - prevW) / prevW) * 100) as number | null }
+  })
+  return { total, fresh, urgent, entryCnt, bySectorRaw, bySector, byPlace: toSorted(loc), topCompanies: [...comp.entries()].map(([name, v]) => ({ name, count: v.count, loc: v.loc })).sort((a, b) => b.count - a.count).slice(0, 10), entryBySector: [...entry.entries()].map(([name, v]) => ({ name, ...v })).sort((a, b) => b.count - a.count).slice(0, 8), dayMap }
+})
+const total = computed(() => derived.value.total)
 const updated = computed(() => {
   const d = new Date(maxPosted.value || nowDate.getTime())
   const s = d.toLocaleDateString('en-GB', { month: 'short', day: 'numeric' })
   return live && loadState.value !== 'fallback' ? `${s}, live` : `${s}, sample`
 })
-const fresh = computed(() => allDocs.value.filter((j) => epoch(j.posted) >= weekStart.value).length)
-const urgent = computed(
-  () =>
-    allDocs.value.filter((j) => {
-      if (!j.closing) return false
-      const d = daysLeft(j.closing, nowDate)
-      return d >= 0 && d <= 7
-    }).length,
-)
-const entryShare = computed(() =>
-  total.value ? Math.round((allDocs.value.filter((j) => j.minYears === 0).length / total.value) * 100) : 0,
-)
-
-function countBy(key: 'sector' | 'location' | 'company') {
-  const m = new Map<string, number>()
-  for (const j of allDocs.value) m.set(j[key], (m.get(j[key]) ?? 0) + 1)
-  return [...m.entries()].map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count)
-}
-
-const bySectorRaw = computed(() => countBy('sector'))
-const byPlace = computed(() => countBy('location'))
-const topCompanies = computed(() => countBy('company').slice(0, 10))
-
-const bySector = computed(() =>
-  bySectorRaw.value.map((r) => {
-    const thisW = allDocs.value.filter((j) => j.sector === r.name && epoch(j.posted) >= weekStart.value).length
-    const prevW = allDocs.value.filter(
-      (j) => j.sector === r.name && epoch(j.posted) >= prevStart.value && epoch(j.posted) < weekStart.value,
-    ).length
-    const delta = prevW === 0 ? null : Math.round(((thisW - prevW) / prevW) * 100)
-    return { ...r, delta }
-  }),
-)
-
-const entryBySector = computed(() => {
-  const m = new Map<string, { count: number; example: string; exampleId: string }>()
-  for (const j of allDocs.value) {
-    if (j.minYears !== 0) continue
-    const e = m.get(j.sector) ?? { count: 0, example: j.title, exampleId: j.id }
-    e.count += 1
-    m.set(j.sector, e)
-  }
-  return [...m.entries()]
-    .map(([name, v]) => ({ name, ...v }))
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 8)
-})
+const fresh = computed(() => derived.value.fresh)
+const urgent = computed(() => derived.value.urgent)
+const entryShare = computed(() => derived.value.total ? Math.round((derived.value.entryCnt / derived.value.total) * 100) : 0)
+const bySectorRaw = computed(() => derived.value.bySectorRaw)
+const byPlace = computed(() => derived.value.byPlace)
+const topCompanies = computed(() => derived.value.topCompanies)
+const bySector = computed(() => derived.value.bySector)
+const entryBySector = computed(() => derived.value.entryBySector)
 
 function companyBase(name: string): string {
-  const j = allDocs.value.find((x) => x.company === name)
-  return (j?.location ?? '').toLowerCase()
+  return (derived.value.topCompanies.find((x) => x.name === name)?.loc ?? '').toLowerCase()
 }
 
 const closingSoon = computed(() => {
@@ -301,18 +308,15 @@ function barPct(day: { total: number }): number {
   return day.total ? (day.total / maxTotal.value) * 100 : 0
 }
 const daily = computed(() => {
+  const dm = derived.value.dayMap
   const days: Array<{ label: string; total: number; segs: Array<{ name: string; count: number; share: number }> }> = []
   for (let back = 59; back >= 0; back--) {
-    const dayMs = maxPosted.value - back * 86400000
-    const key = new Date(dayMs).toISOString().slice(0, 10)
-    const inDay = allDocs.value.filter((j) => j.posted === key)
-    const m = new Map<string, number>()
-    for (const j of inDay) m.set(j.sector, (m.get(j.sector) ?? 0) + 1)
-    const segs = [...m.entries()]
-      .map(([name, count]) => ({ name, count, share: inDay.length ? (count / inDay.length) * 100 : 0 }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 8)
-    days.push({ label: key, total: inDay.length, segs })
+    const key = new Date(maxPosted.value - back * 86400000).toISOString().slice(0, 10)
+    const m = dm.get(key)
+    if (!m) { days.push({ label: key, total: 0, segs: [] }); continue }
+    let tot = 0; for (const c of m.values()) tot += c
+    const segs = [...m.entries()].map(([name, count]) => ({ name, count, share: tot ? (count / tot) * 100 : 0 })).sort((a, b) => b.count - a.count).slice(0, 8)
+    days.push({ label: key, total: tot, segs })
   }
   return days
 })
