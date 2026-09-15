@@ -66,7 +66,7 @@
 
 <script setup lang="ts">
 import { SECTORS, LOCATIONS, type SampleJob } from '~/data/sampleJobs'
-import { searchJobsLocal, remoteSearch, isRemote, daysLeft } from '~/composables/useJobSearch'
+import { searchJobsLocal, remoteSearch, isRemote, daysLeft, liveRawCached } from '~/composables/useJobSearch'
 
 const PER_PAGE = 20
 
@@ -135,15 +135,22 @@ watch(page, () => {
 let t: ReturnType<typeof setTimeout> | null = null
 async function runRemote() {
   const t0 = performance.now()
+  // serve stale cache instantly so UI never blanks
+  const stale = liveRawCached({ q: query.value.trim() || '', query_by: 'title,company,sector,location,blurb', sort_by: 'posted:desc', page: String(page.value), per_page: String(PER_PAGE), ...(sector.value || location.value || maxYears.value !== null ? { filter_by: [ ...(sector.value ? [`sector:=${sector.value}`] : []), ...(location.value ? [`location:=${location.value}`] : []), ...(maxYears.value !== null ? [`min_years:<=${maxYears.value}`] : []) ].join(' && ') } : {}), include_fields: 'id,title,company,sector,location,blurb,url,closing,posted,min_years' }) as { hits?: Array<{ document: Record<string, unknown> }>; found?: number; search_time_ms?: number } | null
+  if (stale?.hits) {
+    const { toJobHit } = await import('~/composables/useJobSearch')
+    remoteHits.value = stale.hits.map((h) => toJobHit(h.document))
+    remoteFound.value = stale.found ?? 0
+    remoteTook.value = stale.search_time_ms ?? null
+  }
   try {
     const r = await remoteSearch(query.value, sector.value, location.value, maxYears.value, page.value, PER_PAGE)
     remoteHits.value = r.hits
     remoteFound.value = r.found
     remoteTook.value = r.took
-  } catch {
-    remoteHits.value = []
-    remoteFound.value = 0
-    remoteTook.value = null
+  } catch (e: unknown) {
+    if (e instanceof DOMException && e.name === 'AbortError') return
+    if (!stale?.hits) { remoteHits.value = []; remoteFound.value = 0; remoteTook.value = null }
   }
   ms.value = Math.round((performance.now() - t0) * 10) / 10
 }

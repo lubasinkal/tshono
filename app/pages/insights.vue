@@ -152,39 +152,43 @@ const nowDate = new Date()
 const liveDocs = ref<SampleJob[] | null>(null)
 const loadState = ref<'loading' | 'ready' | 'fallback'>('loading')
 
+const LS_KEY = 'tshono:insights:v1'
 onMounted(async () => {
-  if (!live) {
-    loadState.value = 'ready'
-    return
-  }
+  if (!live) { loadState.value = 'ready'; return }
+  // hydrate from localStorage instantly — perceived 0ms
+  try {
+    const cached = localStorage.getItem(LS_KEY)
+    if (cached) {
+      const { at, docs } = JSON.parse(cached) as { at: number; docs: SampleJob[] }
+      if (Date.now() - at < 5 * 60_000 && Array.isArray(docs) && docs.length) {
+        liveDocs.value = docs
+        loadState.value = 'ready'
+      }
+    }
+  } catch {}
   try {
     const fields = 'id,title,company,sector,location,url,closing,posted,min_years'
     const perPage = 250
-    let page = 1
-    let found = Number.POSITIVE_INFINITY
-    const docs: SampleJob[] = []
-    while (docs.length < found) {
-      const r = (await liveRaw({
-        q: '',
-        query_by: 'title',
-        per_page: String(perPage),
-        page: String(page),
-        include_fields: fields,
-      })) as {
-        hits?: Array<{ document: RawDoc }>
-        found?: number
-      }
-      const hits = r.hits ?? []
-      found = r.found ?? hits.length
-      docs.push(...hits.map((h) => toJobHit(h.document as unknown as Record<string, unknown>)))
-      if (hits.length < perPage) break
-      page += 1
+    const first = (await liveRaw({ q: '', query_by: 'title', per_page: String(perPage), page: '1', include_fields: fields })) as { hits?: Array<{ document: RawDoc }>; found?: number }
+    const hits0 = first.hits ?? []
+    const found = first.found ?? hits0.length
+    const docs: SampleJob[] = hits0.map((h) => toJobHit(h.document as unknown as Record<string, unknown>))
+    // show first page immediately if no cache
+    if (!liveDocs.value && docs.length) { liveDocs.value = [...docs]; loadState.value = 'ready' }
+    const pages = Math.ceil(found / perPage)
+    if (pages > 1) {
+      const rest = await Promise.all(
+        Array.from({ length: pages - 1 }, (_, i) =>
+          liveRaw({ q: '', query_by: 'title', per_page: String(perPage), page: String(i + 2), include_fields: fields }) as Promise<{ hits?: Array<{ document: RawDoc }> }>,
+        ),
+      )
+      for (const r of rest) for (const h of (r.hits ?? [])) docs.push(toJobHit(h.document as unknown as Record<string, unknown>))
     }
     liveDocs.value = docs
     loadState.value = 'ready'
+    try { localStorage.setItem(LS_KEY, JSON.stringify({ at: Date.now(), docs })) } catch {}
   } catch {
-    liveDocs.value = null
-    loadState.value = 'fallback'
+    if (!liveDocs.value) { liveDocs.value = null; loadState.value = 'fallback' }
   }
 })
 

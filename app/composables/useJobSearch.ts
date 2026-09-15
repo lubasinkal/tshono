@@ -69,12 +69,30 @@ export async function remoteSearch(
   return { hits: (r.hits ?? []).map((h) => toJobHit(h.document)), found: r.found ?? 0, took: r.search_time_ms ?? 0 }
 }
 
+let abort: AbortController | null = null
+const Q_CACHE = new Map<string, { at: number; data: unknown }>()
+const Q_TTL = 30_000
+function cacheKey(params: Record<string, string>): string {
+  return Object.keys(params).sort().map((k) => `${k}=${params[k]}`).join('&')
+}
 export async function liveRaw(params: Record<string, string>): Promise<unknown> {
   const { base, key } = remoteBase()
-  return $fetch(`${base}/search`, {
+  const ck = cacheKey(params)
+  const hit = Q_CACHE.get(ck)
+  if (hit && Date.now() - hit.at < Q_TTL) return hit.data
+  if (abort) abort.abort()
+  abort = new AbortController()
+  const data = await $fetch(`${base}/search`, {
     params,
     headers: { 'X-TYPESENSE-API-KEY': key },
+    signal: abort.signal as unknown as AbortSignal,
   })
+  Q_CACHE.set(ck, { at: Date.now(), data })
+  return data
+}
+export function liveRawCached(params: Record<string, string>): unknown | null {
+  const hit = Q_CACHE.get(cacheKey(params))
+  return hit && Date.now() - hit.at < Q_TTL ? hit.data : null
 }
 
 export async function remoteGet(id: string): Promise<JobHit | null> {
