@@ -74,7 +74,7 @@ const route = useRoute()
 const router = useRouter()
 const box = ref<HTMLInputElement | null>(null)
 const focused = ref(false)
-const isCompact = computed(() => focused.value || query.value.trim().length > 0 || sector.value !== '' || location.value !== '' || exp.value !== '')
+const isCompact = computed(() => query.value.trim().length > 0 || sector.value !== '' || location.value !== '' || exp.value !== '')
 
 const query = ref(String(route.query.q ?? ''))
 const sector = ref(String(route.query.sector ?? ''))
