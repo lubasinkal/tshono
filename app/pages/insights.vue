@@ -276,10 +276,12 @@ const closingSoon = computed(() => {
   return [...dated, ...freshTop]
 })
 
-const palette = ['#4ade80', '#38bdf8', '#f472b6', '#fbbf24', '#a78bfa', '#34d399', '#fb7185', '#22d3ee']
 function sectorColor(name: string): string {
-  const i = bySectorRaw.value.findIndex((r) => r.name === name)
-  return palette[Math.max(0, i) % palette.length] ?? palette[0] ?? '#4ade80'
+  // Stable hash → golden-angle hue so every sector gets a distinct colour, no modulo collisions.
+  let h = 0
+  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0
+  const hue = (h * 137.5) % 360
+  return `hsl(${hue.toFixed(1)} 72% 62%)`
 }
 
 const hoverDay = ref<number | null>(null)
