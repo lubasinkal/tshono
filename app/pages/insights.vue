@@ -24,7 +24,7 @@
       <div class="stat"><b>{{ entryShare }}%</b><span>entry level share</span></div>
     </div>
 
-    <h2 class="sect"><span>#</span> Top Sectors. Share of fresh roles by sector.</h2>
+    <h2 class="sect"><span>#</span> Top Sectors. Share of tracked roles by sector.</h2>
     <div class="weekaxis"><span v-for="d in axis" :key="d">{{ d }}</span></div>
     <div class="stack">
       <div
@@ -36,7 +36,7 @@
         <i
           v-for="s in day.segs"
           :key="s.name"
-          :style="{ height: (s.count / maxDay * 100) + '%', background: sectorColor(s.name) }"
+          :style="{ height: s.share + '%', background: sectorColor(s.name) }"
         />
       </div>
     </div>
@@ -132,16 +132,29 @@ onMounted(async () => {
     return
   }
   try {
-    const r = (await liveRaw({
-      q: '',
-      query_by: 'title',
-      per_page: '500',
-      include_fields: 'id,title,company,sector,location,url,closing,posted,min_years',
-    })) as {
-      hits?: Array<{ document: RawDoc }>
+    const fields = 'id,title,company,sector,location,url,closing,posted,min_years'
+    const perPage = 250
+    let page = 1
+    let found = Number.POSITIVE_INFINITY
+    const docs: SampleJob[] = []
+    while (docs.length < found) {
+      const r = (await liveRaw({
+        q: '',
+        query_by: 'title',
+        per_page: String(perPage),
+        page: String(page),
+        include_fields: fields,
+      })) as {
+        hits?: Array<{ document: RawDoc }>
+        found?: number
+      }
+      const hits = r.hits ?? []
+      found = r.found ?? hits.length
+      docs.push(...hits.map((h) => toJobHit(h.document as unknown as Record<string, unknown>)))
+      if (hits.length < perPage) break
+      page += 1
     }
-    liveDocs.value =
-      (r.hits ?? []).map((h) => toJobHit(h.document as unknown as Record<string, unknown>)) ?? []
+    liveDocs.value = docs
     loadState.value = 'ready'
   } catch {
     liveDocs.value = null
@@ -237,15 +250,15 @@ function sectorColor(name: string): string {
 }
 
 const daily = computed(() => {
-  const days: Array<{ label: string; total: number; segs: Array<{ name: string; count: number }> }> = []
+  const days: Array<{ label: string; total: number; segs: Array<{ name: string; count: number; share: number }> }> = []
   for (let back = 8; back >= 0; back--) {
     const dayMs = maxPosted.value - back * 86400000
     const key = new Date(dayMs).toISOString().slice(0, 10)
-    const inDay = allDocs.value.filter((j) => epoch(j.posted) <= dayMs + 86399999)
+    const inDay = allDocs.value.filter((j) => j.posted === key)
     const m = new Map<string, number>()
     for (const j of inDay) m.set(j.sector, (m.get(j.sector) ?? 0) + 1)
     const segs = [...m.entries()]
-      .map(([name, count]) => ({ name, count }))
+      .map(([name, count]) => ({ name, count, share: inDay.length ? (count / inDay.length) * 100 : 0 }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 8)
     days.push({ label: key, total: inDay.length, segs })
@@ -259,7 +272,6 @@ const axis = computed(() => {
   })
   return labels
 })
-const maxDay = computed(() => Math.max(...daily.value.map((d) => d.total), 1))
 const max = computed(() => Math.max(...bySectorRaw.value.map((r) => r.count), 1))
 const pct = (n: number) => Math.round((n / max.value) * 100)
 
