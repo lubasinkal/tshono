@@ -25,8 +25,11 @@
     </div>
 
     <h2 class="sect"><span>#</span> Top Sectors. Daily postings by sector, last 60 days.</h2>
-    <div class="weekaxis"><span v-for="(day, i) in daily" :key="day.label">{{ isTick(i) ? fmtDay(day.label) : '' }}</span></div>
+    <div class="weekaxis"><span v-for="(day, i) in daily" :key="day.label"><b v-if="isTick(i)" :class="i % 14 === 3 ? 'tick' : 'tick tick--minor'">{{ fmtDay(day.label) }}</b></span></div>
     <div class="stack" @mouseleave="hoverDay = null">
+      <div class="yline" />
+      <div class="ymax">{{ maxTotal }}</div>
+      <div class="ymid">{{ Math.round(maxTotal / 2) }}</div>
       <div
         v-for="(day, i) in daily"
         :key="day.label"
@@ -48,6 +51,16 @@
           <div v-for="s in day.segs" :key="s.name" class="tiprow">
             <i :style="{ background: sectorColor(s.name) }" />{{ s.name.toLowerCase() }}<b>{{ s.count }}</b>
           </div>
+        </div>
+      </div>
+    </div>
+    <div v-if="hovered" class="sheet">
+      <div class="sheetcard">
+        <button class="sheetx" @click="hoverDay = null" aria-label="Close">✕</button>
+        <div class="tipdate">{{ fmtDay(hovered.label) }}</div>
+        <div class="tiptotal">{{ hovered.total }} total</div>
+        <div v-for="s in hovered.segs" :key="s.name" class="tiprow">
+          <i :style="{ background: sectorColor(s.name) }" />{{ s.name.toLowerCase() }}<b>{{ s.count }}</b>
         </div>
       </div>
     </div>
@@ -261,6 +274,7 @@ function sectorColor(name: string): string {
 }
 
 const hoverDay = ref<number | null>(null)
+const hovered = computed(() => (hoverDay.value === null ? null : daily.value[hoverDay.value] ?? null))
 const MON = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
 function fmtDay(iso: string): string {
   const dt = new Date(iso + 'T00:00:00')
@@ -300,7 +314,7 @@ const pct = (n: number) => Math.round((n / max.value) * 100)
 useHead({ title: 'tshono data. botswana hiring live' })
 useSeoMeta({
   ogTitle: 'tshono data. botswana hiring live',
-  ogDescription: 'See who is hiring in Botswana, where demand sits, and which roles close soon.',
-  ogImage: 'https://tshono.pages.dev/og.png',
+  ogDescription: 'Explore jobs data across Botswana. Sectors, companies, places and closing soon.',
+  ogImage: 'https://tshono.pages.dev/og-insights.png',
 })
 </script>
