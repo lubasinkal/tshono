@@ -4,6 +4,7 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   css: ['~/assets/css/main.css'],
   app: {
+    viewTransition: true,
     head: {
       title: 'Tshono. Fast Botswana jobs search',
       meta: [

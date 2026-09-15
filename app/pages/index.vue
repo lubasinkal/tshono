@@ -1,5 +1,5 @@
 <template>
-  <section>
+  <section :class="{ 'is-compact': isCompact }">
     <div class="hero">
       <h1>Find work<span class="dot">.</span> Fast<span class="dot">.</span></h1>
       <p>Every opportunity in Botswana in one instant search. No accounts, no noise.</p>
@@ -12,6 +12,8 @@
           aria-label="Search jobs"
           autocomplete="off"
           spellcheck="false"
+          @focus="focused = true"
+          @blur="focused = false"
         />
         <span class="kbd"><span>/</span></span>
       </div>
@@ -71,6 +73,8 @@ const PER_PAGE = 20
 const route = useRoute()
 const router = useRouter()
 const box = ref<HTMLInputElement | null>(null)
+const focused = ref(false)
+const isCompact = computed(() => focused.value || query.value.trim().length > 0 || sector.value !== '' || location.value !== '' || exp.value !== '')
 
 const query = ref(String(route.query.q ?? ''))
 const sector = ref(String(route.query.sector ?? ''))
