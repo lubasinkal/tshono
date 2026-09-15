@@ -24,7 +24,8 @@
       <div class="stat"><b>{{ entryShare }}%</b><span>entry level share</span></div>
     </div>
 
-    <h2 class="sect"><span>#</span> Top Sectors. Daily postings by sector, last 60 days.</h2>
+    <h2 class="sect"><span>#</span> Top Sectors. Daily postings by sector, last 60 days. <span class="peak">peak {{ maxTotal }}/day</span></h2>
+    <div ref="chartEl" class="chartscroll">
     <div class="weekaxis"><span v-for="(day, i) in daily" :key="day.label"><b v-if="isTick(i)" :class="i % 14 === 3 ? 'tick' : 'tick tick--minor'">{{ fmtDay(day.label) }}</b></span></div>
     <div class="stack" @mouseleave="hoverDay = null">
       <div class="yline" />
@@ -53,6 +54,7 @@
           </div>
         </div>
       </div>
+    </div>
     </div>
     <div v-if="hovered" class="sheet">
       <div class="sheetcard">
@@ -289,6 +291,12 @@ function tipAlign(i: number): string {
   return ''
 }
 const maxTotal = computed(() => Math.max(...daily.value.map((d) => d.total), 1))
+const chartEl = ref<HTMLElement | null>(null)
+function scrollChartEnd() {
+  if (typeof window === 'undefined' || window.innerWidth > 720) return
+  const el = chartEl.value
+  if (el) el.scrollLeft = el.scrollWidth
+}
 function barPct(day: { total: number }): number {
   return day.total ? (day.total / maxTotal.value) * 100 : 0
 }
@@ -310,6 +318,8 @@ const daily = computed(() => {
 })
 const max = computed(() => Math.max(...bySectorRaw.value.map((r) => r.count), 1))
 const pct = (n: number) => Math.round((n / max.value) * 100)
+watch(daily, () => { nextTick(scrollChartEnd) })
+onMounted(() => { nextTick(scrollChartEnd) })
 
 useHead({ title: 'tshono data. botswana hiring live' })
 useSeoMeta({

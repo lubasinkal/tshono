@@ -195,7 +195,9 @@ kbd, .kbd span {
 .ymax, .ymid { position: absolute; left: 16px; font-family: var(--mono); font-size: 9px; color: var(--faint); pointer-events: none; }
 .ymax { top: 6px; }
 .ymid { top: calc(50% - 14px); }
+.peak { color: var(--accent); border: 1px solid var(--accent-dim); background: rgba(74, 222, 128, 0.07); border-radius: 7px; padding: 2px 8px; font-size: 12px; white-space: nowrap; }
 .stackbar, .stackcol { position: relative; z-index: 1; }
+.chartscroll { min-width: 0; }
 .sheet { display: none; }
 .stack { position: relative; display: flex; gap: 3px; align-items: stretch; height: 190px; padding: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; }
 .stackcol { position: relative; flex: 1; display: flex; flex-direction: column; justify-content: flex-end; min-width: 0; min-height: 0; border-radius: 3px; cursor: pointer; background: rgba(255, 255, 255, 0.028); }
@@ -235,6 +237,12 @@ kbd, .kbd span {
   .weekaxis { gap: 2px; }
   .tick--minor { display: none; }
   .tip { display: none; }
+  .chartscroll { overflow-x: auto; margin: 0 -20px; padding: 0 20px 6px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .chartscroll::-webkit-scrollbar { display: none; }
+  .chartscroll .stack { min-width: max-content; }
+  .chartscroll .stackcol { flex: 0 0 44px; }
+  .chartscroll .weekaxis span { flex: 0 0 44px; }
+  .yline, .ymax, .ymid { display: none; }
   .sheet { display: block; position: fixed; left: 12px; right: 12px; bottom: 12px; z-index: 60; }
   .sheetcard { position: relative; background: var(--panel2); border: 1px solid var(--line2); border-radius: 14px; padding: 14px 16px; font-family: var(--mono); font-size: 12px; box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6); max-height: 46vh; overflow-y: auto; }
   .sheetx { position: absolute; top: 8px; right: 10px; background: none; border: none; color: var(--faint); font-size: 14px; padding: 6px; cursor: pointer; }
