@@ -190,6 +190,13 @@ kbd, .kbd span {
 .sect span { color: var(--faint); font-family: var(--mono); font-weight: 400; margin-right: 6px; }
 .weekaxis { display: flex; gap: 3px; padding: 0 12px; font-family: var(--mono); font-size: 9px; color: var(--faint); text-transform: uppercase; margin-bottom: 6px; }
 .weekaxis span { flex: 1; min-width: 0; overflow: visible; white-space: nowrap; }
+.tick { font-weight: 400; }
+.yline { position: absolute; left: 12px; right: 12px; top: 50%; border-top: 1px dashed var(--line2); pointer-events: none; }
+.ymax, .ymid { position: absolute; left: 16px; font-family: var(--mono); font-size: 9px; color: var(--faint); pointer-events: none; }
+.ymax { top: 6px; }
+.ymid { top: calc(50% - 14px); }
+.stackbar, .stackcol { position: relative; z-index: 1; }
+.sheet { display: none; }
 .stack { position: relative; display: flex; gap: 3px; align-items: stretch; height: 190px; padding: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; }
 .stackcol { position: relative; flex: 1; display: flex; flex-direction: column; justify-content: flex-end; min-width: 0; min-height: 0; border-radius: 3px; cursor: pointer; background: rgba(255, 255, 255, 0.028); }
 .stackcol:hover, .stackcol.hot { background: rgba(255, 255, 255, 0.07); }
@@ -224,4 +231,11 @@ kbd, .kbd span {
   .row { grid-template-columns: 110px 1fr 32px; }
   .cmdbar input { font-size: 16px; padding-right: 20px; }
   .cmdbar .kbd { display: none; }
+  .stack { height: 170px; gap: 2px; }
+  .weekaxis { gap: 2px; }
+  .tick--minor { display: none; }
+  .tip { display: none; }
+  .sheet { display: block; position: fixed; left: 12px; right: 12px; bottom: 12px; z-index: 60; }
+  .sheetcard { position: relative; background: var(--panel2); border: 1px solid var(--line2); border-radius: 14px; padding: 14px 16px; font-family: var(--mono); font-size: 12px; box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6); max-height: 46vh; overflow-y: auto; }
+  .sheetx { position: absolute; top: 8px; right: 10px; background: none; border: none; color: var(--faint); font-size: 14px; padding: 6px; cursor: pointer; }
 }
