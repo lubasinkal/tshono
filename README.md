@@ -8,6 +8,7 @@ through one file: `app/composables/useJobSearch.ts`.
 
 ## Stack
 
+k
 Nuxt 4 + Bun. No UI framework on purpose for speed and cheap data.
 
 ## Run it
