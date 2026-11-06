@@ -1,37 +1,45 @@
 <template>
   <section class="wrap">
     <p><NuxtLink to="/">← back to search</NuxtLink></p>
-    <div v-if="job">
-      <h1 class="title">{{ job.title }}</h1>
-      <p class="sub">{{ job.company }} · {{ job.location }}</p>
-      <div class="jobmeta">
-        <span><b>sector</b> {{ job.sector.toLowerCase() }}</span>
-        <span><b>place</b> {{ job.location.toLowerCase() }}</span>
-        <span><b>experience</b> {{ job.minYears === 0 ? 'entry level' : job.minYears + ' years plus' }}</span>
-        <span><b>posted</b> {{ postedLabel }}</span>
-        <span><b>closes</b> {{ job.closing || 'not stated' }}</span>
+    <div v-if="job" class="jobgrid">
+      <div class="jobmain">
+        <h1 class="title">{{ job.title }}</h1>
+        <p class="sub"><NuxtLink :to="`/companies/${encodeURIComponent(job.company)}`">{{ job.company }}</NuxtLink> · {{ job.location }}</p>
+        <div class="jobbody">
+          <template v-for="(b, i) in bodyBlocks" :key="i">
+            <h3 v-if="b.kind === 'h'">{{ b.text }}</h3>
+            <ul v-else-if="b.kind === 'ul'">
+              <li v-for="(it, k) in b.items" :key="k">{{ it }}</li>
+            </ul>
+            <p v-else>{{ b.text }}</p>
+          </template>
+        </div>
       </div>
-      <div class="jobbody">
-        <template v-for="(b, i) in bodyBlocks" :key="i">
-          <h3 v-if="b.kind === 'h'">{{ b.text }}</h3>
-          <ul v-else-if="b.kind === 'ul'">
-            <li v-for="(it, k) in b.items" :key="k">{{ it }}</li>
+      <aside class="jobside">
+        <div class="sidecard">
+          <h2 class="sideh">job facts</h2>
+          <dl class="facts">
+            <div class="fact"><dt>company</dt><dd><NuxtLink :to="`/companies/${encodeURIComponent(job.company)}`">{{ job.company }}</NuxtLink></dd></div>
+            <div class="fact"><dt>sector</dt><dd><NuxtLink :to="`/sectors/${encodeURIComponent(job.sector)}`">{{ job.sector.toLowerCase() }}</NuxtLink></dd></div>
+            <div class="fact"><dt>place</dt><dd>{{ job.location.toLowerCase() }}</dd></div>
+            <div class="fact"><dt>experience</dt><dd>{{ job.minYears === 0 ? 'entry level' : job.minYears + ' years plus' }}</dd></div>
+            <div class="fact"><dt>posted</dt><dd>{{ postedLabel }}</dd></div>
+            <div class="fact"><dt>closes</dt><dd>{{ job.closing || 'not stated' }}</dd></div>
+          </dl>
+          <a class="applybtn" :href="job.url" target="_blank" rel="noopener">apply at source ↗</a>
+        </div>
+        <div class="sidecard">
+          <h2 class="sideh">similar roles</h2>
+          <ul class="sidelist">
+            <li v-for="s in similar" :key="s.id">
+              <NuxtLink :to="`/jobs/${s.id}`">
+                <strong>{{ s.title }}</strong>
+                <span>{{ s.company }}</span>
+              </NuxtLink>
+            </li>
           </ul>
-          <p v-else>{{ b.text }}</p>
-        </template>
-      </div>
-      <p class="applyrow">
-        <a :href="job.url" target="_blank" rel="noopener">apply at source ↗</a>
-      </p>
-      <h2>Similar roles</h2>
-      <ul class="list">
-        <li v-for="s in similar" :key="s.id" class="card">
-          <NuxtLink :to="`/jobs/${s.id}`" class="cardlink">
-            <strong>{{ s.title }}</strong>
-            <span class="co">{{ s.company }} · {{ s.location }}</span>
-          </NuxtLink>
-        </li>
-      </ul>
+        </div>
+      </aside>
     </div>
     <p v-else>role not found. <NuxtLink to="/">back to search</NuxtLink></p>
   </section>
@@ -44,9 +52,22 @@ import { remoteGet, liveRaw, toJobHit, type JobHit } from '~/composables/useJobS
 const route = useRoute()
 const id = String(route.params.id)
 
-const { data: remoteJob } = await useAsyncData(`job-${id}`, async () => remoteGet(id), { server: false })
+const { data: remoteJob } = await useAsyncData(`job-${id}`, async () => remoteGet(id))
 
 const job = computed<SampleJob | JobHit | null | undefined>(() => remoteJob.value)
+const reqUrl = useRequestURL()
+const ogImage = computed(() => {
+  const j = job.value
+  if (!j) return `${reqUrl.origin}/og.png`
+  const p = new URLSearchParams({
+    title: j.title,
+    company: j.company,
+    sector: j.sector,
+    location: j.location,
+    blurb: j.blurb || '',
+  })
+  return `${reqUrl.origin}/og/job?${p.toString()}`
+})
 const postedLabel = computed(() => {
   const j = job.value
   if (!j) return ''
@@ -115,6 +136,10 @@ useHead({ title: job.value ? `${job.value.title} · tshono` : 'role · tshono' }
 useSeoMeta({
   ogTitle: () => (job.value ? `${job.value.title} · tshono` : 'tshono. find work. fast.'),
   ogDescription: () => (job.value ? `${job.value.company} · ${job.value.location} · ${job.value.sector}` : 'Every opportunity in Botswana in one instant search.'),
-  ogImage: 'https://tshono.pages.dev/og.png',
+  ogImage: () => ogImage.value,
+  twitterCard: 'summary_large_image',
+  twitterTitle: () => (job.value ? `${job.value.title} · tshono` : 'tshono. find work. fast.'),
+  twitterDescription: () => (job.value ? `${job.value.company} · ${job.value.location} · ${job.value.sector}` : 'Every opportunity in Botswana in one instant search.'),
+  twitterImage: () => ogImage.value,
 })
 </script>

@@ -86,6 +86,7 @@ export async function liveRaw(params: Record<string, string>): Promise<unknown> 
     params,
     headers: { 'X-TYPESENSE-API-KEY': key },
     signal: abort.signal as unknown as AbortSignal,
+    timeout: 10000,
   })
   Q_CACHE.set(ck, { at: Date.now(), data })
   return data
