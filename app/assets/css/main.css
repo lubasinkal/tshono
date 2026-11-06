@@ -68,17 +68,31 @@ a { color: var(--accent); }
   max-width: 1120px; margin: 0 auto; padding: 0 20px;
   min-height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 12px;
 }
-.brand { font-family: var(--mono); font-weight: 700; font-size: 18px; color: var(--text); text-decoration: none; letter-spacing: -0.5px; }
+.brand { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-weight: 700; font-size: 18px; color: var(--text); text-decoration: none; letter-spacing: -0.5px; }
 .brand b { color: var(--accent); }
+.branddot { width: 10px; height: 10px; border-radius: 3px; background: var(--accent); box-shadow: 0 0 12px color-mix(in srgb, var(--accent) 50%, transparent); flex: none; }
+.brandtag { font-style: normal; font-weight: 400; font-size: 10px; color: var(--accent); border: 1px solid color-mix(in oklab, var(--accent) 40%, transparent); background: var(--accent-dim); border-radius: 5px; padding: 1px 5px; letter-spacing: 1px; text-transform: uppercase; }
+.topbar-right { display: flex; align-items: center; gap: 8px; }
+.hdsearch { position: relative; flex: 0 1 340px; width: 100%; display: flex; align-items: center; }
+.hdsearch kbd { position: absolute; left: 12px; pointer-events: none; z-index: 1; }
+.hdsearch input {
+  width: 100%; background: var(--panel); border: 1px solid var(--line2); color: var(--text);
+  border-radius: var(--radius-sm); padding: 8px 12px 8px 34px; font-family: var(--mono); font-size: 13px; outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.hdsearch input::placeholder { color: var(--faint); }
+.hdsearch input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 14%, transparent); }
 .nav { display: flex; gap: 2px; align-items: center; }
 .nav a {
+  display: inline-flex; align-items: center; gap: 8px;
   color: var(--faint); text-decoration: none; font-family: var(--mono); font-size: 13px;
   padding: 7px 12px; border-radius: var(--radius-sm); transition: color 0.15s, background 0.15s;
 }
+.nav a kbd { font-size: 10px; padding: 1px 5px; }
 .nav a:hover { color: var(--text); background: var(--panel2); }
 .nav a.router-link-active { color: var(--text); background: var(--panel2); }
 .jumpbtn {
-  display: inline-flex; align-items: center; gap: 8px; margin-left: auto;
+  display: inline-flex; align-items: center; gap: 8px;
   font-family: var(--mono); font-size: 13px; color: var(--faint);
   background: transparent; border: 1px solid var(--line); border-radius: var(--radius-sm);
   padding: 6px 8px 6px 12px; cursor: pointer; transition: color 0.15s, border-color 0.15s, background 0.15s;
@@ -217,6 +231,25 @@ kbd, .kbd span {
 .applyrow a { font-family: var(--mono); font-size: 14px; background: var(--accent-dim); border: 1px solid var(--accent); border-radius: var(--radius-sm); padding: 11px 20px; text-decoration: none; display: inline-block; transition: background 0.15s; }
 .applyrow a:hover { background: color-mix(in oklab, var(--accent) 26%, transparent); }
 
+.jobgrid { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 24px; align-items: start; margin-top: 4px; }
+.jobside { position: sticky; top: 72px; display: grid; gap: 12px; }
+.sidecard { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; }
+.sideh { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--faint); margin: 0 0 12px; font-weight: 400; }
+.facts { margin: 0; display: grid; }
+.fact { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); font-family: var(--mono); font-size: 13px; }
+.fact:last-child { border-bottom: none; }
+.fact dt { color: var(--faint); font-size: 12px; }
+.fact dd { margin: 0; color: var(--text); text-align: right; }
+.fact a { color: var(--accent); text-decoration: none; }
+.fact a:hover { text-decoration: underline; }
+.applybtn { display: block; text-align: center; margin-top: 14px; font-family: var(--mono); font-size: 14px; background: var(--accent-dim); border: 1px solid var(--accent); border-radius: var(--radius-sm); padding: 11px 16px; text-decoration: none; transition: background 0.15s; }
+.applybtn:hover { background: color-mix(in oklab, var(--accent) 26%, transparent); }
+.sidelist { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.sidelist li a { display: grid; gap: 2px; padding: 8px 4px; border-radius: var(--radius-sm); text-decoration: none; color: inherit; }
+.sidelist li a:hover { background: var(--panel2); }
+.sidelist strong { font-size: 13px; }
+.sidelist span { font-family: var(--mono); font-size: 12px; color: var(--faint); }
+
 /* ---------- insights ---------- */
 .dhead { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
 .chip {
@@ -300,6 +333,10 @@ kbd, .kbd span {
   .sheet { display: block; position: fixed; left: 12px; right: 12px; bottom: 12px; z-index: 60; }
   .sheetcard { position: relative; background: var(--panel2); border: 1px solid var(--line2); border-radius: 14px; padding: 14px 16px; font-family: var(--mono); font-size: 12px; box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6); max-height: 46vh; overflow-y: auto; }
   .sheetx { position: absolute; top: 8px; right: 10px; background: none; border: none; color: var(--faint); font-size: 14px; padding: 6px; cursor: pointer; }
+  .hdsearch { display: none; }
+  .nav a kbd { display: none; }
   .jumpbtn span { display: none; }
+  .jobgrid { grid-template-columns: 1fr; }
+  .jobside { position: static; }
   .cmdk { padding: 10vh 16px 0; }
 }
