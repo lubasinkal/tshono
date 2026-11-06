@@ -15,6 +15,7 @@
           <nav class="nav">
             <NuxtLink to="/">Search</NuxtLink>
             <NuxtLink to="/companies">Companies</NuxtLink>
+            <NuxtLink to="/sectors">Sectors</NuxtLink>
             <NuxtLink to="/insights">Insights</NuxtLink>
           </nav>
           <button class="jumpbtn" type="button" aria-label="Open command palette" @click="palette?.open()">
