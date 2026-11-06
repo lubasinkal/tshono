@@ -68,12 +68,9 @@ a { color: var(--accent); }
   max-width: 1120px; margin: 0 auto; padding: 0 20px;
   min-height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 12px;
 }
-.brand { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-weight: 700; font-size: 18px; color: var(--text); text-decoration: none; letter-spacing: -0.5px; }
+.brand { font-family: var(--mono); font-weight: 700; font-size: 18px; color: var(--text); text-decoration: none; letter-spacing: -0.5px; }
 .brand b { color: var(--accent); }
-.branddot { width: 10px; height: 10px; border-radius: 3px; background: var(--accent); box-shadow: 0 0 12px color-mix(in srgb, var(--accent) 50%, transparent); flex: none; }
-.brandtag { font-style: normal; font-weight: 400; font-size: 10px; color: var(--accent); border: 1px solid color-mix(in oklab, var(--accent) 40%, transparent); background: var(--accent-dim); border-radius: 5px; padding: 1px 5px; letter-spacing: 1px; text-transform: uppercase; }
-.topbar-right { display: flex; align-items: center; gap: 8px; }
-.hdsearch { position: relative; flex: 0 1 340px; width: 100%; display: flex; align-items: center; }
+.hdsearch { position: relative; flex: 0 1 340px; margin: 0 auto; display: flex; align-items: center; }
 .hdsearch kbd { position: absolute; left: 12px; pointer-events: none; z-index: 1; }
 .hdsearch input {
   width: 100%; background: var(--panel); border: 1px solid var(--line2); color: var(--text);
@@ -317,6 +314,12 @@ kbd, .kbd span {
   .hero { padding: 36px 0 4px; }
   .grid { grid-template-columns: 1fr 1fr; }
   .row { grid-template-columns: 110px 1fr 32px; }
+  .topbar-inner { flex-wrap: wrap; padding-top: 8px; padding-bottom: 8px; row-gap: 4px; }
+  .nav { order: 2; flex-basis: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 2px; }
+  .nav::-webkit-scrollbar { display: none; }
+  .jumpbtn { order: 1; }
+  .dtable { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .dtable th, .dtable td { white-space: nowrap; }
   .cmdbar input { font-size: 15px; padding-left: 16px; padding-right: 16px; }
   .cmdbar .kbd { display: none; }
   .stack { height: clamp(260px, 48vh, 380px); gap: 2px; }

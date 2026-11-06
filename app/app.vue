@@ -2,27 +2,21 @@
   <div class="page">
     <header class="topbar">
       <div class="topbar-inner">
-        <NuxtLink to="/" class="brand">
-          <span class="branddot" aria-hidden="true"></span>
-          <span>tshono<b>.</b></span>
-          <em class="brandtag">bw</em>
-        </NuxtLink>
+        <NuxtLink to="/" class="brand">tshono<b>.</b></NuxtLink>
         <form class="hdsearch" role="search" @submit.prevent="doSearch">
           <kbd>/</kbd>
           <input v-model="hdq" name="q" type="search" placeholder="search roles…" aria-label="Search jobs" autocomplete="off" spellcheck="false" />
         </form>
-        <div class="topbar-right">
-          <nav class="nav">
-            <NuxtLink to="/">Search</NuxtLink>
-            <NuxtLink to="/companies">Companies</NuxtLink>
-            <NuxtLink to="/sectors">Sectors</NuxtLink>
-            <NuxtLink to="/insights">Insights</NuxtLink>
-          </nav>
-          <button class="jumpbtn" type="button" aria-label="Open command palette" @click="palette?.open()">
-            <span>jump to…</span>
-            <kbd>⌘K</kbd>
-          </button>
-        </div>
+        <nav class="nav">
+          <NuxtLink to="/">Search</NuxtLink>
+          <NuxtLink to="/companies">Companies</NuxtLink>
+          <NuxtLink to="/sectors">Sectors</NuxtLink>
+          <NuxtLink to="/insights">Insights</NuxtLink>
+        </nav>
+        <button class="jumpbtn" type="button" aria-label="Open command palette" @click="palette?.open()">
+          <span>jump to…</span>
+          <kbd>⌘K</kbd>
+        </button>
       </div>
     </header>
     <main class="shell">
