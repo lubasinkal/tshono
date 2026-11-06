@@ -13,8 +13,8 @@
         </form>
         <div class="topbar-right">
           <nav class="nav">
-            <NuxtLink to="/">Search<kbd>g s</kbd></NuxtLink>
-            <NuxtLink to="/insights">Insights<kbd>g i</kbd></NuxtLink>
+            <NuxtLink to="/">Search</NuxtLink>
+            <NuxtLink to="/insights">Insights</NuxtLink>
           </nav>
           <button class="jumpbtn" type="button" aria-label="Open command palette" @click="palette?.open()">
             <span>jump to…</span>

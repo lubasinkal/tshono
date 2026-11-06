@@ -23,7 +23,6 @@
           >
             <span class="cmdk-icon">{{ c.icon }}</span>
             <span class="cmdk-label">{{ c.label }}</span>
-            <kbd>{{ c.hint }}</kbd>
           </li>
         </ul>
         <p v-if="!filtered.length" class="cmdk-empty">no match</p>
@@ -33,11 +32,11 @@
 </template>
 
 <script setup lang="ts">
-interface Cmd { icon: string; label: string; hint: string; to: string }
+interface Cmd { icon: string; label: string; to: string }
 
 const commands: Cmd[] = [
-  { icon: '/', label: 'Search jobs', hint: 'g s', to: '/' },
-  { icon: '◉', label: 'Hiring data · insights', hint: 'g i', to: '/insights' },
+  { icon: '/', label: 'Search jobs', to: '/' },
+  { icon: '◉', label: 'Hiring data · insights', to: '/insights' },
 ]
 
 const open = ref(false)
