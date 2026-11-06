@@ -59,9 +59,13 @@ const companies = computed(() => {
 })
 
 useHead({ title: 'companies · tshono' })
+const reqUrl = useRequestURL()
+const ogImage = `${reqUrl.origin}/og/job?${new URLSearchParams({ title: 'Companies', label: 'EMPLOYERS', sub: 'every employer hiring in botswana' }).toString()}`
 useSeoMeta({
   ogTitle: 'companies hiring in botswana · tshono',
   ogDescription: 'Every employer hiring in Botswana, ranked by roles posted.',
-  ogImage: 'https://tshono.pages.dev/og.png',
+  ogImage,
+  twitterCard: 'summary_large_image',
+  twitterImage: ogImage,
 })
 </script>

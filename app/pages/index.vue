@@ -173,6 +173,6 @@ useHead({ title: 'tshono. fast botswana jobs search' })
 useSeoMeta({
   ogTitle: 'tshono. find work. fast.',
   ogDescription: 'Every opportunity in Botswana in one instant search. No accounts, no noise.',
-  ogImage: 'https://tshono.pages.dev/og.png',
+  ogImage: 'https://tshono.pages.dev/og.jpg',
 })
 </script>

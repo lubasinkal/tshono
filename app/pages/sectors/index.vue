@@ -39,9 +39,13 @@ const { load, loadState, bySector, total } = useJobData()
 onMounted(() => load())
 
 useHead({ title: 'sectors · tshono' })
+const reqUrl = useRequestURL()
+const ogImage = `${reqUrl.origin}/og/job?${new URLSearchParams({ title: 'Sectors', label: 'SECTORS', sub: 'every sector hiring in botswana' }).toString()}`
 useSeoMeta({
   ogTitle: 'sectors hiring in botswana · tshono',
   ogDescription: 'Every sector hiring in Botswana, ranked by roles posted.',
-  ogImage: 'https://tshono.pages.dev/og.png',
+  ogImage,
+  twitterCard: 'summary_large_image',
+  twitterImage: ogImage,
 })
 </script>

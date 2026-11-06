@@ -77,6 +77,11 @@ import { useJobData } from '~/composables/useJobData'
 
 const route = useRoute()
 const name = computed(() => String(route.params.name))
+const reqUrl = useRequestURL()
+const ogImage = computed(() => {
+  const p = new URLSearchParams({ title: name.value, label: 'COMPANY', sub: 'hiring in botswana', blurb: 'Explore their roles, hiring trend and more.' })
+  return `${reqUrl.origin}/og/job?${p.toString()}`
+})
 
 const { allDocs, load, loadState, maxPosted, countBy, dailySeries } = useJobData()
 onMounted(() => load())
@@ -106,7 +111,11 @@ const pct = (n: number) => Math.round((n / max.value) * 100)
 useHead({ title: `${name.value} · tshono` })
 useSeoMeta({
   ogTitle: () => `${name.value} · tshono`,
-  ogDescription: () => `${jobs.value.length} roles · ${sectorsList.value} · hiring in botswana`,
-  ogImage: 'https://tshono.pages.dev/og.png',
+  ogDescription: () => (jobs.value.length ? `${jobs.value.length} roles · ${sectorsList.value}` : 'Hiring in Botswana'),
+  ogImage: () => ogImage.value,
+  twitterCard: 'summary_large_image',
+  twitterTitle: () => `${name.value} · tshono`,
+  twitterDescription: () => (jobs.value.length ? `${jobs.value.length} roles · ${sectorsList.value}` : 'Hiring in Botswana'),
+  twitterImage: () => ogImage.value,
 })
 </script>

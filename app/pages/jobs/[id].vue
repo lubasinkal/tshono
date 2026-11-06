@@ -58,7 +58,7 @@ const job = computed<SampleJob | JobHit | null | undefined>(() => remoteJob.valu
 const reqUrl = useRequestURL()
 const ogImage = computed(() => {
   const j = job.value
-  if (!j) return `${reqUrl.origin}/og.png`
+  if (!j) return `${reqUrl.origin}/og.jpg`
   const p = new URLSearchParams({
     title: j.title,
     company: j.company,

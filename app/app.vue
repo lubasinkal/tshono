@@ -50,11 +50,11 @@ useSeoMeta({
   ogSiteName: 'tshono',
   ogTitle: 'tshono. find work. fast.',
   ogDescription: 'Every opportunity in Botswana in one instant search.',
-  ogImage: 'https://tshono.pages.dev/og.png',
+  ogImage: 'https://tshono.pages.dev/og.jpg',
   twitterCard: 'summary_large_image',
   twitterTitle: 'tshono. find work. fast.',
   twitterDescription: 'Every opportunity in Botswana in one instant search.',
-  twitterImage: 'https://tshono.pages.dev/og.png',
+  twitterImage: 'https://tshono.pages.dev/og.jpg',
   themeColor: '#0a0a0a',
 })
 </script>
