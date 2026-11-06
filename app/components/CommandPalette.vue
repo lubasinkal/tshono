@@ -36,6 +36,7 @@ interface Cmd { icon: string; label: string; to: string }
 
 const commands: Cmd[] = [
   { icon: '/', label: 'Search jobs', to: '/' },
+  { icon: '▦', label: 'Companies', to: '/companies' },
   { icon: '◉', label: 'Hiring data · insights', to: '/insights' },
 ]
 
