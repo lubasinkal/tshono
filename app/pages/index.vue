@@ -4,6 +4,7 @@
       <h1>Find work<span class="dot">.</span> Fast<span class="dot">.</span></h1>
       <p>Every opportunity in Botswana in one instant search. No accounts, no noise.</p>
       <div class="cmdbar">
+        <span class="kbd"><span>/</span></span>
         <input
           ref="box"
           v-model="query"
@@ -15,7 +16,6 @@
           @focus="focused = true"
           @blur="focused = false"
         />
-        <span class="kbd"><span>/</span></span>
       </div>
       <div class="filters">
         <select v-model="sector" aria-label="Sector">
