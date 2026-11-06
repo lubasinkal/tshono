@@ -3,9 +3,9 @@
     <p><NuxtLink to="/">← back to search</NuxtLink></p>
     <div v-if="job">
       <h1 class="title">{{ job.title }}</h1>
-      <p class="sub">{{ job.company }} · {{ job.location }}</p>
+      <p class="sub"><NuxtLink :to="`/companies/${encodeURIComponent(job.company)}`">{{ job.company }}</NuxtLink> · {{ job.location }}</p>
       <div class="jobmeta">
-        <span><b>sector</b> {{ job.sector.toLowerCase() }}</span>
+        <span><b>sector</b> <NuxtLink :to="`/sectors/${encodeURIComponent(job.sector)}`">{{ job.sector.toLowerCase() }}</NuxtLink></span>
         <span><b>place</b> {{ job.location.toLowerCase() }}</span>
         <span><b>experience</b> {{ job.minYears === 0 ? 'entry level' : job.minYears + ' years plus' }}</span>
         <span><b>posted</b> {{ postedLabel }}</span>
@@ -44,9 +44,22 @@ import { remoteGet, liveRaw, toJobHit, type JobHit } from '~/composables/useJobS
 const route = useRoute()
 const id = String(route.params.id)
 
-const { data: remoteJob } = await useAsyncData(`job-${id}`, async () => remoteGet(id), { server: false })
+const { data: remoteJob } = await useAsyncData(`job-${id}`, async () => remoteGet(id))
 
 const job = computed<SampleJob | JobHit | null | undefined>(() => remoteJob.value)
+const reqUrl = useRequestURL()
+const ogImage = computed(() => {
+  const j = job.value
+  if (!j) return `${reqUrl.origin}/og.png`
+  const p = new URLSearchParams({
+    title: j.title,
+    company: j.company,
+    sector: j.sector,
+    location: j.location,
+    blurb: j.blurb || '',
+  })
+  return `${reqUrl.origin}/og/job?${p.toString()}`
+})
 const postedLabel = computed(() => {
   const j = job.value
   if (!j) return ''
@@ -115,6 +128,10 @@ useHead({ title: job.value ? `${job.value.title} · tshono` : 'role · tshono' }
 useSeoMeta({
   ogTitle: () => (job.value ? `${job.value.title} · tshono` : 'tshono. find work. fast.'),
   ogDescription: () => (job.value ? `${job.value.company} · ${job.value.location} · ${job.value.sector}` : 'Every opportunity in Botswana in one instant search.'),
-  ogImage: 'https://tshono.pages.dev/og.png',
+  ogImage: () => ogImage.value,
+  twitterCard: 'summary_large_image',
+  twitterTitle: () => (job.value ? `${job.value.title} · tshono` : 'tshono. find work. fast.'),
+  twitterDescription: () => (job.value ? `${job.value.company} · ${job.value.location} · ${job.value.sector}` : 'Every opportunity in Botswana in one instant search.'),
+  twitterImage: () => ogImage.value,
 })
 </script>

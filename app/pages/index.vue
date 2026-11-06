@@ -44,9 +44,9 @@
       <li v-for="j in results" :key="j.id" class="card">
         <NuxtLink :to="`/jobs/${j.id}`" class="cardlink">
           <strong>{{ j.title }}</strong>
-          <span class="co">{{ j.company }} · {{ j.location }}</span>
+          <span class="co"><NuxtLink :to="`/companies/${encodeURIComponent(j.company)}`" class="ilink">{{ j.company }}</NuxtLink> · {{ j.location }}</span>
           <span class="tags">
-            <em>{{ j.sector }}</em>
+            <em><NuxtLink :to="`/sectors/${encodeURIComponent(j.sector)}`" class="ilink">{{ j.sector }}</NuxtLink></em>
             <em>{{ j.minYears === 0 ? 'entry' : j.minYears + ' yrs+' }}</em>
             <em :class="{ hot: j.closing !== '' && left(j) <= 7 }">{{ j.closing === '' ? 'open' : left(j) <= 0 ? 'closed' : left(j) + 'd left' }}</em>
           </span>
