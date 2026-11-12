@@ -57,6 +57,7 @@
           </template>
           <NuxtLink :to="`/employers/jobs/${j.id}/edit`" class="ilink">edit</NuxtLink>
           <button v-if="j.status === 'live'" class="ghostbtn" type="button" @click="close(j.id)">close</button>
+          <button v-else class="ghostbtn" type="button" @click="reopen(j.id)">reopen</button>
         </div>
       </li>
     </ul>
@@ -85,6 +86,7 @@ interface Payload {
 
 const auth = useAuth()
 const route = useRoute()
+const toast = useToast()
 const { data, error, refresh } = await useFetch<Payload>('/api/employer/jobs')
 if (error.value) await navigateTo('/login')
 
@@ -111,13 +113,33 @@ const switchTitle = (j: Job) =>
 
 async function toggleFeature(j: Job) {
   const on = featured(j)
-  await $fetch(`/api/employer/jobs/${j.id}/${on ? 'unfeature' : 'feature'}`, { method: 'POST' })
-  await refresh()
+  try {
+    await $fetch(`/api/employer/jobs/${j.id}/${on ? 'unfeature' : 'feature'}`, { method: 'POST' })
+    toast.success(on ? 'feature removed' : 'job featured')
+    await refresh()
+  } catch (e: any) {
+    toast.error(e?.data?.statusMessage || 'could not update feature')
+  }
 }
 
 async function close(id: string) {
-  await $fetch(`/api/employer/jobs/${id}`, { method: 'DELETE' })
-  await refresh()
+  try {
+    await $fetch(`/api/employer/jobs/${id}`, { method: 'DELETE' })
+    toast.success('job closed')
+    await refresh()
+  } catch (e: any) {
+    toast.error(e?.data?.statusMessage || 'could not close job')
+  }
+}
+
+async function reopen(id: string) {
+  try {
+    await $fetch(`/api/employer/jobs/${id}/reopen`, { method: 'POST' })
+    toast.success('job reopened')
+    await refresh()
+  } catch (e: any) {
+    toast.error(e?.data?.statusMessage || 'could not reopen job')
+  }
 }
 
 async function logout() {

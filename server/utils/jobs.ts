@@ -231,3 +231,40 @@ export async function unfeatureJob(id: string, orgId: string) {
     client.release()
   }
 }
+
+// Reopens a closed job, respecting the same live-job cap as creation.
+export async function reopenJob(id: string, orgId: string) {
+  const client = await pool.connect()
+  let job: JobRow
+  try {
+    await client.query('begin')
+    const live = await client.query<{ n: number; plan_until: Date | null }>(
+      `select (select count(*)::int from jobs where organization_id = $1 and status = 'live') as n,
+              (select plan_until from employer_profiles where organization_id = $1) as plan_until`,
+      [orgId],
+    )
+    const paid = live.rows[0]?.plan_until ? new Date(live.rows[0].plan_until) > new Date() : false
+    if (!paid && live.rows[0]!.n >= 5) {
+      await client.query('rollback')
+      throw createError({ statusCode: 422, statusMessage: 'free accounts can have 5 live jobs; close one first' })
+    }
+    const updated = await client.query<JobRow>(
+      `update jobs set status = 'live', closed_at = null, updated_at = now()
+        where id = $1 and organization_id = $2 and status = 'closed'
+        returning *`,
+      [id, orgId],
+    )
+    if (!updated.rows.length) {
+      await client.query('rollback')
+      throw createError({ statusCode: 404, statusMessage: 'closed job not found' })
+    }
+    job = updated.rows[0]!
+    await client.query('commit')
+  } catch (e) {
+    await client.query('rollback').catch(() => {})
+    throw e
+  } finally {
+    client.release()
+  }
+  return { job, indexed: await tryIndex(job) }
+}

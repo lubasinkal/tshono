@@ -36,6 +36,7 @@
       </div>
     </footer>
     <CommandPalette ref="palette" />
+    <Toaster />
   </div>
 </template>
 
