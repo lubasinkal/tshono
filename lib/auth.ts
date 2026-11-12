@@ -1,11 +1,8 @@
 import { betterAuth } from 'better-auth'
 import { admin, organization } from 'better-auth/plugins'
-import { Pool } from 'pg'
+import { pool } from './db'
 
-// One pool per server process. Better Auth runs its own Kysely dialect over it.
-// DATABASE_URL points at the Neon branch in .env.local (dev) or the host env (prod).
-const pool = new Pool({ connectionString: process.env.DATABASE_URL })
-
+// Postgres pool is shared with the app's own queries (see lib/db.ts).
 export const auth = betterAuth({
   database: pool,
   baseURL: process.env.BETTER_AUTH_URL ?? 'http://localhost:3000',

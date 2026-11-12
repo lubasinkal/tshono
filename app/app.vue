@@ -12,6 +12,7 @@
           <NuxtLink to="/companies">Companies</NuxtLink>
           <NuxtLink to="/sectors">Sectors</NuxtLink>
           <NuxtLink to="/insights">Insights</NuxtLink>
+          <NuxtLink to="/employers">Post a job</NuxtLink>
         </nav>
         <button class="jumpbtn" type="button" aria-label="Open command palette" @click="palette?.open()">
           <span>jump to…</span>

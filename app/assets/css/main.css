@@ -341,3 +341,21 @@ kbd, .kbd span {
   .jobside { position: static; }
   .cmdk { padding: 10vh 16px 0; }
 }
+
+/* employer forms */
+.form { display: grid; gap: 14px; max-width: 720px; margin: 20px 0 40px; }
+.field { display: grid; gap: 6px; }
+.field label { font-family: var(--mono); font-size: 12px; color: var(--faint); text-transform: lowercase; letter-spacing: 0.4px; }
+.field input, .field select, .field textarea {
+  width: 100%; box-sizing: border-box; background: var(--panel); color: var(--text);
+  border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 10px 12px;
+  font: inherit; font-size: 14px;
+}
+.field textarea { resize: vertical; font-family: var(--mono); font-size: 13px; line-height: 1.5; }
+.field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 14%, transparent); }
+.rowfields { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 720px) { .rowfields { grid-template-columns: 1fr 1fr; } }
+.formerr { color: #fb7185; font-family: var(--mono); font-size: 13px; margin: 0; }
+.formnote { color: var(--faint); font-family: var(--mono); font-size: 12px; }
+.ghostbtn { background: none; border: 1px solid var(--line); color: var(--text); border-radius: var(--radius-sm); padding: 8px 12px; font-family: var(--mono); font-size: 13px; cursor: pointer; }
+.ghostbtn:hover { border-color: var(--accent); }
