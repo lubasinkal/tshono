@@ -4,13 +4,13 @@
     <div class="dhead">
       <span class="chip">◉ {{ data?.org.name || 'employer' }}</span>
       <span class="chip">{{ data?.org.verified ? '● verified' : '○ unverified' }}</span>
-      <span class="chip">{{ data?.org.plan || 'free' }} plan</span>
+      <span class="chip">{{ data?.org.planUntil && new Date(data.org.planUntil) > new Date() ? `${data.org.plan} until ${data.org.planUntil.slice(0, 10)}` : 'free plan' }}</span>
       <span class="chip">{{ data?.org.featuredCredits ?? 0 }} featured credits</span>
       <span class="updated">{{ data?.jobs.length || 0 }} jobs</span>
     </div>
 
     <h1 class="title">Your jobs.</h1>
-    <p class="sub">Live jobs appear in search immediately. Free plan: five live jobs.</p>
+    <p class="sub">Live jobs appear in search immediately. Free plan: five live jobs; paid plans are unlimited.</p>
 
     <p>
       <NuxtLink to="/employers/jobs/new" class="applybtn" style="display: inline-block; padding: 9px 16px">+ post a job</NuxtLink>
@@ -63,7 +63,7 @@ interface Job {
   featured_until: string | null
 }
 interface Payload {
-  org: { name: string; plan: string; verified: boolean; featuredCredits: number }
+  org: { name: string; plan: string; planUntil: string | null; verified: boolean; featuredCredits: number }
   jobs: Job[]
 }
 

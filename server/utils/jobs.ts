@@ -107,12 +107,14 @@ async function tryIndex(job: JobRow): Promise<boolean> {
 }
 
 export async function createJob(orgId: string, company: string, input: JobInput) {
-  const { rows: live } = await pool.query<{ n: number }>(
-    `select count(*)::int as n from jobs where organization_id = $1 and status = 'live'`,
+  const { rows: live } = await pool.query<{ n: number; plan_until: Date | null }>(
+    `select (select count(*)::int from jobs where organization_id = $1 and status = 'live') as n,
+            (select plan_until from employer_profiles where organization_id = $1) as plan_until`,
     [orgId],
   )
-  if (live[0]!.n >= 5) {
-    throw createError({ statusCode: 422, statusMessage: 'free accounts can have 5 live jobs; close one first' })
+  const paid = live[0]?.plan_until ? new Date(live[0].plan_until) > new Date() : false
+  if (!paid && live[0]!.n >= 5) {
+    throw createError({ statusCode: 422, statusMessage: 'free accounts can have 5 live jobs; subscribe or close one' })
   }
   const { rows } = await pool.query<JobRow>(
     `insert into jobs (organization_id, source, company, title, sector, location, occupation, employment_type,

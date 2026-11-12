@@ -1,4 +1,4 @@
-import { startFeaturedCheckout } from '~~/lib/polar'
+import { startCheckout } from '~~/lib/polar'
 
 export default defineEventHandler(async (event) => {
   const { user } = await requireEmployer(event)
@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
   if (origin && !successUrl.startsWith(`${origin}/`)) {
     throw createError({ statusCode: 422, statusMessage: 'successUrl must stay on this site' })
   }
-  const url = await startFeaturedCheckout(user, slug, successUrl)
+  const url = await startCheckout(user, slug, successUrl)
   if (!url) throw createError({ statusCode: 503, statusMessage: 'billing is not configured' })
   return { url }
 })

@@ -2,7 +2,7 @@ import { betterAuth } from 'better-auth'
 import { admin, organization } from 'better-auth/plugins'
 import { polar, webhooks } from '@polar-sh/better-auth'
 import { pool } from './db'
-import { grantFeaturedOrder, polarClient } from './polar'
+import { grantOrder, polarClient } from './polar'
 
 // The plugin is only needed for webhook verification; checkout and the customer
 // portal call Polar directly from server/api/employer/*.
@@ -13,7 +13,7 @@ const polarPlugin =
         use: [
           webhooks({
             secret: process.env.POLAR_WEBHOOK_SECRET,
-            onOrderPaid: async (payload) => grantFeaturedOrder(payload as any),
+            onOrderPaid: async (payload) => grantOrder(payload as any),
           }),
         ],
       })
