@@ -12,8 +12,10 @@ function key(): string {
 
 export interface IndexableJob {
   id: string
+  source: 'employer' | 'scraper'
+  external_id: string | null
   title: string
-  company: string
+  company: string | null
   sector: string
   location: string
   occupation: string | null
@@ -37,9 +39,10 @@ export interface IndexableJob {
 export function toJobDoc(job: IndexableJob) {
   const posted = new Date(job.posted_at).getTime() / 1000
   return {
-    id: `emp-${job.id}`,
+    // Scraped rows keep their upstream id so re-indexing is stable.
+    id: job.source === 'scraper' && job.external_id ? job.external_id : `emp-${job.id}`,
     title: job.title,
-    company: job.company,
+    company: job.company ?? '',
     sector: job.sector,
     location: job.location,
     occupation: job.occupation ?? '',

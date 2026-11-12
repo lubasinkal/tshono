@@ -4,7 +4,10 @@ import { indexJob, unindexJob } from './typesense'
 
 export interface JobRow {
   id: string
-  organization_id: string
+  organization_id: string | null
+  source: 'employer' | 'scraper'
+  external_id: string | null
+  company: string | null
   title: string
   sector: string
   location: string
@@ -62,8 +65,9 @@ export function assertValid(input: JobInput): void {
   }
 }
 
-function columns(input: JobInput) {
+function columns(company: string, input: JobInput) {
   return [
+    company,
     input.title,
     input.sector,
     input.location,
@@ -85,9 +89,9 @@ function columns(input: JobInput) {
   ]
 }
 
-async function tryIndex(job: JobRow, company: string): Promise<boolean> {
+async function tryIndex(job: JobRow): Promise<boolean> {
   try {
-    const indexed = await indexJob({ ...job, company })
+    const indexed = await indexJob(job)
     if (indexed) await pool.query('update jobs set indexed_at = now() where id = $1', [job.id])
     return indexed
   } catch (e) {
@@ -106,30 +110,30 @@ export async function createJob(orgId: string, company: string, input: JobInput)
     throw createError({ statusCode: 422, statusMessage: 'free accounts can have 5 live jobs; close one first' })
   }
   const { rows } = await pool.query<JobRow>(
-    `insert into jobs (organization_id, title, sector, location, occupation, employment_type,
+    `insert into jobs (organization_id, source, company, title, sector, location, occupation, employment_type,
        vacancies, work_mode, education_level, min_years, salary_min, salary_max, salary_period,
        contract_months, district, closing, apply_url, blurb, content)
-     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)
+     values ($1,'employer',$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)
      returning *`,
-    [orgId, ...columns(input)],
+    [orgId, ...columns(company, input)],
   )
   const job = rows[0]!
-  return { job, indexed: await tryIndex(job, company) }
+  return { job, indexed: await tryIndex(job) }
 }
 
 export async function updateJob(id: string, orgId: string, company: string, input: JobInput) {
-  const c = columns(input)
+  const c = columns(company, input)
   const { rows } = await pool.query<JobRow>(
-    `update jobs set title=$3, sector=$4, location=$5, occupation=$6, employment_type=$7,
-       vacancies=$8, work_mode=$9, education_level=$10, min_years=$11, salary_min=$12,
-       salary_max=$13, salary_period=$14, contract_months=$15, district=$16, closing=$17,
-       apply_url=$18, blurb=$19, content=$20, updated_at=now()
+    `update jobs set company=$3, title=$4, sector=$5, location=$6, occupation=$7, employment_type=$8,
+       vacancies=$9, work_mode=$10, education_level=$11, min_years=$12, salary_min=$13,
+       salary_max=$14, salary_period=$15, contract_months=$16, district=$17, closing=$18,
+       apply_url=$19, blurb=$20, content=$21, updated_at=now()
      where id=$1 and organization_id=$2 returning *`,
     [id, orgId, ...c],
   )
   if (!rows.length) throw createError({ statusCode: 404, statusMessage: 'job not found' })
   const job = rows[0]!
-  return { job, indexed: await tryIndex(job, company) }
+  return { job, indexed: await tryIndex(job) }
 }
 
 export async function closeJob(id: string, orgId: string) {
