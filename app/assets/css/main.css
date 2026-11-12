@@ -45,6 +45,8 @@
   --sans: ui-sans-serif, system-ui, 'Segoe UI', Roboto, sans-serif;
   --radius: 12px;
   --radius-sm: 8px;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur: 0.2s;
 }
 
 [data-theme='light'] {
@@ -71,6 +73,9 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 a { color: var(--accent); }
+button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+::selection { background: color-mix(in oklab, var(--accent) 28%, transparent); color: var(--text); }
+:focus-visible { outline: 2px solid color-mix(in oklab, var(--accent) 65%, transparent); outline-offset: 2px; }
 
 .page { min-height: 100vh; display: flex; flex-direction: column; }
 
@@ -138,7 +143,11 @@ kbd, .kbd span {
 .list, .stats, .pager { animation: reveal 0.4s cubic-bezier(0.22, 1, 0.36, 1) both; }
 .is-compact .list { animation-delay: 0.06s; }
 @keyframes reveal { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-@media (prefers-reduced-motion: reduce) { .hero, .hero h1, .hero > p, .filters, .cmdbar, .list, .stats, .pager { transition: none !important; animation: none !important; } ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+  .hero, .hero h1, .hero > p, .filters, .cmdbar, .list, .stats, .pager { transition: none !important; animation: none !important; }
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+}
 
 .cmdbar input {
   width: 100%; background: var(--panel); border: 1px solid var(--line2); color: var(--text);
@@ -179,9 +188,10 @@ kbd, .kbd span {
 .ilink:hover { color: var(--accent); text-decoration: underline; }
 .cardlink {
   display: grid; gap: 5px; padding: 15px 8px; text-decoration: none; color: inherit;
-  border-radius: var(--radius-sm); transition: background 0.15s;
+  border-radius: var(--radius-sm);
+  transition: background var(--dur) var(--ease), transform var(--dur) var(--ease);
 }
-.cardlink:hover { background: var(--panel); }
+.cardlink:hover { background: var(--panel); transform: translateY(-1px); }
 .cardlink:hover strong { color: var(--accent); }
 .cardlink strong { font-size: 16px; letter-spacing: -0.2px; transition: color 0.15s; }
 .co { color: var(--faint); font-size: 13px; font-family: var(--mono); }
@@ -231,8 +241,8 @@ kbd, .kbd span {
 }
 .jobbody li::before { content: '▸'; position: absolute; left: 12px; color: var(--accent); }
 .applyrow { margin: 22px 0; }
-.applyrow a { font-family: var(--mono); font-size: 14px; background: var(--accent-dim); border: 1px solid var(--accent); border-radius: var(--radius-sm); padding: 11px 20px; text-decoration: none; display: inline-block; transition: background 0.15s; }
-.applyrow a:hover { background: color-mix(in oklab, var(--accent) 26%, transparent); }
+.applyrow a { font-family: var(--mono); font-size: 14px; background: var(--accent); color: var(--accent-fg); border: 1px solid var(--accent); border-radius: var(--radius-sm); padding: 11px 20px; text-decoration: none; display: inline-block; transition: filter var(--dur) var(--ease), transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease); }
+.applyrow a:hover { filter: brightness(1.08); transform: translateY(-1px); box-shadow: 0 8px 20px color-mix(in oklab, var(--accent) 25%, transparent); }
 
 .jobgrid { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 24px; align-items: start; margin-top: 4px; }
 .jobside { position: sticky; top: 72px; display: grid; gap: 12px; }
@@ -245,8 +255,9 @@ kbd, .kbd span {
 .fact dd { margin: 0; color: var(--text); text-align: right; }
 .fact a { color: var(--accent); text-decoration: none; }
 .fact a:hover { text-decoration: underline; }
-.applybtn { display: block; text-align: center; margin-top: 14px; font-family: var(--mono); font-size: 14px; background: var(--accent-dim); border: 1px solid var(--accent); border-radius: var(--radius-sm); padding: 11px 16px; text-decoration: none; transition: background 0.15s; }
-.applybtn:hover { background: color-mix(in oklab, var(--accent) 26%, transparent); }
+.applybtn { display: block; text-align: center; margin-top: 14px; font-family: var(--mono); font-size: 14px; background: var(--accent); color: var(--accent-fg); border: 1px solid var(--accent); border-radius: var(--radius-sm); padding: 11px 16px; text-decoration: none; cursor: pointer; transition: filter var(--dur) var(--ease), transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease); }
+.applybtn:hover { filter: brightness(1.08); transform: translateY(-1px); box-shadow: 0 8px 20px color-mix(in oklab, var(--accent) 25%, transparent); }
+.applybtn:disabled { opacity: 0.5; cursor: default; transform: none; filter: none; box-shadow: none; }
 .sidelist { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
 .sidelist li a { display: grid; gap: 2px; padding: 8px 4px; border-radius: var(--radius-sm); text-decoration: none; color: inherit; }
 .sidelist li a:hover { background: var(--panel2); }
@@ -363,8 +374,8 @@ kbd, .kbd span {
 @media (max-width: 720px) { .rowfields { grid-template-columns: 1fr 1fr; } }
 .formerr { color: #fb7185; font-family: var(--mono); font-size: 13px; margin: 0; }
 .formnote { color: var(--faint); font-family: var(--mono); font-size: 12px; max-width: 720px; margin: 10px auto 0; }
-.ghostbtn { background: none; border: 1px solid var(--line); color: var(--text); border-radius: var(--radius-sm); padding: 8px 12px; font-family: var(--mono); font-size: 13px; cursor: pointer; }
-.ghostbtn:hover { border-color: var(--accent); }
+.ghostbtn { background: none; border: 1px solid var(--line); color: var(--text); border-radius: var(--radius-sm); padding: 8px 12px; font-family: var(--mono); font-size: 13px; cursor: pointer; transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease), background var(--dur) var(--ease); }
+.ghostbtn:hover { border-color: var(--accent); transform: translateY(-1px); background: var(--panel2); }
 
 .nav .navauth {
   display: inline-flex; align-items: center; gap: 8px;
@@ -392,8 +403,11 @@ kbd, .kbd span {
 .plan {
   position: relative; background: var(--panel); border: 1px solid var(--line);
   border-radius: var(--radius); padding: 16px; display: grid; gap: 8px; align-content: start;
+  transition: transform var(--dur) var(--ease), border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
 }
+.plan:hover { transform: translateY(-2px); border-color: var(--line2); }
 .plan--hot { border-color: var(--accent); box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent); }
+.plan--hot:hover { border-color: var(--accent); box-shadow: 0 12px 28px color-mix(in oklab, var(--accent) 14%, transparent); }
 .planbadge {
   position: absolute; top: -10px; right: 12px; background: var(--accent); color: var(--accent-fg);
   font-family: var(--mono); font-size: 11px; font-weight: 700; padding: 3px 8px;
