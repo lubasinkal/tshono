@@ -377,13 +377,14 @@ kbd, .kbd span {
 .ghostbtn { background: none; border: 1px solid var(--line); color: var(--text); border-radius: var(--radius-sm); padding: 8px 12px; font-family: var(--mono); font-size: 13px; cursor: pointer; transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease), background var(--dur) var(--ease); }
 .ghostbtn:hover { border-color: var(--accent); transform: translateY(-1px); background: var(--panel2); }
 
-.nav .navauth {
+.navauth {
   display: inline-flex; align-items: center; gap: 8px;
   color: var(--text); text-decoration: none; font-family: var(--mono); font-size: 13px;
   padding: 7px 12px; border-radius: var(--radius-sm); border: 1px solid var(--line);
-  background: transparent; cursor: pointer; transition: border-color 0.15s, background 0.15s;
+  background: transparent; cursor: pointer;
+  transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease), transform var(--dur) var(--ease);
 }
-.nav .navauth:hover { border-color: var(--accent); background: var(--panel2); }
+.navauth:hover { border-color: var(--accent); background: var(--panel2); transform: translateY(-1px); }
 
 /* auth / job forms share one narrow column so headings line up with the fields */
 .wrap.narrow { width: 100%; max-width: 720px; margin: 0 auto; }
@@ -422,4 +423,6 @@ kbd, .kbd span {
 @media (max-width: 720px) {
   .featuredhero { grid-template-columns: 1fr; justify-items: start; }
   .featprice { justify-items: start; }
+  .themebtn { margin-left: auto; }
+  .navauth { order: 1; }
 }
