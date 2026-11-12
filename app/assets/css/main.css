@@ -230,7 +230,7 @@ kbd, .kbd span {
 .jobmeta b { color: var(--faint); font-weight: 400; margin-right: 6px; }
 .jobbody { line-height: 1.75; color: var(--muted); font-size: 15px; }
 .jobsummary { color: var(--muted); font-size: 15px; line-height: 1.65; margin: 14px 0 20px; max-width: 640px; }
-.applybox { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; margin-bottom: 22px; }
+.applybox { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; margin: 22px 0; }
 .applybox-title { font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent); margin: 0 0 8px; font-weight: 700; }
 .applybox p { color: var(--muted); font-size: 14px; margin: 0 0 12px; line-height: 1.6; }
 .applybox .applybtn { margin: 0; }

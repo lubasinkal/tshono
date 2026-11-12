@@ -100,11 +100,6 @@
     </div>
 
     <div class="field">
-      <label for="content">full advert</label>
-      <textarea id="content" v-model="form.content" rows="12" placeholder="Requirements, duties, how to apply." />
-    </div>
-
-    <div class="field">
       <label for="responsibilities">key responsibilities</label>
       <textarea id="responsibilities" v-model="form.responsibilities" rows="6" placeholder="One per line, e.g. Maintain underground equipment…" />
     </div>
@@ -157,6 +152,8 @@ const form = reactive<JobInput>({
   closing: '',
   applyUrl: '',
   blurb: '',
+  // Not edited here anymore: only scraped jobs carry a full advert. The edit
+  // page still passes the existing text through so saving does not wipe it.
   content: '',
   responsibilities: '',
   requirements: '',
