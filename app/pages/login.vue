@@ -10,7 +10,7 @@
     <h1 class="title">{{ meta.title }}</h1>
     <p class="sub">{{ meta.sub2 }}</p>
 
-    <form class="form" @submit.prevent="submit">
+    <form class="form auth" @submit.prevent="submit">
       <div v-if="mode === 'register'" class="field">
         <label for="role">i am</label>
         <select id="role" v-model="role">
