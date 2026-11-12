@@ -32,6 +32,8 @@ export interface IndexableJob {
   closing: string | null
   blurb: string
   content: string
+  responsibilities?: string | null
+  requirements?: string | null
   apply_url: string
   posted_at: Date | string
   featured_until?: Date | string | null
@@ -58,6 +60,8 @@ export function toJobDoc(job: IndexableJob) {
     district: job.district ?? '',
     blurb: job.blurb.slice(0, 300),
     content: job.content,
+    responsibilities: job.responsibilities ?? '',
+    requirements: job.requirements ?? '',
     url: job.apply_url,
     closing: job.closing ?? '',
     posted: Math.floor(posted),

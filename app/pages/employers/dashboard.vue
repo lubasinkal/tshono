@@ -14,6 +14,7 @@
 
     <p>
       <NuxtLink to="/employers/jobs/new" class="applybtn" style="display: inline-block; padding: 9px 16px">+ post a job</NuxtLink>
+      <NuxtLink to="/employers/settings" class="ghostbtn" style="margin-left: 10px; display: inline-block">company</NuxtLink>
       <NuxtLink to="/employers/billing" class="ghostbtn" style="margin-left: 10px; display: inline-block">billing</NuxtLink>
       <button class="ghostbtn" type="button" style="margin-left: 10px" @click="logout">sign out</button>
     </p>

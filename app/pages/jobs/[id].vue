@@ -6,6 +6,14 @@
         <h1 class="title">{{ job.title }}</h1>
         <p class="sub"><NuxtLink :to="`/companies/${encodeURIComponent(job.company)}`">{{ job.company }}</NuxtLink> · {{ job.location }}</p>
         <div class="jobbody">
+          <template v-if="responsibilities.length">
+            <h3>key responsibilities</h3>
+            <ul><li v-for="(r, i) in responsibilities" :key="i">{{ r }}</li></ul>
+          </template>
+          <template v-if="requirements.length">
+            <h3>requirements</h3>
+            <ul><li v-for="(r, i) in requirements" :key="i">{{ r }}</li></ul>
+          </template>
           <template v-for="(b, i) in bodyBlocks" :key="i">
             <h3 v-if="b.kind === 'h'">{{ b.text }}</h3>
             <ul v-else-if="b.kind === 'ul'">
@@ -97,6 +105,14 @@ const bodyText = computed(() => {
   if (!j) return ''
   return j.content || j.blurb || 'No further detail captured. Open the source link to read the full advert.'
 })
+const responsibilities = computed(() =>
+  (job.value as (SampleJob & { responsibilities?: string }) | null | undefined)
+    ?.responsibilities?.split('\n').map((s) => s.trim()).filter(Boolean) ?? [],
+)
+const requirements = computed(() =>
+  (job.value as (SampleJob & { requirements?: string }) | null | undefined)
+    ?.requirements?.split('\n').map((s) => s.trim()).filter(Boolean) ?? [],
+)
 
 interface BodyBlock {
   kind: 'h' | 'ul' | 'p'

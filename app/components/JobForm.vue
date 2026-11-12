@@ -99,6 +99,16 @@
       <textarea id="content" v-model="form.content" rows="12" placeholder="Requirements, duties, how to apply." />
     </div>
 
+    <div class="field">
+      <label for="responsibilities">key responsibilities</label>
+      <textarea id="responsibilities" v-model="form.responsibilities" rows="6" placeholder="One per line, e.g. Maintain underground equipment…" />
+    </div>
+
+    <div class="field">
+      <label for="requirements">requirements</label>
+      <textarea id="requirements" v-model="form.requirements" rows="6" placeholder="One per line, e.g. 3+ years experience…" />
+    </div>
+
     <p v-if="localError || error" class="formerr">{{ localError || error }}</p>
     <button class="applybtn" type="submit" :disabled="saving">{{ saving ? 'saving…' : submitLabel }}</button>
   </form>
@@ -143,6 +153,8 @@ const form = reactive<JobInput>({
   applyUrl: '',
   blurb: '',
   content: '',
+  responsibilities: '',
+  requirements: '',
   ...props.initial,
 })
 const localError = ref('')

@@ -61,6 +61,8 @@ export interface JobInput {
   applyUrl: string
   blurb: string
   content: string
+  responsibilities: string
+  requirements: string
 }
 
 export type JobErrors = Partial<Record<keyof JobInput, string>>
@@ -112,5 +114,7 @@ export function validateJob(input: Partial<JobInput>): JobErrors {
 
   if ((input.blurb ?? '').length > 400) e.blurb = 'blurb max 400 characters'
   if ((input.content ?? '').length > 8000) e.content = 'details max 8000 characters'
+  if ((input.responsibilities ?? '').length > 4000) e.responsibilities = 'responsibilities max 4000 characters'
+  if ((input.requirements ?? '').length > 4000) e.requirements = 'requirements max 4000 characters'
   return e
 }

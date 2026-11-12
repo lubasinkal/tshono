@@ -2,6 +2,8 @@ import type { SampleJob } from '~/data/sampleJobs'
 
 export interface JobHit extends SampleJob {
   content?: string
+  responsibilities?: string
+  requirements?: string
 }
 
 // Typesense stores snake_case. UI reads camelCase. Normalize every live doc here.
@@ -18,6 +20,8 @@ export function toJobHit(d: Record<string, unknown>): JobHit {
     posted: typeof d.posted === 'number' ? new Date(d.posted * 1000).toISOString().slice(0, 10) : String(d.posted ?? ''),
     minYears: typeof d.min_years === 'number' ? d.min_years : 0,
     content: typeof d.content === 'string' ? d.content : undefined,
+    responsibilities: typeof d.responsibilities === 'string' ? d.responsibilities : undefined,
+    requirements: typeof d.requirements === 'string' ? d.requirements : undefined,
     occupation: typeof d.occupation === 'string' && d.occupation ? d.occupation : undefined,
     employmentType: typeof d.employment_type === 'string' && d.employment_type ? d.employment_type : undefined,
     vacancies: typeof d.vacancies === 'number' && d.vacancies > 0 ? d.vacancies : undefined,
