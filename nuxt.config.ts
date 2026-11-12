@@ -30,8 +30,9 @@ export default defineNuxtConfig({
     },
   },
   nitro: {
-    // Static friendly output for Cloudflare Pages. Typesense stays on the VPS.
-    preset: 'cloudflare_pages',
+    // Cloudflare Pages for the static public site; the VPS deploy sets
+    // NITRO_PRESET=node-server and runs .output/server/index.mjs.
+    preset: process.env.NITRO_PRESET || 'cloudflare_pages',
   },
   routeRules: {
     '/': { prerender: true },
