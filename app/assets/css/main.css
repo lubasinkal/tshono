@@ -422,6 +422,36 @@ kbd, .kbd span {
 .plandesc { color: var(--text); font-family: var(--mono); font-size: 13px; }
 .plansave { color: var(--accent); font-family: var(--mono); font-size: 12px; }
 .strike { color: var(--faint); }
+
+/* dashboard */
+.dashhead { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+.dashhead .title { margin-bottom: 2px; }
+.dashhead-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.dashhead-actions .applybtn { margin: 0; padding: 9px 16px; display: inline-block; }
+.jobcards { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.jobcard {
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 14px 16px;
+  transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+.jobcard:hover { border-color: var(--line2); transform: translateY(-1px); }
+.jobcard.featured { border-color: var(--accent); }
+.jobcard-main { display: grid; gap: 4px; min-width: 0; }
+.jobcard-title { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.jobcard-title strong { font-size: 16px; letter-spacing: -0.2px; }
+.jobcard-meta { color: var(--muted); font-family: var(--mono); font-size: 12px; }
+.jobcard-status { display: flex; gap: 6px; margin-top: 2px; }
+.jobcard-actions { display: flex; align-items: center; gap: 10px; flex: none; }
+.status { font-family: var(--mono); font-size: 11px; padding: 2px 8px; border-radius: 20px; border: 1px solid var(--line); color: var(--muted); }
+.status.live { color: var(--accent); border-color: color-mix(in oklab, var(--accent) 40%, transparent); }
+.status.closed { color: var(--faint); }
+.status.warn { color: var(--warn); border-color: color-mix(in oklab, var(--warn) 45%, transparent); }
+@media (max-width: 720px) {
+  .jobcard { flex-direction: column; align-items: flex-start; }
+  .jobcard-actions { width: 100%; }
+}
+
 .switch {
   position: relative; display: inline-block; vertical-align: middle;
   width: 34px; height: 20px; border-radius: 999px;

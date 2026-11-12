@@ -1,40 +1,50 @@
 <template>
   <section class="wrap">
     <p><NuxtLink to="/">← search</NuxtLink></p>
-    <div class="dhead">
-      <span class="chip">◉ {{ data?.org.name || 'employer' }}</span>
-      <span class="chip">{{ data?.org.verified ? '● verified' : '○ unverified' }}</span>
-      <span class="chip">{{ data?.org.planUntil && new Date(data.org.planUntil) > new Date() ? `${data.org.plan} until ${data.org.planUntil.slice(0, 10)}` : 'free plan' }}</span>
-      <span class="chip">{{ data?.org.featuredCredits ?? 0 }} featured credits</span>
-      <span class="updated">{{ data?.jobs.length || 0 }} jobs</span>
+
+    <div class="dashhead">
+      <div>
+        <h1 class="title">{{ data?.org.name || 'Your dashboard' }}</h1>
+        <p class="sub">{{ planLabel }}<template v-if="data?.org"> · {{ data.org.verified ? 'verified' : 'unverified' }}</template></p>
+      </div>
+      <div class="dashhead-actions">
+        <NuxtLink to="/employers/jobs/new" class="applybtn">+ post a job</NuxtLink>
+        <NuxtLink to="/employers/settings" class="ghostbtn">company</NuxtLink>
+        <NuxtLink to="/employers/billing" class="ghostbtn">billing</NuxtLink>
+        <button class="ghostbtn" type="button" @click="logout">sign out</button>
+      </div>
     </div>
 
-    <h1 class="title">Your jobs.</h1>
-    <p class="sub">Live jobs appear in search immediately. Free plan: five live jobs; paid plans are unlimited.</p>
-
-    <p>
-      <NuxtLink to="/employers/jobs/new" class="applybtn" style="display: inline-block; padding: 9px 16px">+ post a job</NuxtLink>
-      <NuxtLink to="/employers/settings" class="ghostbtn" style="margin-left: 10px; display: inline-block">company</NuxtLink>
-      <NuxtLink to="/employers/billing" class="ghostbtn" style="margin-left: 10px; display: inline-block">billing</NuxtLink>
-      <button class="ghostbtn" type="button" style="margin-left: 10px" @click="logout">sign out</button>
-    </p>
+    <div class="grid">
+      <div class="stat"><b>{{ jobs.length }}</b><span>jobs</span></div>
+      <div class="stat"><b>{{ liveCount }}</b><span>live</span></div>
+      <div class="stat"><b>{{ data?.org.featuredCredits ?? 0 }}</b><span>featured credits</span></div>
+      <div class="stat"><b>{{ featuredCount }}</b><span>featured now</span></div>
+    </div>
 
     <p v-if="message" class="formnote">{{ message }}</p>
 
-    <table v-if="data?.jobs.length" class="dtable">
-      <thead>
-        <tr><th>role</th><th>place</th><th>status</th><th>posted</th><th>search</th><th></th></tr>
-      </thead>
-      <tbody>
-        <tr v-for="j in data.jobs" :key="j.id">
-          <td>{{ j.title.toLowerCase() }}</td>
-          <td>{{ j.location.toLowerCase() }}</td>
-          <td>{{ j.status }}</td>
-          <td>{{ j.posted_at.slice(0, 10) }}</td>
-          <td>{{ j.indexed_at ? 'indexed' : 'not indexed' }}</td>
-          <td style="white-space: nowrap">
+    <h2 class="sect"><span>#</span> jobs</h2>
+
+    <ul v-if="jobs.length" class="jobcards">
+      <li v-for="j in jobs" :key="j.id" class="jobcard" :class="{ featured: featured(j) }">
+        <div class="jobcard-main">
+          <div class="jobcard-title">
+            <strong>{{ j.title.toLowerCase() }}</strong>
+            <span v-if="featured(j)" class="peak">★ featured</span>
+          </div>
+          <div class="jobcard-meta">
+            {{ j.location.toLowerCase() }} · {{ j.sector.toLowerCase() }} · posted {{ j.posted_at.slice(0, 10) }}
+          </div>
+          <div class="jobcard-status">
+            <span class="status" :class="j.status">{{ j.status }}</span>
+            <span v-if="j.status === 'live' && !j.indexed_at" class="status warn">not in search</span>
+          </div>
+        </div>
+
+        <div class="jobcard-actions">
+          <template v-if="j.status === 'live'">
             <button
-              v-if="j.status === 'live'"
               class="switch"
               :class="{ on: featured(j) }"
               :disabled="!featured(j) && (data?.org.featuredCredits ?? 0) < 1"
@@ -44,13 +54,16 @@
               @click="toggleFeature(j)"
             ><span class="knob"></span></button>
             <span class="switchlabel">{{ featured(j) ? 'featured' : 'feature' }}</span>
-            <NuxtLink :to="`/employers/jobs/${j.id}/edit`" class="ilink" style="margin-left: 8px">edit</NuxtLink>
-            <button v-if="j.status === 'live'" class="ghostbtn" type="button" style="margin-left: 8px" @click="close(j.id)">close</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <p v-else class="empty">No jobs yet. <NuxtLink to="/employers/jobs/new">Post the first one</NuxtLink>.</p>
+          </template>
+          <NuxtLink :to="`/employers/jobs/${j.id}/edit`" class="ilink">edit</NuxtLink>
+          <button v-if="j.status === 'live'" class="ghostbtn" type="button" @click="close(j.id)">close</button>
+        </div>
+      </li>
+    </ul>
+    <div v-else class="empty">
+      <p>No jobs yet.</p>
+      <NuxtLink to="/employers/jobs/new" class="applybtn" style="display: inline-block">post your first job</NuxtLink>
+    </div>
   </section>
 </template>
 
@@ -75,7 +88,18 @@ const route = useRoute()
 const { data, error, refresh } = await useFetch<Payload>('/api/employer/jobs')
 if (error.value) await navigateTo('/login')
 
+const jobs = computed(() => data.value?.jobs ?? [])
+const liveCount = computed(() => jobs.value.filter((j) => j.status === 'live').length)
+const featuredCount = computed(() => jobs.value.filter((j) => featured(j)).length)
+
 const message = ref(route.query.purchased ? 'Payment received. Credits appear once Polar confirms the order (a few seconds).' : '')
+
+const planLabel = computed(() => {
+  const o = data.value?.org
+  if (!o) return ''
+  if (o.planUntil && new Date(o.planUntil) > new Date()) return `${o.plan} plan · until ${o.planUntil.slice(0, 10)}`
+  return 'free plan · 5 live jobs'
+})
 
 const featured = (j: Job) => Boolean(j.featured_until && new Date(j.featured_until) > new Date())
 const switchTitle = (j: Job) =>
