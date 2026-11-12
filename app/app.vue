@@ -3,10 +3,6 @@
     <header class="topbar">
       <div class="topbar-inner">
         <NuxtLink to="/" class="brand">tshono<b>.</b></NuxtLink>
-        <form class="hdsearch" role="search" @submit.prevent="doSearch">
-          <kbd>/</kbd>
-          <input v-model="hdq" name="q" type="search" placeholder="search roles…" aria-label="Search jobs" autocomplete="off" spellcheck="false" />
-        </form>
         <nav class="nav">
           <NuxtLink to="/">Search</NuxtLink>
           <NuxtLink to="/companies">Companies</NuxtLink>
@@ -44,10 +40,6 @@ body { margin: 0; }
 
 <script setup lang="ts">
 const palette = ref<{ open: () => void } | null>(null)
-const hdq = ref('')
-function doSearch() {
-  navigateTo({ path: '/', query: hdq.value.trim() ? { q: hdq.value.trim() } : {} })
-}
 
 const auth = useAuth()
 // Read the session through the documented endpoint with the incoming cookie
