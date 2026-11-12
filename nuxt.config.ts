@@ -29,14 +29,11 @@ export default defineNuxtConfig({
       searchCollection: 'jobs',
     },
   },
-  nitro: {
-    // Cloudflare Pages for the static public site; the VPS deploy sets
-    // NITRO_PRESET=node-server and runs .output/server/index.mjs.
-    preset: process.env.NITRO_PRESET || 'cloudflare_pages',
-  },
   routeRules: {
-    '/': { prerender: true },
-    '/insights': { prerender: true },
+    // Rendered per request so NUXT_PUBLIC_* is read from runtime env, not baked
+    // into a prerendered payload at build time. Cached in memory for 10 min.
+    '/': { swr: 600 },
+    '/insights': { swr: 600 },
   },
   typescript: {
     typeCheck: true,
