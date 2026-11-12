@@ -30,6 +30,7 @@ export interface JobRow {
   posted_at: Date
   indexed_at: Date | null
   closed_at: Date | null
+  featured_until: Date | null
 }
 
 const str = (v: unknown, max: number) => String(v ?? '').trim().slice(0, max)
@@ -87,6 +88,10 @@ function columns(company: string, input: JobInput) {
     input.blurb,
     input.content,
   ]
+}
+
+export async function refreshIndex(job: JobRow): Promise<boolean> {
+  return tryIndex(job)
 }
 
 async function tryIndex(job: JobRow): Promise<boolean> {
@@ -156,4 +161,45 @@ export async function listJobs(orgId: string) {
     [orgId],
   )
   return rows
+}
+
+// Spends one featured credit on a live job: 30 days at the top of search.
+export async function featureJob(id: string, orgId: string) {
+  const client = await pool.connect()
+  let job: JobRow
+  try {
+    await client.query('begin')
+    const profile = await client.query<{ featured_credits: number }>(
+      'select featured_credits from employer_profiles where organization_id = $1 for update',
+      [orgId],
+    )
+    if (!profile.rows[0] || profile.rows[0].featured_credits < 1) {
+      await client.query('rollback')
+      throw createError({ statusCode: 422, statusMessage: 'no featured credits; buy a pack first' })
+    }
+    await client.query(
+      'update employer_profiles set featured_credits = featured_credits - 1 where organization_id = $1',
+      [orgId],
+    )
+    const updated = await client.query<JobRow>(
+      `update jobs
+          set featured_until = greatest(now(), coalesce(featured_until, now())) + interval '30 days',
+              updated_at = now()
+        where id = $1 and organization_id = $2 and status = 'live'
+        returning *`,
+      [id, orgId],
+    )
+    if (!updated.rows.length) {
+      await client.query('rollback')
+      throw createError({ statusCode: 404, statusMessage: 'live job not found' })
+    }
+    job = updated.rows[0]!
+    await client.query('commit')
+  } catch (e) {
+    await client.query('rollback').catch(() => {})
+    throw e
+  } finally {
+    client.release()
+  }
+  return { job, indexed: await tryIndex(job) }
 }

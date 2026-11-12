@@ -34,6 +34,7 @@ export interface IndexableJob {
   content: string
   apply_url: string
   posted_at: Date | string
+  featured_until?: Date | string | null
 }
 
 export function toJobDoc(job: IndexableJob) {
@@ -61,6 +62,9 @@ export function toJobDoc(job: IndexableJob) {
     closing: job.closing ?? '',
     posted: Math.floor(posted),
     min_years: job.min_years,
+    featured_until: job.featured_until
+      ? Math.floor(new Date(job.featured_until).getTime() / 1000)
+      : 0,
   }
 }
 

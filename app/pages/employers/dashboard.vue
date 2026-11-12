@@ -5,6 +5,7 @@
       <span class="chip">◉ {{ data?.org.name || 'employer' }}</span>
       <span class="chip">{{ data?.org.verified ? '● verified' : '○ unverified' }}</span>
       <span class="chip">{{ data?.org.plan || 'free' }} plan</span>
+      <span class="chip">{{ data?.org.featuredCredits ?? 0 }} featured credits</span>
       <span class="updated">{{ data?.jobs.length || 0 }} jobs</span>
     </div>
 
@@ -13,8 +14,11 @@
 
     <p>
       <NuxtLink to="/employers/jobs/new" class="applybtn" style="display: inline-block; padding: 9px 16px">+ post a job</NuxtLink>
+      <NuxtLink to="/employers/billing" class="ghostbtn" style="margin-left: 10px; display: inline-block">billing</NuxtLink>
       <button class="ghostbtn" type="button" style="margin-left: 10px" @click="logout">sign out</button>
     </p>
+
+    <p v-if="message" class="formnote">{{ message }}</p>
 
     <table v-if="data?.jobs.length" class="dtable">
       <thead>
@@ -22,13 +26,22 @@
       </thead>
       <tbody>
         <tr v-for="j in data.jobs" :key="j.id">
-          <td>{{ j.title.toLowerCase() }}</td>
+          <td>
+            {{ j.title.toLowerCase() }}
+            <span v-if="featured(j)" class="chip" style="margin-left: 8px">★ featured</span>
+          </td>
           <td>{{ j.location.toLowerCase() }}</td>
           <td>{{ j.status }}</td>
           <td>{{ j.posted_at.slice(0, 10) }}</td>
           <td>{{ j.indexed_at ? 'indexed' : 'not indexed' }}</td>
           <td style="white-space: nowrap">
-            <NuxtLink :to="`/employers/jobs/${j.id}/edit`" class="ilink">edit</NuxtLink>
+            <button
+              v-if="j.status === 'live' && !featured(j) && (data?.org.featuredCredits ?? 0) > 0"
+              class="ghostbtn"
+              type="button"
+              @click="feature(j.id)"
+            >feature</button>
+            <NuxtLink :to="`/employers/jobs/${j.id}/edit`" class="ilink" style="margin-left: 8px">edit</NuxtLink>
             <button v-if="j.status === 'live'" class="ghostbtn" type="button" style="margin-left: 8px" @click="close(j.id)">close</button>
           </td>
         </tr>
@@ -47,15 +60,26 @@ interface Job {
   status: string
   posted_at: string
   indexed_at: string | null
+  featured_until: string | null
 }
 interface Payload {
-  org: { name: string; plan: string; verified: boolean }
+  org: { name: string; plan: string; verified: boolean; featuredCredits: number }
   jobs: Job[]
 }
 
 const auth = useAuth()
+const route = useRoute()
 const { data, error, refresh } = await useFetch<Payload>('/api/employer/jobs')
 if (error.value) await navigateTo('/login')
+
+const message = ref(route.query.purchased ? 'Payment received. Credits appear once Polar confirms the order (a few seconds).' : '')
+
+const featured = (j: Job) => Boolean(j.featured_until && new Date(j.featured_until) > new Date())
+
+async function feature(id: string) {
+  await $fetch(`/api/employer/jobs/${id}/feature`, { method: 'POST' })
+  await refresh()
+}
 
 async function close(id: string) {
   await $fetch(`/api/employer/jobs/${id}`, { method: 'DELETE' })

@@ -132,7 +132,7 @@ let t: ReturnType<typeof setTimeout> | null = null
 async function runRemote() {
   const t0 = performance.now()
   // serve stale cache instantly so UI never blanks
-  const stale = liveRawCached({ q: query.value.trim() || '', query_by: 'title,company,sector,location,blurb', sort_by: 'posted:desc', page: String(page.value), per_page: String(PER_PAGE), ...(sector.value || location.value || maxYears.value !== null ? { filter_by: [ ...(sector.value ? [`sector:=${sector.value}`] : []), ...(location.value ? [`location:=${location.value}`] : []), ...(maxYears.value !== null ? [`min_years:<=${maxYears.value}`] : []) ].join(' && ') } : {}), include_fields: 'id,title,company,sector,location,blurb,url,closing,posted,min_years' }) as { hits?: Array<{ document: Record<string, unknown> }>; found?: number; search_time_ms?: number } | null
+  const stale = liveRawCached({ q: query.value.trim() || '', query_by: 'title,company,sector,location,blurb', sort_by: 'featured_until:desc,posted:desc', page: String(page.value), per_page: String(PER_PAGE), ...(sector.value || location.value || maxYears.value !== null ? { filter_by: [ ...(sector.value ? [`sector:=${sector.value}`] : []), ...(location.value ? [`location:=${location.value}`] : []), ...(maxYears.value !== null ? [`min_years:<=${maxYears.value}`] : []) ].join(' && ') } : {}), include_fields: 'id,title,company,sector,location,blurb,url,closing,posted,min_years' }) as { hits?: Array<{ document: Record<string, unknown> }>; found?: number; search_time_ms?: number } | null
   if (stale?.hits) {
     const { toJobHit } = await import('~/composables/useJobSearch')
     remoteHits.value = stale.hits.map((h) => toJobHit(h.document))

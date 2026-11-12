@@ -60,7 +60,7 @@ export async function remoteSearch(
   const res = await liveRaw({
     q: query.trim() || '',
     query_by: 'title,company,sector,location,blurb',
-    sort_by: 'posted:desc',
+    sort_by: 'featured_until:desc,posted:desc',
     page: String(page),
     per_page: String(perPage),
     include_fields: 'id,title,company,sector,location,blurb,url,closing,posted,min_years',
