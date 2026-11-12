@@ -1,5 +1,5 @@
 <template>
-  <section class="wrap">
+  <section class="wrap narrow">
     <p><NuxtLink to="/employers/dashboard">← your jobs</NuxtLink></p>
     <template v-if="job">
       <h1 class="title">Edit job.</h1>

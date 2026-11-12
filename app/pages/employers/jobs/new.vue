@@ -1,5 +1,5 @@
 <template>
-  <section class="wrap">
+  <section class="wrap narrow">
     <p><NuxtLink to="/employers/dashboard">← your jobs</NuxtLink></p>
     <h1 class="title">Post a job.</h1>
     <p class="sub">It goes live in search as soon as you publish.</p>

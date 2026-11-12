@@ -1,5 +1,5 @@
 <template>
-  <section class="wrap">
+  <section class="wrap narrow">
     <p><NuxtLink to="/">← back to search</NuxtLink></p>
 
     <div class="dhead">
