@@ -18,6 +18,7 @@ export interface SampleJob {
   salaryMax?: number
   salaryPeriod?: string
   district?: string
+  applyInstructions?: string
 }
 
 export { SECTORS, LOCATIONS } from '~~/shared/constants'

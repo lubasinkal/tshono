@@ -90,6 +90,11 @@
     </div>
 
     <div class="field">
+      <label for="applyInstructions">application instructions</label>
+      <textarea id="applyInstructions" v-model="form.applyInstructions" rows="4" placeholder="e.g. Email your CV and cover letter to jobs@company.co.bw with the role in the subject line." />
+    </div>
+
+    <div class="field">
       <label for="blurb">one-line summary</label>
       <input id="blurb" v-model="form.blurb" maxlength="400" placeholder="What the job is, in one sentence." />
     </div>
@@ -155,6 +160,7 @@ const form = reactive<JobInput>({
   content: '',
   responsibilities: '',
   requirements: '',
+  applyInstructions: '',
   ...props.initial,
 })
 const localError = ref('')

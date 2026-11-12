@@ -28,6 +28,7 @@ export interface JobRow {
   content: string
   responsibilities: string
   requirements: string
+  apply_instructions: string
   status: 'live' | 'closed'
   posted_at: Date
   indexed_at: Date | null
@@ -60,6 +61,7 @@ export function readJobInput(body: any): JobInput {
     content: str(body?.content, 8000),
     responsibilities: str(body?.responsibilities, 4000),
     requirements: str(body?.requirements, 4000),
+    applyInstructions: str(body?.applyInstructions, 2000),
   }
 }
 
@@ -93,6 +95,7 @@ function columns(company: string, input: JobInput) {
     input.content,
     input.responsibilities,
     input.requirements,
+    input.applyInstructions,
   ]
 }
 
@@ -125,8 +128,8 @@ export async function createJob(orgId: string, company: string, input: JobInput)
   const { rows } = await pool.query<JobRow>(
     `insert into jobs (organization_id, source, company, title, sector, location, occupation, employment_type,
        vacancies, work_mode, education_level, min_years, salary_min, salary_max, salary_period,
-       contract_months, district, closing, apply_url, blurb, content, responsibilities, requirements)
-     values ($1,'employer',$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22)
+       contract_months, district, closing, apply_url, blurb, content, responsibilities, requirements, apply_instructions)
+     values ($1,'employer',$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23)
      returning *`,
     [orgId, ...columns(company, input)],
   )
@@ -140,7 +143,7 @@ export async function updateJob(id: string, orgId: string, company: string, inpu
     `update jobs set company=$3, title=$4, sector=$5, location=$6, occupation=$7, employment_type=$8,
        vacancies=$9, work_mode=$10, education_level=$11, min_years=$12, salary_min=$13,
        salary_max=$14, salary_period=$15, contract_months=$16, district=$17, closing=$18,
-       apply_url=$19, blurb=$20, content=$21, responsibilities=$22, requirements=$23, updated_at=now()
+       apply_url=$19, blurb=$20, content=$21, responsibilities=$22, requirements=$23, apply_instructions=$24, updated_at=now()
      where id=$1 and organization_id=$2 returning *`,
     [id, orgId, ...c],
   )

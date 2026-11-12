@@ -34,6 +34,7 @@ export interface IndexableJob {
   content: string
   responsibilities?: string | null
   requirements?: string | null
+  apply_instructions?: string | null
   apply_url: string
   posted_at: Date | string
   featured_until?: Date | string | null
@@ -62,6 +63,7 @@ export function toJobDoc(job: IndexableJob) {
     content: job.content,
     responsibilities: job.responsibilities ?? '',
     requirements: job.requirements ?? '',
+    apply_instructions: job.apply_instructions ?? '',
     url: job.apply_url,
     closing: job.closing ?? '',
     posted: Math.floor(posted),

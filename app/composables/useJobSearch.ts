@@ -31,6 +31,7 @@ export function toJobHit(d: Record<string, unknown>): JobHit {
     salaryMax: typeof d.salary_max === 'number' && d.salary_max > 0 ? d.salary_max : undefined,
     salaryPeriod: typeof d.salary_period === 'string' && d.salary_period ? d.salary_period : undefined,
     district: typeof d.district === 'string' && d.district ? d.district : undefined,
+    applyInstructions: typeof d.apply_instructions === 'string' && d.apply_instructions ? d.apply_instructions : undefined,
   }
 }
 
