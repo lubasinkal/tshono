@@ -4,12 +4,14 @@ export interface ToastItem {
   type: 'success' | 'error' | 'info'
 }
 
-const toasts = useState<ToastItem[]>('app-toasts', () => [])
 let nextId = 1
 
 // Minimal toast queue (no dependency). Call toast.success()/error()/info()
 // from any component or handler; <Toaster /> renders them top-right.
+// useState must live inside the function — Nuxt forbids it at module scope.
 export function useToast() {
+  const toasts = useState<ToastItem[]>('app-toasts', () => [])
+
   function dismiss(id: number) {
     toasts.value = toasts.value.filter((t) => t.id !== id)
   }
