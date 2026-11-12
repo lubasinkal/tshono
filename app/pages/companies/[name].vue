@@ -25,27 +25,33 @@
         <div class="stat"><b>{{ locations.length }}</b><span>places</span></div>
       </div>
 
+      <div v-if="company" class="sidecard">
+        <h2 class="sideh">about {{ name.toLowerCase() }}</h2>
+        <p v-if="company.about" class="jobbody">{{ company.about }}</p>
+        <dl class="facts">
+          <div v-if="company.website" class="fact"><dt>website</dt><dd><a :href="company.website" target="_blank" rel="noopener">{{ company.website.replace(/^https?:\/\//, '') }}</a></dd></div>
+          <div v-if="company.sector" class="fact"><dt>sector</dt><dd>{{ company.sector.toLowerCase() }}</dd></div>
+          <div v-if="company.location" class="fact"><dt>location</dt><dd>{{ company.location.toLowerCase() }}</dd></div>
+          <div v-if="company.contact_name" class="fact"><dt>contact</dt><dd>{{ company.contact_name }}</dd></div>
+          <div v-if="company.phone" class="fact"><dt>phone</dt><dd>{{ company.phone }}</dd></div>
+        </dl>
+      </div>
+
+      <h2 class="sect"><span>#</span> company facts</h2>
+      <div class="sidecard">
+        <dl class="facts">
+          <div class="fact"><dt>based in</dt><dd>{{ locationsList }}</dd></div>
+          <div class="fact"><dt>sectors</dt><dd>{{ sectorsFull }}</dd></div>
+          <div class="fact"><dt>active since</dt><dd>{{ activeSince }}</dd></div>
+          <div v-if="salaryRange" class="fact"><dt>typical salary</dt><dd>{{ salaryRange }}</dd></div>
+          <div v-if="employmentTypes" class="fact"><dt>employment</dt><dd>{{ employmentTypes }}</dd></div>
+          <div v-if="workModes" class="fact"><dt>work mode</dt><dd>{{ workModes }}</dd></div>
+          <div v-if="topRoles" class="fact"><dt>top roles</dt><dd>{{ topRoles }}</dd></div>
+        </dl>
+      </div>
+
       <h2 class="sect"><span>#</span> Hiring Trend. Roles posted, last 60 days.</h2>
       <BarTrend :days="trend" />
-
-      <h2 class="sect"><span>#</span> Role Mix. What they hire for.</h2>
-      <table class="dtable">
-        <thead><tr><th>rank</th><th>role</th><th>posts</th></tr></thead>
-        <tbody>
-          <tr v-for="(r, i) in roleMix" :key="r.name">
-            <td class="rank">{{ String(i + 1).padStart(2, '0') }}</td>
-            <td>{{ r.name.toLowerCase() }}</td>
-            <td>{{ r.count }}</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <h2 class="sect"><span>#</span> Sectors.</h2>
-      <div v-for="r in sectorMix" :key="r.name" class="row">
-        <span class="rname">{{ r.name.toLowerCase() }}</span>
-        <span class="rbar"><i :style="{ width: pct(r.count) + '%' }" /></span>
-        <b>{{ r.count }}</b>
-      </div>
 
       <h2 class="sect"><span>#</span> Open Roles.</h2>
       <ul class="list">
@@ -75,6 +81,15 @@
 <script setup lang="ts">
 import { useJobData } from '~/composables/useJobData'
 
+interface CompanyProfile {
+  website: string
+  about: string
+  sector: string
+  location: string
+  contact_name: string
+  phone: string
+}
+
 const route = useRoute()
 const name = computed(() => String(route.params.name))
 const reqUrl = useRequestURL()
@@ -85,6 +100,11 @@ const ogImage = computed(() => {
 
 const { allDocs, load, loadState, maxPosted, countBy, dailySeries } = useJobData()
 onMounted(() => load())
+
+const { data: companyData } = await useFetch<{ company: CompanyProfile | null }>(
+  () => `/api/companies/${encodeURIComponent(name.value)}`,
+)
+const company = computed(() => companyData.value?.company ?? null)
 
 const jobs = computed(() => allDocs.value.filter((j) => j.company.toLowerCase() === name.value.toLowerCase()))
 
@@ -105,8 +125,24 @@ const similar = computed(() => {
   return countBy(allDocs.value.filter((j) => j.company.toLowerCase() !== name.value.toLowerCase() && secs.has(j.sector)), (j) => j.company).slice(0, 8)
 })
 
-const max = computed(() => Math.max(...sectorMix.value.map((r) => r.count), 1))
-const pct = (n: number) => Math.round((n / max.value) * 100)
+const locationsList = computed(() => locations.value.map((l) => l.name.toLowerCase()).join(', '))
+const sectorsFull = computed(() => sectorMix.value.map((s) => s.name.toLowerCase()).join(', '))
+const activeSince = computed(() => jobs.value.map((j) => j.posted.slice(0, 4)).sort()[0] ?? '')
+const topRoles = computed(() => roleMix.value.slice(0, 5).map((r) => r.name.toLowerCase()).join(', '))
+const salaryRange = computed(() => {
+  const withSal = jobs.value.filter((j) => (j.salaryMin ?? 0) > 0 || (j.salaryMax ?? 0) > 0)
+  if (!withSal.length) return ''
+  const lo = Math.min(...withSal.map((j) => (j.salaryMin ?? j.salaryMax)!))
+  const hi = Math.max(...withSal.map((j) => (j.salaryMax ?? j.salaryMin)!))
+  const fmt = (n: number) => `BWP ${n.toLocaleString('en-BW')}`
+  return lo === hi ? fmt(lo) : `${fmt(lo)} – ${fmt(hi)}`
+})
+const employmentTypes = computed(() =>
+  [...new Set(jobs.value.map((j) => j.employmentType).filter(Boolean))].map((t) => t!.replace(/_/g, ' ')).join(', '),
+)
+const workModes = computed(() =>
+  [...new Set(jobs.value.map((j) => j.workMode).filter(Boolean))].map((t) => t!.replace(/_/g, ' ')).join(', '),
+)
 
 useHead({ title: `${name.value} · tshono` })
 useSeoMeta({

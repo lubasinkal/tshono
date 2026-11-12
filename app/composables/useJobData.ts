@@ -12,6 +12,11 @@ interface RawDoc {
   closing: string
   posted: number
   min_years: number
+  salary_min?: number
+  salary_max?: number
+  salary_period?: string
+  employment_type?: string
+  work_mode?: string
 }
 
 export interface Seg { name: string; count: number; share: number }
@@ -52,7 +57,7 @@ export function useJobData() {
       }
     } catch {}
     try {
-      const fields = 'id,title,company,sector,location,url,closing,posted,min_years'
+      const fields = 'id,title,company,sector,location,url,closing,posted,min_years,salary_min,salary_max,salary_period,employment_type,work_mode'
       const perPage = 250
       const first = (await liveRaw({ q: '', query_by: 'title', per_page: String(perPage), page: '1', include_fields: fields })) as { hits?: Array<{ document: RawDoc }>; found?: number }
       const hits0 = first.hits ?? []
