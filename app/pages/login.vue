@@ -11,12 +11,20 @@
     <p class="sub">{{ meta.sub2 }}</p>
 
     <form class="form" @submit.prevent="submit">
+      <div v-if="mode === 'register'" class="field">
+        <label for="role">i am</label>
+        <select id="role" v-model="role">
+          <option value="employer">hiring — post jobs</option>
+          <option value="jobseeker">looking for work</option>
+        </select>
+      </div>
+
       <div v-if="mode === 'register'" class="rowfields">
         <div class="field">
           <label for="name">your name</label>
           <input id="name" v-model="name" autocomplete="name" required />
         </div>
-        <div class="field">
+        <div v-if="role === 'employer'" class="field">
           <label for="company">company</label>
           <input id="company" v-model="company" required placeholder="Acme Mining" />
         </div>
@@ -103,6 +111,7 @@ const auth = useAuth()
 const route = useRoute()
 const mode = ref<Mode>(route.query.mode === 'register' ? 'register' : 'signin')
 
+const role = ref<'employer' | 'jobseeker'>('employer')
 const name = ref('')
 const company = ref('')
 const email = ref('')
@@ -127,9 +136,17 @@ function slugify(s: string) {
 const meta = computed(() => {
   switch (mode.value) {
     case 'signin':
-      return { chip: '◉ sign in', sub: 'welcome back', title: 'Sign in.', sub2: 'Employers and paid accounts use the same sign-in.' }
+      return { chip: '◉ sign in', sub: 'welcome back', title: 'Sign in.', sub2: 'Employers and jobseekers use the same sign-in.' }
     case 'register':
-      return { chip: '◉ create account', sub: 'post jobs on tshono', title: 'Create account.', sub2: 'One account per company. Free plan: five live jobs.' }
+      return {
+        chip: '◉ create account',
+        sub: role.value === 'employer' ? 'post jobs on tshono' : 'find work on tshono',
+        title: 'Create account.',
+        sub2:
+          role.value === 'employer'
+            ? 'One account per company. Free plan: five live jobs.'
+            : 'One account per person. Your profile is private and used to match you with jobs.',
+      }
     case 'otp-send':
       return { chip: '◉ sign in with code', sub: 'no password needed', title: 'Sign in with code.', sub2: "We'll email you a 6-digit code." }
     case 'otp-verify':
@@ -206,7 +223,7 @@ async function submit() {
     if (mode.value === 'signin') {
       const { error: err } = await auth.signIn.email({ email: email.value, password: password.value })
       if (err) throw new Error(err.message || 'sign in failed')
-      window.location.href = '/employers/dashboard'
+      window.location.href = '/dashboard'
     } else if (mode.value === 'register') {
       const { error: upErr } = await auth.signUp.email({
         email: email.value,
@@ -215,20 +232,25 @@ async function submit() {
       })
       if (upErr) throw new Error(upErr.message || 'could not create the account')
 
-      const { data: org, error: orgErr } = await auth.organization.create({
-        name: company.value,
-        slug: slugify(company.value),
-      })
-      if (orgErr || !org) throw new Error(orgErr?.message || 'could not create the company')
-
-      await $fetch('/api/employer/profile', { method: 'POST', body: { organizationId: org.id } })
-      window.location.href = '/employers/dashboard'
+      if (role.value === 'employer') {
+        const { data: org, error: orgErr } = await auth.organization.create({
+          name: company.value,
+          slug: slugify(company.value),
+        })
+        if (orgErr || !org) throw new Error(orgErr?.message || 'could not create the company')
+        await $fetch('/api/employer/profile', { method: 'POST', body: { organizationId: org.id } })
+      } else {
+        // Empty profile marks the account as a jobseeker; details are filled in
+        // on /jobseekers/profile afterwards.
+        await $fetch('/api/jobseeker/profile', { method: 'POST', body: {} })
+      }
+      window.location.href = '/dashboard'
     } else if (mode.value === 'otp-send') {
       await sendOtp('sign-in')
     } else if (mode.value === 'otp-verify') {
       const { error: err } = await auth.signIn.emailOtp({ email: email.value, otp: otp.value })
       if (err) throw new Error(err.message || 'invalid code')
-      window.location.href = '/employers/dashboard'
+      window.location.href = '/dashboard'
     } else if (mode.value === 'forgot-send') {
       await sendOtp('forget-password')
     } else if (mode.value === 'forgot-verify') {

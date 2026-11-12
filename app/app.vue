@@ -19,7 +19,7 @@
             <kbd>⌘K</kbd>
           </button>
           <template v-if="user">
-            <NuxtLink to="/employers/dashboard" class="navauth">Dashboard</NuxtLink>
+            <NuxtLink to="/dashboard" class="navauth">Dashboard</NuxtLink>
             <button class="navauth" type="button" @click="logout">Sign out</button>
           </template>
           <NuxtLink v-else to="/login" class="navauth">Sign in</NuxtLink>
