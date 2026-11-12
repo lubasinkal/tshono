@@ -15,6 +15,9 @@
           </template>
           <NuxtLink v-else to="/login" class="navauth">Sign in</NuxtLink>
         </nav>
+        <button class="themebtn" type="button" :aria-label="theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'" @click="toggleTheme">
+          {{ theme === 'dark' ? '☾' : '☀' }}
+        </button>
         <button class="jumpbtn" type="button" aria-label="Open command palette" @click="palette?.open()">
           <span>jump to…</span>
           <kbd>⌘K</kbd>
@@ -36,6 +39,14 @@
 
 <style>
 body { margin: 0; }
+.themebtn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; color: var(--text); background: transparent;
+  border: 1px solid var(--line); border-radius: var(--radius-sm);
+  font-family: var(--mono); font-size: 15px; line-height: 1; cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.themebtn:hover { border-color: var(--line2); background: var(--panel2); }
 </style>
 
 <script setup lang="ts">
@@ -47,6 +58,26 @@ const auth = useAuth()
 const requestFetch = useRequestFetch()
 const { data: session } = await useAsyncData('auth-session', () => requestFetch('/api/auth/get-session'))
 const user = computed(() => (session.value as { user?: { email: string } } | null)?.user ?? null)
+
+const theme = ref<'dark' | 'light'>('dark')
+function toggleTheme() {
+  const next = theme.value === 'dark' ? 'light' : 'dark'
+  theme.value = next
+  document.documentElement.dataset.theme = next
+  localStorage.setItem('tshono-theme', next)
+}
+onMounted(() => {
+  theme.value = document.documentElement.dataset.theme === 'light' ? 'light' : 'dark'
+})
+
+// Set the theme before paint so there is no flash on reload.
+useHead({
+  script: [
+    {
+      innerHTML: `(function(){try{var t=localStorage.getItem('tshono-theme')||'dark';document.documentElement.dataset.theme=t}catch(e){document.documentElement.dataset.theme='dark'}})()`,
+    },
+  ],
+})
 
 async function logout() {
   await auth.signOut()

@@ -38,12 +38,28 @@
   --muted: oklch(84.9% 0 0);
   --faint: oklch(77.3% 0 0);
   --accent: oklch(78.7% 0.128 230.318);
+  --accent-fg: #0a0a0a;
   --accent-dim: color-mix(in oklab, var(--accent) 16%, transparent);
   --warn: oklch(70.4% 0.191 22.216);
   --mono: 'SpaceMono', ui-monospace, SFMono-Regular, Menlo, monospace;
   --sans: ui-sans-serif, system-ui, 'Segoe UI', Roboto, sans-serif;
   --radius: 12px;
   --radius-sm: 8px;
+}
+
+[data-theme='light'] {
+  color-scheme: light;
+  --bg: oklch(97.6% 0.006 260);
+  --panel: oklch(100% 0 0);
+  --panel2: oklch(94.5% 0.01 260);
+  --line: oklch(88% 0.008 260);
+  --line2: oklch(76% 0.01 260);
+  --text: oklch(20% 0.02 262);
+  --muted: oklch(44% 0.02 262);
+  --faint: oklch(56% 0.02 262);
+  --accent: oklch(50% 0.14 245);
+  --accent-fg: #ffffff;
+  --warn: oklch(52% 0.19 25);
 }
 
 * { box-sizing: border-box; }
@@ -259,8 +275,8 @@ kbd, .kbd span {
 .chartscroll { min-width: 0; }
 .sheet { display: none; }
 .stack { position: relative; display: flex; gap: 3px; align-items: stretch; height: clamp(340px, 52vh, 520px); padding: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); }
-.stackcol { position: relative; flex: 1; display: flex; flex-direction: column; justify-content: flex-end; min-width: 0; min-height: 0; border-radius: 3px; cursor: pointer; background: rgba(255, 255, 255, 0.028); }
-.stackcol:hover, .stackcol.hot { background: rgba(255, 255, 255, 0.07); }
+.stackcol { position: relative; flex: 1; display: flex; flex-direction: column; justify-content: flex-end; min-width: 0; min-height: 0; border-radius: 3px; cursor: pointer; background: color-mix(in srgb, var(--text) 4%, transparent); }
+.stackcol:hover, .stackcol.hot { background: color-mix(in srgb, var(--text) 9%, transparent); }
 .stackbar { width: 100%; display: flex; flex-direction: column-reverse; gap: 1px; min-height: 0; }
 .stackbar i { display: block; width: 100%; border-radius: 1px; min-height: 2px; }
 .stackcol:hover .stackbar i, .stackcol.hot .stackbar i { filter: brightness(1.4); }
@@ -379,7 +395,7 @@ kbd, .kbd span {
 }
 .plan--hot { border-color: var(--accent); box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent); }
 .planbadge {
-  position: absolute; top: -10px; right: 12px; background: var(--accent); color: #0a0a0a;
+  position: absolute; top: -10px; right: 12px; background: var(--accent); color: var(--accent-fg);
   font-family: var(--mono); font-size: 11px; font-weight: 700; padding: 3px 8px;
   border-radius: var(--radius-sm); text-transform: uppercase; letter-spacing: 0.4px;
 }
