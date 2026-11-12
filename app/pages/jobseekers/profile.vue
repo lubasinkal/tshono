@@ -1,6 +1,6 @@
 <template>
   <section class="wrap narrow">
-    <p><NuxtLink to="/">← search</NuxtLink></p>
+    <p><NuxtLink to="/jobseekers">← your dashboard</NuxtLink></p>
 
     <div class="dhead">
       <span class="chip">◉ jobseeker profile</span>
@@ -238,7 +238,10 @@ import {
 } from '~~/shared/jobseeker'
 import { LOCATIONS, SECTORS } from '~/data/sampleJobs'
 
-const { data } = await useFetch<{ profile: JobseekerInput }>('/api/jobseeker/profile')
+const { data, error: loadError } = await useFetch<{ profile: JobseekerInput }>(
+  '/api/jobseeker/profile',
+)
+if (loadError.value) await navigateTo('/login')
 
 const label = (v: string) => v.replace(/_/g, ' ')
 const form = reactive<JobseekerInput>({
