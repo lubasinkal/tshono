@@ -1,49 +1,71 @@
 <template>
   <section class="wrap narrow">
     <p><NuxtLink to="/employers/dashboard">← your jobs</NuxtLink></p>
-    <h1 class="title">Plans.</h1>
-    <p class="sub">
-      Free posting stays free. Paid plans add unlimited live jobs and featured credits —
-      cheaper than Jobs Botswana, with more featured slots.
-    </p>
 
     <div class="dhead">
       <span class="chip">◉ {{ activePaid ? `${data?.org.plan} until ${untilLabel}` : 'free plan' }}</span>
       <span class="chip">{{ data?.org.featuredCredits ?? 0 }} featured credits</span>
     </div>
 
-    <div class="grid">
-      <div class="stat">
-        <b>BWP 249</b>
-        <span>per month</span>
-        <span class="formnote">unlimited jobs · 10 featured</span>
-        <button class="ghostbtn" type="button" style="margin-top: 10px" @click="buy('monthly')">subscribe</button>
+    <h1 class="title">Get seen first.</h1>
+    <p class="sub">Free posting stays free. Pay only when you want the top of search.</p>
+
+    <!-- Foot-in-the-door: the cheap one-off is the first ask. -->
+    <div class="featuredhero">
+      <div>
+        <h2 class="feathtitle">featured job</h2>
+        <p class="formnote">Top of search for 30 days. One payment, no subscription.</p>
       </div>
-      <div class="stat">
-        <b>BWP 549</b>
-        <span>3 months, once off</span>
-        <span class="formnote">unlimited jobs · 30 featured</span>
-        <button class="ghostbtn" type="button" style="margin-top: 10px" @click="buy('pass')">buy pass</button>
+      <div class="featprice">
+        <b>BWP 99</b>
+        <span>was <s class="strike">P270</s> at Jobs Botswana</span>
       </div>
-      <div class="stat">
-        <b>BWP 1,099</b>
-        <span>per year</span>
-        <span class="formnote">unlimited jobs · 120 featured</span>
-        <button class="ghostbtn" type="button" style="margin-top: 10px" @click="buy('annual')">subscribe</button>
+      <button class="applybtn" type="button" @click="buy('featured')">feature a job · BWP 99</button>
+    </div>
+
+    <!-- Plans. -->
+    <div class="plans">
+      <div class="plan">
+        <span class="planname">monthly</span>
+        <b class="price">BWP 249<span class="per">/mo</span></b>
+        <span class="plandesc">unlimited jobs · 10 featured</span>
+        <span class="plansave">Jobs Botswana <s class="strike">P270</s> for 5 jobs</span>
+        <button class="ghostbtn" type="button" @click="buy('monthly')">subscribe</button>
+      </div>
+
+      <div class="plan plan--hot">
+        <span class="planbadge">most popular</span>
+        <span class="planname">3-month pass</span>
+        <b class="price">BWP 549<span class="per"> · P183/mo</span></b>
+        <span class="plandesc">unlimited jobs · 30 featured</span>
+        <span class="plansave">save P198 vs monthly · JB <s class="strike">P607</s></span>
+        <button class="applybtn" type="button" @click="buy('pass')">get the pass</button>
+      </div>
+
+      <div class="plan">
+        <span class="planbadge">best value</span>
+        <span class="planname">annual</span>
+        <b class="price">BWP 1,099<span class="per"> · P92/mo</span></b>
+        <span class="plandesc">unlimited jobs · 120 featured</span>
+        <span class="plansave">save 63% · JB <s class="strike">P1,350</s></span>
+        <button class="ghostbtn" type="button" @click="buy('annual')">subscribe</button>
       </div>
     </div>
 
     <h2 class="sect"><span>#</span> Featured top-ups.</h2>
-    <div class="grid">
-      <div class="stat">
-        <b>BWP 99</b>
-        <span>1 featured job · 30 days</span>
-        <button class="ghostbtn" type="button" style="margin-top: 10px" @click="buy('featured')">buy one</button>
+    <div class="plans">
+      <div class="plan">
+        <span class="planname">single</span>
+        <b class="price">BWP 99</b>
+        <span class="plandesc">1 featured job · 30 days</span>
+        <button class="ghostbtn" type="button" @click="buy('featured')">buy one</button>
       </div>
-      <div class="stat">
-        <b>BWP 499</b>
-        <span>10 featured jobs</span>
-        <button class="ghostbtn" type="button" style="margin-top: 10px" @click="buy('featured-10')">buy ten</button>
+      <div class="plan plan--hot">
+        <span class="planbadge">save 50%</span>
+        <span class="planname">ten pack</span>
+        <b class="price">BWP 499<span class="per"> · P50 each</span></b>
+        <span class="plandesc">10 featured jobs</span>
+        <button class="applybtn" type="button" @click="buy('featured-10')">buy ten</button>
       </div>
     </div>
 
