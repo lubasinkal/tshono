@@ -205,3 +205,23 @@ export async function featureJob(id: string, orgId: string) {
   }
   return { job, indexed: await tryIndex(job) }
 }
+
+// Removes a job from featured placement. The spent credit is not refunded.
+export async function unfeatureJob(id: string, orgId: string) {
+  const client = await pool.connect()
+  try {
+    const updated = await client.query<JobRow>(
+      `update jobs
+          set featured_until = null, updated_at = now()
+        where id = $1 and organization_id = $2 and status = 'live' and featured_until is not null
+        returning *`,
+      [id, orgId],
+    )
+    if (!updated.rows.length) {
+      throw createError({ statusCode: 404, statusMessage: 'featured job not found' })
+    }
+    return { job: updated.rows[0]!, indexed: await tryIndex(updated.rows[0]!) }
+  } finally {
+    client.release()
+  }
+}

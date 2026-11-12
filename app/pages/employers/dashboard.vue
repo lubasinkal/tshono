@@ -26,21 +26,23 @@
       </thead>
       <tbody>
         <tr v-for="j in data.jobs" :key="j.id">
-          <td>
-            {{ j.title.toLowerCase() }}
-            <span v-if="featured(j)" class="chip" style="margin-left: 8px">★ featured</span>
-          </td>
+          <td>{{ j.title.toLowerCase() }}</td>
           <td>{{ j.location.toLowerCase() }}</td>
           <td>{{ j.status }}</td>
           <td>{{ j.posted_at.slice(0, 10) }}</td>
           <td>{{ j.indexed_at ? 'indexed' : 'not indexed' }}</td>
           <td style="white-space: nowrap">
             <button
-              v-if="j.status === 'live' && !featured(j) && (data?.org.featuredCredits ?? 0) > 0"
-              class="ghostbtn"
+              v-if="j.status === 'live'"
+              class="switch"
+              :class="{ on: featured(j) }"
+              :disabled="!featured(j) && (data?.org.featuredCredits ?? 0) < 1"
+              :aria-pressed="featured(j)"
+              :title="switchTitle(j)"
               type="button"
-              @click="feature(j.id)"
-            >feature</button>
+              @click="toggleFeature(j)"
+            ><span class="knob"></span></button>
+            <span class="switchlabel">{{ featured(j) ? 'featured' : 'feature' }}</span>
             <NuxtLink :to="`/employers/jobs/${j.id}/edit`" class="ilink" style="margin-left: 8px">edit</NuxtLink>
             <button v-if="j.status === 'live'" class="ghostbtn" type="button" style="margin-left: 8px" @click="close(j.id)">close</button>
           </td>
@@ -75,9 +77,16 @@ if (error.value) await navigateTo('/login')
 const message = ref(route.query.purchased ? 'Payment received. Credits appear once Polar confirms the order (a few seconds).' : '')
 
 const featured = (j: Job) => Boolean(j.featured_until && new Date(j.featured_until) > new Date())
+const switchTitle = (j: Job) =>
+  featured(j)
+    ? 'featured — click to remove'
+    : (data.value?.org.featuredCredits ?? 0) > 0
+      ? 'feature this job (uses 1 credit)'
+      : 'no featured credits'
 
-async function feature(id: string) {
-  await $fetch(`/api/employer/jobs/${id}/feature`, { method: 'POST' })
+async function toggleFeature(j: Job) {
+  const on = featured(j)
+  await $fetch(`/api/employer/jobs/${j.id}/${on ? 'unfeature' : 'feature'}`, { method: 'POST' })
   await refresh()
 }
 

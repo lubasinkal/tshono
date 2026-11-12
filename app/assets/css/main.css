@@ -422,6 +422,20 @@ kbd, .kbd span {
 .plandesc { color: var(--text); font-family: var(--mono); font-size: 13px; }
 .plansave { color: var(--accent); font-family: var(--mono); font-size: 12px; }
 .strike { color: var(--faint); }
+.switch {
+  position: relative; display: inline-block; vertical-align: middle;
+  width: 34px; height: 20px; border-radius: 999px;
+  background: var(--panel2); border: 1px solid var(--line2); cursor: pointer;
+  transition: background var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.switch .knob {
+  position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%;
+  background: var(--faint); transition: transform var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+.switch.on { background: var(--accent); border-color: var(--accent); }
+.switch.on .knob { transform: translateX(14px); background: var(--accent-fg); }
+.switch:disabled { opacity: 0.4; cursor: not-allowed; }
+.switchlabel { font-family: var(--mono); font-size: 12px; color: var(--muted); margin-left: 8px; vertical-align: middle; }
 @media (max-width: 720px) {
   .featuredhero { grid-template-columns: 1fr; justify-items: start; }
   .featprice { justify-items: start; }
