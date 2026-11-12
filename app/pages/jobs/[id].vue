@@ -5,6 +5,15 @@
       <div class="jobmain">
         <h1 class="title">{{ job.title }}</h1>
         <p class="sub"><NuxtLink :to="`/companies/${encodeURIComponent(job.company)}`">{{ job.company }}</NuxtLink> · {{ job.location }}</p>
+
+        <p class="jobsummary">{{ summary }}</p>
+
+        <div class="applybox">
+          <h2 class="applybox-title">how to apply</h2>
+          <p>Applications are handled by {{ job.company }} on their own site. Click below to open the application form.</p>
+          <a class="applybtn" :href="job.url" target="_blank" rel="noopener">apply now ↗</a>
+        </div>
+
         <div class="jobbody">
           <template v-if="responsibilities.length">
             <h3>key responsibilities</h3>
@@ -83,6 +92,22 @@ const ogImage = computed(() => {
   return `${reqUrl.origin}/og/job?${p.toString()}`
 })
 const pretty = (v: string) => v.replace(/_/g, ' ')
+const summary = computed(() => {
+  const j = job.value
+  if (!j) return ''
+  const bits: string[] = []
+  const type = j.employmentType ? pretty(j.employmentType) : ''
+  const mode = j.workMode ? pretty(j.workMode) : ''
+  const role = [type, mode].filter(Boolean).join(', ')
+  const place = `${j.location.toLowerCase()}${j.district ? ` (${j.district.toLowerCase()})` : ''}`
+  bits.push(role ? `${role} role in ${place}` : `role in ${place}`)
+  if (j.vacancies && j.vacancies > 1) bits.push(`${j.vacancies} positions`)
+  if (j.educationLevel) bits.push(pretty(j.educationLevel))
+  bits.push(j.minYears === 0 ? 'entry level' : `${j.minYears}+ years experience`)
+  if (salaryLabel.value) bits.push(salaryLabel.value.toLowerCase())
+  if (j.closing) bits.push(`closes ${j.closing}`)
+  return bits.join(' · ')
+})
 const salaryLabel = computed(() => {
   const j = job.value
   if (!j || (j.salaryMin === undefined && j.salaryMax === undefined)) return ''
