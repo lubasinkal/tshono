@@ -5,7 +5,7 @@ import { pool } from '~~/lib/db'
 export default defineEventHandler(async (event) => {
   const { org } = await requireEmployer(event)
   const { rows } = await pool.query(
-    `select organization_id, website, about, sector, location, contact_name, phone, verified_at, plan
+    `select organization_id, website, about, sector, location, contact_name, phone, email, address, verified_at, plan
        from employer_profiles where organization_id = $1`,
     [org.id],
   )
@@ -19,6 +19,8 @@ export default defineEventHandler(async (event) => {
       location: 'Botswana',
       contact_name: '',
       phone: '',
+      email: '',
+      address: '',
       verified_at: null,
       plan: 'free',
     },

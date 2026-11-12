@@ -5,7 +5,7 @@ import { pool } from '~~/lib/db'
 export default defineEventHandler(async (event) => {
   const name = String(getRouterParam(event, 'name') ?? '')
   const { rows } = await pool.query(
-    `select p.website, p.about, p.sector, p.location, p.contact_name, p.phone
+    `select p.website, p.about, p.sector, p.location, p.contact_name, p.phone, p.email, p.address
        from employer_profiles p
        join organization o on o.id = p.organization_id
       where lower(o.name) = lower($1)

@@ -47,6 +47,17 @@
         </div>
       </div>
 
+      <div class="rowfields">
+        <div class="field">
+          <label for="email">contact email</label>
+          <input id="email" v-model="form.email" type="email" autocomplete="email" />
+        </div>
+        <div class="field">
+          <label for="address">address</label>
+          <input id="address" v-model="form.address" autocomplete="street-address" placeholder="Plot 123, Industrial, Gaborone" />
+        </div>
+      </div>
+
       <p v-if="error" class="formerr">{{ error }}</p>
       <p v-if="saved" class="formnote">saved.</p>
       <button class="applybtn" type="submit" :disabled="busy">{{ busy ? 'saving…' : 'save details' }}</button>
@@ -66,6 +77,8 @@ const form = reactive({
   location: String(data.value?.profile.location ?? 'Botswana'),
   contactName: String(data.value?.profile.contact_name ?? ''),
   phone: String(data.value?.profile.phone ?? ''),
+  email: String(data.value?.profile.email ?? ''),
+  address: String(data.value?.profile.address ?? ''),
 })
 const error = ref('')
 const saved = ref(false)
@@ -86,6 +99,8 @@ async function save() {
         location: form.location,
         contactName: form.contactName,
         phone: form.phone,
+        email: form.email,
+        address: form.address,
       },
     })
     saved.value = true

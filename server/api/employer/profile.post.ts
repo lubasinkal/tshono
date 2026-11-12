@@ -19,17 +19,23 @@ export default defineEventHandler(async (event) => {
   if (website && !/^https:\/\//.test(website)) {
     throw createError({ statusCode: 422, statusMessage: 'website must start with https://' })
   }
+  const email = String(body?.email ?? '').trim().slice(0, 200)
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw createError({ statusCode: 422, statusMessage: 'email is not valid' })
+  }
+  const address = String(body?.address ?? '').trim().slice(0, 300)
   const sector = String(body?.sector ?? 'General')
   const location = String(body?.location ?? 'Botswana')
   if (!SECTORS.includes(sector as (typeof SECTORS)[number])) throw createError({ statusCode: 422, statusMessage: 'unknown sector' })
   if (!LOCATIONS.includes(location as (typeof LOCATIONS)[number])) throw createError({ statusCode: 422, statusMessage: 'unknown location' })
 
   const { rows } = await pool.query(
-    `insert into employer_profiles (organization_id, website, about, sector, location, contact_name, phone)
-     values ($1,$2,$3,$4,$5,$6,$7)
+    `insert into employer_profiles (organization_id, website, about, sector, location, contact_name, phone, email, address)
+     values ($1,$2,$3,$4,$5,$6,$7,$8,$9)
      on conflict (organization_id) do update set
        website = excluded.website, about = excluded.about, sector = excluded.sector,
-       location = excluded.location, contact_name = excluded.contact_name, phone = excluded.phone
+       location = excluded.location, contact_name = excluded.contact_name, phone = excluded.phone,
+       email = excluded.email, address = excluded.address
      returning *`,
     [
       organizationId,
@@ -39,6 +45,8 @@ export default defineEventHandler(async (event) => {
       location,
       String(body?.contactName ?? session.user.name ?? '').trim().slice(0, 120),
       String(body?.phone ?? '').trim().slice(0, 40),
+      email,
+      address,
     ],
   )
   return { profile: rows[0] }

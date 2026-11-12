@@ -34,6 +34,8 @@
           <div v-if="company.location" class="fact"><dt>location</dt><dd>{{ company.location.toLowerCase() }}</dd></div>
           <div v-if="company.contact_name" class="fact"><dt>contact</dt><dd>{{ company.contact_name }}</dd></div>
           <div v-if="company.phone" class="fact"><dt>phone</dt><dd>{{ company.phone }}</dd></div>
+          <div v-if="company.email" class="fact"><dt>email</dt><dd><a :href="`mailto:${company.email}`">{{ company.email }}</a></dd></div>
+          <div v-if="company.address" class="fact"><dt>address</dt><dd>{{ company.address }}</dd></div>
         </dl>
       </div>
 
@@ -43,10 +45,6 @@
           <div class="fact"><dt>based in</dt><dd>{{ locationsList }}</dd></div>
           <div class="fact"><dt>sectors</dt><dd>{{ sectorsFull }}</dd></div>
           <div class="fact"><dt>active since</dt><dd>{{ activeSince }}</dd></div>
-          <div v-if="salaryRange" class="fact"><dt>typical salary</dt><dd>{{ salaryRange }}</dd></div>
-          <div v-if="employmentTypes" class="fact"><dt>employment</dt><dd>{{ employmentTypes }}</dd></div>
-          <div v-if="workModes" class="fact"><dt>work mode</dt><dd>{{ workModes }}</dd></div>
-          <div v-if="topRoles" class="fact"><dt>top roles</dt><dd>{{ topRoles }}</dd></div>
         </dl>
       </div>
 
@@ -88,6 +86,8 @@ interface CompanyProfile {
   location: string
   contact_name: string
   phone: string
+  email: string
+  address: string
 }
 
 const route = useRoute()
@@ -109,7 +109,6 @@ const company = computed(() => companyData.value?.company ?? null)
 const jobs = computed(() => allDocs.value.filter((j) => j.company.toLowerCase() === name.value.toLowerCase()))
 
 const sectorMix = computed(() => countBy(jobs.value, (j) => j.sector))
-const roleMix = computed(() => countBy(jobs.value, (j) => j.title).slice(0, 12))
 const locations = computed(() => countBy(jobs.value, (j) => j.location))
 const base = computed(() => locations.value[0]?.name.toLowerCase() ?? 'botswana')
 const sectorsList = computed(() => sectorMix.value.slice(0, 3).map((s) => s.name.toLowerCase()).join(' · ') || 'hiring')
@@ -128,21 +127,6 @@ const similar = computed(() => {
 const locationsList = computed(() => locations.value.map((l) => l.name.toLowerCase()).join(', '))
 const sectorsFull = computed(() => sectorMix.value.map((s) => s.name.toLowerCase()).join(', '))
 const activeSince = computed(() => jobs.value.map((j) => j.posted.slice(0, 4)).sort()[0] ?? '')
-const topRoles = computed(() => roleMix.value.slice(0, 5).map((r) => r.name.toLowerCase()).join(', '))
-const salaryRange = computed(() => {
-  const withSal = jobs.value.filter((j) => (j.salaryMin ?? 0) > 0 || (j.salaryMax ?? 0) > 0)
-  if (!withSal.length) return ''
-  const lo = Math.min(...withSal.map((j) => (j.salaryMin ?? j.salaryMax)!))
-  const hi = Math.max(...withSal.map((j) => (j.salaryMax ?? j.salaryMin)!))
-  const fmt = (n: number) => `BWP ${n.toLocaleString('en-BW')}`
-  return lo === hi ? fmt(lo) : `${fmt(lo)} – ${fmt(hi)}`
-})
-const employmentTypes = computed(() =>
-  [...new Set(jobs.value.map((j) => j.employmentType).filter(Boolean))].map((t) => t!.replace(/_/g, ' ')).join(', '),
-)
-const workModes = computed(() =>
-  [...new Set(jobs.value.map((j) => j.workMode).filter(Boolean))].map((t) => t!.replace(/_/g, ' ')).join(', '),
-)
 
 useHead({ title: `${name.value} · tshono` })
 useSeoMeta({
