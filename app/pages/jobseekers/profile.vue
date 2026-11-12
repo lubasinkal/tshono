@@ -22,6 +22,11 @@
         />
       </div>
 
+      <label class="check">
+        <input v-model="form.visible" type="checkbox" />
+        <span>visible to employers — they can find this profile, including your phone, when they search candidates</span>
+      </label>
+
       <div class="rowfields">
         <div class="field">
           <label for="occupation">occupation group (ISCO-08)</label>
@@ -112,10 +117,102 @@
         ></textarea>
       </div>
 
+      <div class="rowfields">
+        <div class="field">
+          <label for="availableFrom">available from</label>
+          <input id="availableFrom" v-model="form.availableFrom" type="date" />
+        </div>
+        <div class="field">
+          <label>relocation</label>
+          <label class="check"><input v-model="form.relocate" type="checkbox" /><span>willing to relocate</span></label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="languages">languages</label>
+        <input id="languages" v-model="form.languages" maxlength="300" placeholder="e.g. Setswana, English" />
+      </div>
+
+      <div class="field">
+        <label for="certifications">certifications &licences</label>
+        <textarea
+          id="certifications"
+          v-model="form.certifications"
+          rows="3"
+          maxlength="500"
+          placeholder="One per line, e.g. Code 10 driver's licence, First aid level 2"
+        ></textarea>
+      </div>
+
       <div class="field">
         <label for="phone">phone</label>
         <input id="phone" v-model="form.phone" autocomplete="tel" />
       </div>
+
+      <h2 class="sect"><span>#</span> work history</h2>
+
+      <div v-for="(r, i) in form.experience" :key="`exp-${i}`" class="cvrow">
+        <div class="rowfields">
+          <div class="field">
+            <label :for="`exp-title-${i}`">job title</label>
+            <input :id="`exp-title-${i}`" v-model="r.title" maxlength="120" />
+          </div>
+          <div class="field">
+            <label :for="`exp-company-${i}`">company</label>
+            <input :id="`exp-company-${i}`" v-model="r.company" maxlength="120" />
+          </div>
+          <div class="field">
+            <label :for="`exp-start-${i}`">started</label>
+            <input :id="`exp-start-${i}`" v-model="r.startDate" type="date" />
+          </div>
+          <div class="field">
+            <label :for="`exp-end-${i}`">ended</label>
+            <input :id="`exp-end-${i}`" v-model="r.endDate" type="date" :disabled="r.current" />
+          </div>
+        </div>
+        <label class="check"><input v-model="r.current" type="checkbox" /><span>still there</span></label>
+        <div class="field">
+          <label :for="`exp-desc-${i}`">what you did</label>
+          <textarea :id="`exp-desc-${i}`" v-model="r.description" rows="3" maxlength="1000" />
+        </div>
+        <div class="cvrow-actions">
+          <button class="ghostbtn" type="button" @click="form.experience.splice(i, 1)">remove</button>
+        </div>
+      </div>
+
+      <button class="ghostbtn" type="button" @click="form.experience.push({ ...emptyExperience })">
+        + add a role
+      </button>
+
+      <h2 class="sect"><span>#</span> education</h2>
+
+      <div v-for="(r, i) in form.education" :key="`edu-${i}`" class="cvrow">
+        <div class="rowfields">
+          <div class="field">
+            <label :for="`edu-inst-${i}`">institution</label>
+            <input :id="`edu-inst-${i}`" v-model="r.institution" maxlength="120" />
+          </div>
+          <div class="field">
+            <label :for="`edu-qual-${i}`">qualification</label>
+            <input :id="`edu-qual-${i}`" v-model="r.qualification" maxlength="120" />
+          </div>
+          <div class="field">
+            <label :for="`edu-field-${i}`">field</label>
+            <input :id="`edu-field-${i}`" v-model="r.field" maxlength="120" placeholder="optional" />
+          </div>
+          <div class="field">
+            <label :for="`edu-year-${i}`">year</label>
+            <input :id="`edu-year-${i}`" v-model.number="r.year" type="number" min="1950" max="2100" placeholder="optional" />
+          </div>
+        </div>
+        <div class="cvrow-actions">
+          <button class="ghostbtn" type="button" @click="form.education.splice(i, 1)">remove</button>
+        </div>
+      </div>
+
+      <button class="ghostbtn" type="button" @click="form.education.push({ ...emptyEducation })">
+        + add a qualification
+      </button>
 
       <p v-if="error" class="formerr">{{ error }}</p>
       <p v-if="saved" class="formnote">saved.</p>
@@ -132,14 +229,25 @@ import {
   SALARY_PERIODS,
   WORK_MODES,
 } from '~~/shared/job'
-import { emptyJobseeker, validateJobseeker, type JobseekerInput } from '~~/shared/jobseeker'
+import {
+  emptyEducation,
+  emptyExperience,
+  emptyJobseeker,
+  parseJobseeker,
+  type JobseekerInput,
+} from '~~/shared/jobseeker'
 import { LOCATIONS, SECTORS } from '~/data/sampleJobs'
 
 const { data } = await useFetch<{ profile: JobseekerInput }>('/api/jobseeker/profile')
 
 const label = (v: string) => v.replace(/_/g, ' ')
-const num = (v: unknown): number | null => (v === null || v === undefined || v === '' ? null : Number(v))
-const form = reactive<JobseekerInput>({ ...emptyJobseeker, ...(data.value?.profile ?? {}) })
+const form = reactive<JobseekerInput>({
+  ...emptyJobseeker,
+  ...(data.value?.profile ?? {}),
+  // Copy the lists so editing never mutates the shared defaults.
+  experience: (data.value?.profile.experience ?? []).map((r) => ({ ...r })),
+  education: (data.value?.profile.education ?? []).map((r) => ({ ...r })),
+})
 const error = ref('')
 const saved = ref(false)
 const busy = ref(false)
@@ -149,14 +257,9 @@ async function save() {
   error.value = ''
   saved.value = false
   try {
-    const payload: JobseekerInput = {
-      ...form,
-      years: Number(form.years) || 0,
-      salaryMin: num(form.salaryMin),
-    }
-    const first = Object.values(validateJobseeker(payload))[0]
-    if (first) throw new Error(first)
-    await $fetch('/api/jobseeker/profile', { method: 'POST', body: payload })
+    const parsed = parseJobseeker(form)
+    if ('error' in parsed) throw new Error(parsed.error)
+    await $fetch('/api/jobseeker/profile', { method: 'POST', body: parsed.data })
     saved.value = true
   } catch (e: any) {
     error.value = e?.data?.statusMessage || e?.message || 'could not save'
@@ -167,3 +270,15 @@ async function save() {
 
 useHead({ title: 'your profile · tshono' })
 </script>
+
+<style scoped>
+.cvrow {
+  display: grid;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 14px;
+}
+.cvrow-actions { display: flex; justify-content: flex-end; }
+</style>
