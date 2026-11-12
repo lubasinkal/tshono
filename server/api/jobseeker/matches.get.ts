@@ -1,4 +1,5 @@
 import { pool } from '~~/lib/db'
+import { publicJobId } from '~~/shared/job'
 
 // Live jobs ordered by fit against the signed-in jobseeker's profile. Not a
 // ranking engine: profile matches first, then featured, then recency. The
@@ -11,8 +12,8 @@ export default defineEventHandler(async (event) => {
   )
   const p = profile[0] ?? { occupation: '', sector: '', location: '' }
   const { rows } = await pool.query(
-    `select j.id, j.title, coalesce(j.company, o.name) as company, j.sector, j.location,
-            j.closing,
+    `select j.id, j.source, j.external_id, j.title, coalesce(j.company, o.name) as company,
+            j.sector, j.location, j.closing,
             (coalesce(j.occupation = nullif($1, ''), false)
              or coalesce(j.sector = nullif($2, ''), false)
              or coalesce(j.location = nullif($3, ''), false)) as matched
@@ -27,5 +28,10 @@ export default defineEventHandler(async (event) => {
       limit 6`,
     [p.occupation ?? '', p.sector ?? '', p.location ?? ''],
   )
-  return { jobs: rows }
+  // The page links to /jobs/[id], which resolves the Typesense document id.
+  const jobs = rows.map(({ source, external_id, ...row }) => ({
+    ...row,
+    id: publicJobId({ id: row.id, source, external_id }),
+  }))
+  return { jobs }
 })

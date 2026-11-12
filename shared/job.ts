@@ -43,6 +43,17 @@ export function districtFor(location: string): string | null {
   return LOCATION_DISTRICT[location] ?? null
 }
 
+// Public job URL id, matching the Typesense document id: employer posts are
+// namespaced, scraped rows keep their upstream id. A Postgres uuid is never a
+// public URL, so every list that links to /jobs/[id] must use this.
+export function publicJobId(job: {
+  id: string
+  source: string
+  external_id: string | null
+}): string {
+  return job.source === 'scraper' && job.external_id ? job.external_id : `emp-${job.id}`
+}
+
 export interface JobInput {
   title: string
   sector: string

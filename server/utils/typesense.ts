@@ -1,6 +1,10 @@
 // Server-side writer for the public search index. The admin key never leaves the
 // server: the browser keeps using the scoped search-only key.
 
+// Relative on purpose: scripts/reindex.ts runs under bun, where the ~ aliases
+// are not resolved.
+import { publicJobId } from '../../shared/job'
+
 function host(): string {
   const raw = process.env.TYPESENSE_URL || process.env.NUXT_PUBLIC_SEARCH_HOST || 'ts.lubasiverse.com'
   return raw.replace(/^https?:\/\//, '').replace(/\/$/, '')
@@ -43,8 +47,8 @@ export interface IndexableJob {
 export function toJobDoc(job: IndexableJob) {
   const posted = new Date(job.posted_at).getTime() / 1000
   return {
-    // Scraped rows keep their upstream id so re-indexing is stable.
-    id: job.source === 'scraper' && job.external_id ? job.external_id : `emp-${job.id}`,
+    // Id comes from shared/job so URLs and index documents cannot diverge.
+    id: publicJobId(job),
     title: job.title,
     company: job.company ?? '',
     sector: job.sector,
