@@ -11,6 +11,10 @@
 <script setup lang="ts">
 import type { JobInput } from '~~/shared/job'
 
+const auth = useAuth()
+const { data: session } = await auth.useSession(useFetch)
+if (!session.value?.user) await navigateTo('/login')
+
 const saving = ref(false)
 const error = ref('')
 

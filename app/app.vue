@@ -12,7 +12,12 @@
           <NuxtLink to="/companies">Companies</NuxtLink>
           <NuxtLink to="/sectors">Sectors</NuxtLink>
           <NuxtLink to="/insights">Insights</NuxtLink>
-          <NuxtLink to="/employers">Post a job</NuxtLink>
+          <NuxtLink to="/employers/jobs/new">Post a job</NuxtLink>
+          <template v-if="user">
+            <NuxtLink to="/employers/dashboard">Dashboard</NuxtLink>
+            <button class="navauth" type="button" @click="logout">Sign out</button>
+          </template>
+          <NuxtLink v-else to="/login" class="navauth">Sign in</NuxtLink>
         </nav>
         <button class="jumpbtn" type="button" aria-label="Open command palette" @click="palette?.open()">
           <span>jump to…</span>
@@ -42,6 +47,18 @@ const palette = ref<{ open: () => void } | null>(null)
 const hdq = ref('')
 function doSearch() {
   navigateTo({ path: '/', query: hdq.value.trim() ? { q: hdq.value.trim() } : {} })
+}
+
+const auth = useAuth()
+// Read the session through the documented endpoint with the incoming cookie
+// forwarded during SSR. Plain useSession did not forward it from app.vue.
+const requestFetch = useRequestFetch()
+const { data: session } = await useAsyncData('auth-session', () => requestFetch('/api/auth/get-session'))
+const user = computed(() => (session.value as { user?: { email: string } } | null)?.user ?? null)
+
+async function logout() {
+  await auth.signOut()
+  window.location.href = '/login'
 }
 
 useSeoMeta({

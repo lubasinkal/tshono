@@ -359,3 +359,11 @@ kbd, .kbd span {
 .formnote { color: var(--faint); font-family: var(--mono); font-size: 12px; }
 .ghostbtn { background: none; border: 1px solid var(--line); color: var(--text); border-radius: var(--radius-sm); padding: 8px 12px; font-family: var(--mono); font-size: 13px; cursor: pointer; }
 .ghostbtn:hover { border-color: var(--accent); }
+
+.nav .navauth {
+  display: inline-flex; align-items: center; gap: 8px;
+  color: var(--text); text-decoration: none; font-family: var(--mono); font-size: 13px;
+  padding: 7px 12px; border-radius: var(--radius-sm); border: 1px solid var(--line);
+  background: transparent; cursor: pointer; transition: border-color 0.15s, background 0.15s;
+}
+.nav .navauth:hover { border-color: var(--accent); background: var(--panel2); }

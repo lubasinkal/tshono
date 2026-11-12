@@ -29,12 +29,6 @@ export default defineNuxtConfig({
       searchCollection: 'jobs',
     },
   },
-  routeRules: {
-    // Rendered per request so NUXT_PUBLIC_* is read from runtime env, not baked
-    // into a prerendered payload at build time. Cached in memory for 10 min.
-    '/': { swr: 600 },
-    '/insights': { swr: 600 },
-  },
   typescript: {
     typeCheck: true,
   },

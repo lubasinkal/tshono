@@ -55,7 +55,7 @@ interface Payload {
 
 const auth = useAuth()
 const { data, error, refresh } = await useFetch<Payload>('/api/employer/jobs')
-if (error.value) await navigateTo('/employers')
+if (error.value) await navigateTo('/login')
 
 async function close(id: string) {
   await $fetch(`/api/employer/jobs/${id}`, { method: 'DELETE' })
@@ -64,7 +64,7 @@ async function close(id: string) {
 
 async function logout() {
   await auth.signOut()
-  await navigateTo('/employers')
+  window.location.href = '/login'
 }
 
 useHead({ title: 'your jobs · tshono' })

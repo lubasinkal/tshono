@@ -42,7 +42,7 @@ interface Job {
 
 const route = useRoute()
 const { data, error: loadError } = await useFetch<{ jobs: Job[] }>('/api/employer/jobs')
-if (loadError.value) await navigateTo('/employers')
+if (loadError.value) await navigateTo('/login')
 const job = computed(() => data.value?.jobs.find((j) => j.id === String(route.params.id)))
 
 const saving = ref(false)
