@@ -99,6 +99,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 }
 .nav a:hover { color: var(--text); background: var(--panel2); }
 .nav a.router-link-active { color: var(--text); background: var(--panel2); }
+.navright { display: flex; align-items: center; gap: 8px; margin-left: auto; }
 .jumpbtn {
   display: inline-flex; align-items: center; gap: 8px;
   font-family: var(--mono); font-size: 13px; color: var(--faint);
@@ -335,7 +336,8 @@ kbd, .kbd span {
   .topbar-inner { flex-wrap: wrap; padding-top: 8px; padding-bottom: 8px; row-gap: 4px; }
   .nav { order: 2; flex-basis: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 2px; }
   .nav::-webkit-scrollbar { display: none; }
-  .jumpbtn { order: 1; }
+  .navright { order: 1; }
+  .jumpbtn { display: none; }
   .dtable { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .dtable th, .dtable td { white-space: nowrap; }
   .cmdbar input { font-size: 15px; padding-left: 16px; padding-right: 16px; }
@@ -423,6 +425,4 @@ kbd, .kbd span {
 @media (max-width: 720px) {
   .featuredhero { grid-template-columns: 1fr; justify-items: start; }
   .featprice { justify-items: start; }
-  .themebtn { margin-left: auto; }
-  .navauth { order: 1; }
 }

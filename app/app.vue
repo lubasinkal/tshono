@@ -10,18 +10,20 @@
           <NuxtLink to="/insights">Insights</NuxtLink>
           <NuxtLink to="/employers/jobs/new">Post a job</NuxtLink>
         </nav>
-        <button class="themebtn" type="button" :aria-label="theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'" @click="toggleTheme">
-          {{ theme === 'dark' ? '☾' : '☀' }}
-        </button>
-        <button class="jumpbtn" type="button" aria-label="Open command palette" @click="palette?.open()">
-          <span>jump to…</span>
-          <kbd>⌘K</kbd>
-        </button>
-        <template v-if="user">
-          <NuxtLink to="/employers/dashboard" class="navauth">Dashboard</NuxtLink>
-          <button class="navauth" type="button" @click="logout">Sign out</button>
-        </template>
-        <NuxtLink v-else to="/login" class="navauth">Sign in</NuxtLink>
+        <div class="navright">
+          <button class="themebtn" type="button" :aria-label="theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'" @click="toggleTheme">
+            {{ theme === 'dark' ? '☾' : '☀' }}
+          </button>
+          <button class="jumpbtn" type="button" aria-label="Open command palette" @click="palette?.open()">
+            <span>jump to…</span>
+            <kbd>⌘K</kbd>
+          </button>
+          <template v-if="user">
+            <NuxtLink to="/employers/dashboard" class="navauth">Dashboard</NuxtLink>
+            <button class="navauth" type="button" @click="logout">Sign out</button>
+          </template>
+          <NuxtLink v-else to="/login" class="navauth">Sign in</NuxtLink>
+        </div>
       </div>
     </header>
     <main class="shell">
