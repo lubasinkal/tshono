@@ -284,4 +284,7 @@ useHead({ title: 'your profile · tshono' })
   margin-bottom: 14px;
 }
 .cvrow-actions { display: flex; justify-content: flex-end; }
+@media (max-width: 520px) {
+  .cvrow { padding: 12px 10px; }
+}
 </style>

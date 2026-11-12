@@ -178,6 +178,7 @@ kbd, .kbd span {
 .stats .live-dot { color: var(--accent); white-space: nowrap; }
 @media (max-width: 520px) {
   .stats { font-size: 11px; }
+  .filters select { font-size: 16px; }
 }
 
 .list { list-style: none; padding: 0; margin: 0; display: grid; }
@@ -345,7 +346,7 @@ kbd, .kbd span {
   .jumpbtn { display: none; }
   .dtable { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .dtable th, .dtable td { white-space: nowrap; }
-  .cmdbar input { font-size: 15px; padding-left: 16px; padding-right: 16px; }
+  .cmdbar input { font-size: 16px; padding-left: 16px; padding-right: 16px; }
   .cmdbar .kbd { display: none; }
   .stack { height: clamp(260px, 48vh, 380px); gap: 2px; }
   .weekaxis { gap: 2px; }
@@ -368,22 +369,46 @@ kbd, .kbd span {
 
 /* employer forms */
 .form { display: grid; gap: 14px; width: 100%; max-width: 720px; margin: 20px auto 40px; }
-.field { display: grid; gap: 6px; }
-.field label { font-family: var(--mono); font-size: 12px; color: var(--faint); text-transform: lowercase; letter-spacing: 0.4px; }
-.field input, .field select, .field textarea {
-  width: 100%; box-sizing: border-box; background: var(--panel); color: var(--text);
+.field { display: grid; gap: 6px; min-width: 0; }
+/* :not(.check) keeps the opt-in checkbox line out of the field-label styling. */
+.field > label:not(.check) {
+  font-family: var(--mono); font-size: 12px; color: var(--faint);
+  text-transform: lowercase; letter-spacing: 0.4px; overflow-wrap: anywhere;
+}
+/* Checkboxes are not text fields: leave them alone so they keep their size. */
+.field input:not([type='checkbox']):not([type='radio']),
+.field select,
+.field textarea {
+  width: 100%; min-width: 0; box-sizing: border-box; background: var(--panel); color: var(--text);
   border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 10px 12px;
   font: inherit; font-size: 14px;
 }
 .field textarea { resize: vertical; font-family: var(--mono); font-size: 13px; line-height: 1.5; }
-.field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 14%, transparent); }
+.field input:not([type='checkbox']):not([type='radio']):focus,
+.field select:focus,
+.field textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 14%, transparent); }
 .check {
   display: flex; align-items: flex-start; gap: 10px; cursor: pointer;
   font-family: var(--mono); font-size: 12px; color: var(--muted); line-height: 1.5;
 }
 .check input { flex: none; width: 16px; height: 16px; margin: 0; accent-color: var(--accent); }
-.rowfields { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
-@media (max-width: 720px) { .rowfields { grid-template-columns: 1fr 1fr; } }
+/* Rows of fields share the width equally: 2 fields fill the row, 4 split it,
+   and they wrap instead of squeezing when space runs out. */
+.rowfields { display: flex; flex-wrap: wrap; gap: 12px; }
+.rowfields > * { flex: 1 1 150px; min-width: 0; }
+@media (max-width: 900px) {
+  .rowfields > * { flex-basis: calc(50% - 6px); }
+}
+@media (max-width: 520px) {
+  .rowfields > * { flex-basis: 100%; }
+  /* 16px keeps iOS from zooming the page when a field gets focus. */
+  .field input:not([type='checkbox']):not([type='radio']),
+  .field select,
+  .field textarea { font-size: 16px; }
+  .check { font-size: 13px; }
+  .form { gap: 16px; }
+  .applybtn { padding: 13px 16px; }
+}
 .formerr { color: #fb7185; font-family: var(--mono); font-size: 13px; margin: 0; }
 .formnote { color: var(--faint); font-family: var(--mono); font-size: 12px; max-width: 720px; margin: 10px auto 0; }
 .ghostbtn { background: none; border: 1px solid var(--line); color: var(--text); border-radius: var(--radius-sm); padding: 8px 12px; font-family: var(--mono); font-size: 13px; cursor: pointer; transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease), background var(--dur) var(--ease); }
