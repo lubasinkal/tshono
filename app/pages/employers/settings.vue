@@ -12,6 +12,11 @@
 
     <form class="form" @submit.prevent="save">
       <div class="field">
+        <label for="name">company name</label>
+        <input id="name" v-model="form.name" required maxlength="80" />
+      </div>
+
+      <div class="field">
         <label for="website">website</label>
         <input id="website" v-model="form.website" type="url" placeholder="https://yourcompany.co.bw" />
       </div>
@@ -71,6 +76,7 @@ import { LOCATIONS, SECTORS } from '~/data/sampleJobs'
 const { data } = await useFetch<{ org: { id: string; name: string }; profile: Record<string, string | null> }>('/api/employer/profile')
 
 const form = reactive({
+  name: String(data.value?.org.name ?? ''),
   website: String(data.value?.profile.website ?? ''),
   about: String(data.value?.profile.about ?? ''),
   sector: String(data.value?.profile.sector ?? 'General'),
@@ -93,6 +99,7 @@ async function save() {
       method: 'POST',
       body: {
         organizationId: data.value?.org.id,
+        name: form.name,
         website: form.website,
         about: form.about,
         sector: form.sector,
@@ -104,6 +111,8 @@ async function save() {
       },
     })
     saved.value = true
+    // Keep the header in step without a reload; other pages refetch the name.
+    if (data.value) data.value.org.name = form.name
   } catch (e: any) {
     error.value = e?.data?.statusMessage || e?.message || 'could not save'
   } finally {
