@@ -9,6 +9,15 @@ export interface SampleJob {
   minYears: number
   blurb: string
   url: string
+  occupation?: string
+  employmentType?: string
+  vacancies?: number
+  workMode?: string
+  educationLevel?: string
+  salaryMin?: number
+  salaryMax?: number
+  salaryPeriod?: string
+  district?: string
 }
 
 export { SECTORS, LOCATIONS } from '~~/shared/constants'

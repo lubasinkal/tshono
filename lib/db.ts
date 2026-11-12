@@ -1,4 +1,8 @@
-import { Pool } from 'pg'
+import { Pool, types } from 'pg'
+
+// pg parses DATE into a JS Date by default, which turns '2027-03-31' into a full
+// ISO timestamp on the wire and in Typesense. Keep calendar dates as strings.
+types.setTypeParser(1082, (v: string) => v)
 
 // One pool per process. DATABASE_URL comes from .env locally and from the
 // Dokploy environment in production.

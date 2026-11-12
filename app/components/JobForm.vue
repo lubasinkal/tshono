@@ -29,6 +29,62 @@
     </div>
 
     <div class="field">
+      <label for="occupation">occupation group (ISCO-08)</label>
+      <select id="occupation" v-model="form.occupation" required>
+        <option value="" disabled>pick the closest group</option>
+        <option v-for="o in OCCUPATIONS" :key="o" :value="o">{{ o.toLowerCase() }}</option>
+      </select>
+    </div>
+
+    <div class="rowfields">
+      <div class="field">
+        <label for="employmentType">employment type</label>
+        <select id="employmentType" v-model="form.employmentType">
+          <option v-for="t in EMPLOYMENT_TYPES" :key="t" :value="t">{{ label(t) }}</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="workMode">work mode</label>
+        <select id="workMode" v-model="form.workMode">
+          <option v-for="m in WORK_MODES" :key="m" :value="m">{{ label(m) }}</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="vacancies">positions</label>
+        <input id="vacancies" v-model.number="form.vacancies" type="number" min="1" max="1000" />
+      </div>
+      <div class="field">
+        <label for="educationLevel">education</label>
+        <select id="educationLevel" v-model="form.educationLevel">
+          <option value="">not stated</option>
+          <option v-for="l in EDUCATION_LEVELS" :key="l" :value="l">{{ label(l) }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="rowfields">
+      <div class="field">
+        <label for="salaryMin">salary min (BWP)</label>
+        <input id="salaryMin" v-model.number="form.salaryMin" type="number" min="0" placeholder="optional" />
+      </div>
+      <div class="field">
+        <label for="salaryMax">salary max (BWP)</label>
+        <input id="salaryMax" v-model.number="form.salaryMax" type="number" min="0" placeholder="optional" />
+      </div>
+      <div class="field">
+        <label for="salaryPeriod">salary period</label>
+        <select id="salaryPeriod" v-model="form.salaryPeriod">
+          <option value="">not stated</option>
+          <option v-for="p in SALARY_PERIODS" :key="p" :value="p">{{ label(p) }}</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="contractMonths">contract months</label>
+        <input id="contractMonths" v-model.number="form.contractMonths" type="number" min="0" max="120" placeholder="optional" />
+      </div>
+    </div>
+
+    <div class="field">
       <label for="apply">apply link (https)</label>
       <input id="apply" v-model="form.applyUrl" type="url" required placeholder="https://yourcompany.co.bw/careers/role" />
     </div>
@@ -49,7 +105,15 @@
 </template>
 
 <script setup lang="ts">
-import { validateJob, type JobInput } from '~~/shared/job'
+import {
+  EDUCATION_LEVELS,
+  EMPLOYMENT_TYPES,
+  OCCUPATIONS,
+  SALARY_PERIODS,
+  WORK_MODES,
+  validateJob,
+  type JobInput,
+} from '~~/shared/job'
 import { LOCATIONS, SECTORS } from '~/data/sampleJobs'
 
 const props = withDefaults(
@@ -58,11 +122,23 @@ const props = withDefaults(
 )
 const emit = defineEmits<{ submit: [JobInput] }>()
 
+const label = (v: string) => v.replace(/_/g, ' ')
+const num = (v: unknown): number | null => (v === null || v === undefined || v === '' ? null : Number(v))
+
 const form = reactive<JobInput>({
   title: '',
   sector: 'General',
   location: 'Gaborone',
+  occupation: '',
+  employmentType: 'full_time',
+  vacancies: 1,
+  workMode: 'on_site',
+  educationLevel: '',
   minYears: 0,
+  salaryMin: null,
+  salaryMax: null,
+  salaryPeriod: '',
+  contractMonths: null,
   closing: '',
   applyUrl: '',
   blurb: '',
@@ -72,13 +148,20 @@ const form = reactive<JobInput>({
 const localError = ref('')
 
 function submit() {
-  const errors = validateJob(form)
+  const payload: JobInput = {
+    ...form,
+    vacancies: Number(form.vacancies) || 1,
+    salaryMin: num(form.salaryMin),
+    salaryMax: num(form.salaryMax),
+    contractMonths: num(form.contractMonths),
+  }
+  const errors = validateJob(payload)
   const first = Object.values(errors)[0]
   if (first) {
     localError.value = first
     return
   }
   localError.value = ''
-  emit('submit', { ...form })
+  emit('submit', payload)
 }
 </script>

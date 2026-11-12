@@ -16,6 +16,16 @@ export interface IndexableJob {
   company: string
   sector: string
   location: string
+  occupation: string | null
+  employment_type: string | null
+  vacancies: number
+  work_mode: string | null
+  education_level: string | null
+  salary_min: number | null
+  salary_max: number | null
+  salary_period: string | null
+  contract_months: number | null
+  district: string | null
   min_years: number
   closing: string | null
   blurb: string
@@ -32,6 +42,16 @@ export function toJobDoc(job: IndexableJob) {
     company: job.company,
     sector: job.sector,
     location: job.location,
+    occupation: job.occupation ?? '',
+    employment_type: job.employment_type ?? '',
+    vacancies: job.vacancies,
+    work_mode: job.work_mode ?? '',
+    education_level: job.education_level ?? '',
+    salary_min: job.salary_min ?? 0,
+    salary_max: job.salary_max ?? 0,
+    salary_period: job.salary_period ?? '',
+    contract_months: job.contract_months ?? 0,
+    district: job.district ?? '',
     blurb: job.blurb.slice(0, 300),
     content: job.content,
     url: job.apply_url,

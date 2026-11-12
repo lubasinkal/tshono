@@ -9,6 +9,15 @@
           title: job.title,
           sector: job.sector,
           location: job.location,
+          occupation: job.occupation || '',
+          employmentType: job.employment_type || 'full_time',
+          vacancies: job.vacancies ?? 1,
+          workMode: job.work_mode || 'on_site',
+          educationLevel: job.education_level || '',
+          salaryMin: job.salary_min,
+          salaryMax: job.salary_max,
+          salaryPeriod: job.salary_period || '',
+          contractMonths: job.contract_months,
           minYears: job.min_years,
           closing: job.closing || '',
           applyUrl: job.apply_url,
@@ -33,6 +42,15 @@ interface Job {
   title: string
   sector: string
   location: string
+  occupation: string | null
+  employment_type: string | null
+  vacancies: number
+  work_mode: string | null
+  education_level: string | null
+  salary_min: number | null
+  salary_max: number | null
+  salary_period: string | null
+  contract_months: number | null
   min_years: number
   closing: string | null
   apply_url: string

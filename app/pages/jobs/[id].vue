@@ -21,7 +21,13 @@
           <dl class="facts">
             <div class="fact"><dt>company</dt><dd><NuxtLink :to="`/companies/${encodeURIComponent(job.company)}`">{{ job.company }}</NuxtLink></dd></div>
             <div class="fact"><dt>sector</dt><dd><NuxtLink :to="`/sectors/${encodeURIComponent(job.sector)}`">{{ job.sector.toLowerCase() }}</NuxtLink></dd></div>
-            <div class="fact"><dt>place</dt><dd>{{ job.location.toLowerCase() }}</dd></div>
+            <div class="fact"><dt>place</dt><dd>{{ job.location.toLowerCase() }}<template v-if="job.district"> · {{ job.district.toLowerCase() }} district</template></dd></div>
+            <div v-if="job.occupation" class="fact"><dt>occupation</dt><dd>{{ job.occupation.toLowerCase() }}</dd></div>
+            <div v-if="job.employmentType" class="fact"><dt>type</dt><dd>{{ pretty(job.employmentType) }}</dd></div>
+            <div v-if="job.workMode" class="fact"><dt>work mode</dt><dd>{{ pretty(job.workMode) }}</dd></div>
+            <div v-if="job.vacancies && job.vacancies > 1" class="fact"><dt>positions</dt><dd>{{ job.vacancies }}</dd></div>
+            <div v-if="job.educationLevel" class="fact"><dt>education</dt><dd>{{ pretty(job.educationLevel) }}</dd></div>
+            <div v-if="salaryLabel" class="fact"><dt>salary</dt><dd>{{ salaryLabel }}</dd></div>
             <div class="fact"><dt>experience</dt><dd>{{ job.minYears === 0 ? 'entry level' : job.minYears + ' years plus' }}</dd></div>
             <div class="fact"><dt>posted</dt><dd>{{ postedLabel }}</dd></div>
             <div class="fact"><dt>closes</dt><dd>{{ job.closing || 'not stated' }}</dd></div>
@@ -67,6 +73,17 @@ const ogImage = computed(() => {
     blurb: j.blurb || '',
   })
   return `${reqUrl.origin}/og/job?${p.toString()}`
+})
+const pretty = (v: string) => v.replace(/_/g, ' ')
+const salaryLabel = computed(() => {
+  const j = job.value
+  if (!j || (j.salaryMin === undefined && j.salaryMax === undefined)) return ''
+  const fmt = (n: number) => n.toLocaleString('en-BW')
+  const range = j.salaryMin !== undefined && j.salaryMax !== undefined
+    ? `${fmt(j.salaryMin)}–${fmt(j.salaryMax)}`
+    : fmt((j.salaryMin ?? j.salaryMax)!)
+  const per = j.salaryPeriod ? { annual: 'year', monthly: 'month', hourly: 'hour' }[j.salaryPeriod] ?? j.salaryPeriod : ''
+  return `BWP ${range}${per ? ` / ${per}` : ''}`
 })
 const postedLabel = computed(() => {
   const j = job.value

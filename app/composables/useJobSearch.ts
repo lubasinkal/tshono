@@ -18,6 +18,15 @@ export function toJobHit(d: Record<string, unknown>): JobHit {
     posted: typeof d.posted === 'number' ? new Date(d.posted * 1000).toISOString().slice(0, 10) : String(d.posted ?? ''),
     minYears: typeof d.min_years === 'number' ? d.min_years : 0,
     content: typeof d.content === 'string' ? d.content : undefined,
+    occupation: typeof d.occupation === 'string' && d.occupation ? d.occupation : undefined,
+    employmentType: typeof d.employment_type === 'string' && d.employment_type ? d.employment_type : undefined,
+    vacancies: typeof d.vacancies === 'number' && d.vacancies > 0 ? d.vacancies : undefined,
+    workMode: typeof d.work_mode === 'string' && d.work_mode ? d.work_mode : undefined,
+    educationLevel: typeof d.education_level === 'string' && d.education_level ? d.education_level : undefined,
+    salaryMin: typeof d.salary_min === 'number' && d.salary_min > 0 ? d.salary_min : undefined,
+    salaryMax: typeof d.salary_max === 'number' && d.salary_max > 0 ? d.salary_max : undefined,
+    salaryPeriod: typeof d.salary_period === 'string' && d.salary_period ? d.salary_period : undefined,
+    district: typeof d.district === 'string' && d.district ? d.district : undefined,
   }
 }
 
