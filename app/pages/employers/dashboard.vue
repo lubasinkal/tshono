@@ -9,6 +9,7 @@
       </div>
       <div class="dashhead-actions">
         <NuxtLink to="/employers/jobs/new" class="applybtn">+ post a job</NuxtLink>
+        <NuxtLink to="/employers/candidates" class="ghostbtn">candidates</NuxtLink>
         <NuxtLink to="/employers/settings" class="ghostbtn">company</NuxtLink>
         <NuxtLink to="/employers/billing" class="ghostbtn">billing</NuxtLink>
         <button class="ghostbtn" type="button" @click="logout">sign out</button>
