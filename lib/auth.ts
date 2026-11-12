@@ -1,5 +1,5 @@
 import { betterAuth } from 'better-auth'
-import { admin, organization } from 'better-auth/plugins'
+import { admin, emailOTP, organization } from 'better-auth/plugins'
 import { polar, webhooks } from '@polar-sh/better-auth'
 import { pool } from './db'
 import { grantOrder, polarClient } from './polar'
@@ -36,6 +36,37 @@ export const auth = betterAuth({
   plugins: [
     organization(),
     admin(),
+    emailOTP({
+      // OTP signs in existing users and resets passwords. It must not create
+      // accounts: sign-up needs the organization + employer-profile step.
+      disableSignUp: true,
+      overrideDefaultEmailVerification: true,
+      async sendVerificationOTP({ email, otp, type }) {
+        const apiKey = process.env.RESEND_API_KEY
+        const from = process.env.EMAIL_FROM || 'noreply@tshono.lubasiverse.com'
+        const subject: Record<string, string> = {
+          'sign-in': 'Sign in to tshono',
+          'email-verification': 'Verify your email · tshono',
+          'forget-password': 'Reset your password · tshono',
+        }
+        const html = `<p>Your tshono code is <strong>${otp}</strong>. It expires in 5 minutes.</p>`
+        if (!apiKey) {
+          // Local dev without a mail provider: read the code from server logs.
+          console.log(`[auth] ${type} OTP for ${email}: ${otp}`)
+          return
+        }
+        try {
+          const res = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ from, to: [email], subject: subject[type] ?? 'Your tshono code', html }),
+          })
+          if (!res.ok) console.error('[auth] resend failed', res.status, await res.text())
+        } catch (e) {
+          console.error('[auth] resend error', e)
+        }
+      },
+    }),
     ...(polarPlugin ? [polarPlugin] : []),
   ],
 })

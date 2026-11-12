@@ -1,5 +1,5 @@
 import { createAuthClient } from 'better-auth/vue'
-import { adminClient, organizationClient } from 'better-auth/client/plugins'
+import { adminClient, emailOTPClient, organizationClient } from 'better-auth/client/plugins'
 
 // Request-scoped client: forwards the incoming cookie during SSR so server-rendered
 // pages see the same session the browser has. Use for useAsyncData/server calls;
@@ -9,7 +9,7 @@ export function useAuth() {
   const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
   return createAuthClient({
     baseURL: url.origin,
-    plugins: [organizationClient(), adminClient()],
+    plugins: [organizationClient(), adminClient(), emailOTPClient()],
     fetchOptions: { headers },
   })
 }
