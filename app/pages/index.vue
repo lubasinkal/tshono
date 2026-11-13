@@ -33,6 +33,11 @@
           <option value="5">up to 5 yrs</option>
         </select>
       </div>
+
+      <p v-if="supply.jobseekers || supply.employers" class="supply">
+        <span v-if="supply.jobseekers">{{ countLabel(supply.jobseekers) }} jobseekers</span>
+        <span v-if="supply.employers">{{ countLabel(supply.employers) }} employers</span>
+      </p>
     </div>
 
     <p class="stats">
@@ -72,6 +77,19 @@ import { isFeatured } from '~~/shared/job'
 import { remoteSearch, daysLeft, liveRawCached } from '~/composables/useJobSearch'
 
 const PER_PAGE = 20
+
+// Floored to a round number so a young marketplace does not advertise "3
+// jobseekers"; the "+" keeps it honest because it never overstates.
+function countLabel(n: number): string {
+  if (n >= 1000) return `${Math.floor(n / 1000) * 1000}+`
+  if (n >= 100) return `${Math.floor(n / 100) * 100}+`
+  if (n >= 10) return `${Math.floor(n / 10) * 10}+`
+  return String(n)
+}
+
+const { data: supply } = await useFetch<{ jobseekers: number; employers: number }>('/api/stats', {
+  default: () => ({ jobseekers: 0, employers: 0 }),
+})
 
 const route = useRoute()
 const router = useRouter()
