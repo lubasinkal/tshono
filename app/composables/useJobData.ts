@@ -25,10 +25,12 @@ export interface Day { label: string; total: number; segs: Seg[] }
 const LS_KEY = 'tshono:insights:v1'
 const CACHE_MS = 5 * 60_000
 
+// One muted family at a consistent lightness, so the chart reads as part of the
+// page instead of a rainbow. Hues stay far enough apart to tell sectors apart.
 const PALETTE = [
-  '#4ade80', '#38bdf8', '#f472b6', '#fbbf24', '#a78bfa', '#22d3ee', '#fb7185', '#34d399',
-  '#f97316', '#e879f9', '#2dd4bf', '#facc15', '#818cf8', '#fb923c', '#4adeff', '#c084fc',
-  '#f43f5e', '#a3e635', '#eab308', '#5eead4', '#ff6b6b', '#51cf66', '#fcc419', '#9775fa',
+  'oklch(72% 0.12 230)', 'oklch(74% 0.10 195)', 'oklch(76% 0.11 150)', 'oklch(78% 0.11 118)',
+  'oklch(80% 0.11 92)', 'oklch(78% 0.12 66)', 'oklch(74% 0.12 45)', 'oklch(72% 0.13 25)',
+  'oklch(70% 0.12 352)', 'oklch(68% 0.11 318)', 'oklch(66% 0.10 288)', 'oklch(70% 0.11 255)',
 ] as const
 const SECTOR_COLOR = new Map<string, string>()
 

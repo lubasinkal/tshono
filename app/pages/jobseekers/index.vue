@@ -101,12 +101,12 @@ useHead({ title: 'your dashboard · tshono' })
 </script>
 
 <style scoped>
-.todo { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.todo { list-style: none; margin: 0; padding: 0; display: grid; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
 .todo a {
-  display: block; padding: 10px 14px; background: var(--panel);
-  border: 1px solid var(--line); border-radius: var(--radius-sm);
-  color: var(--text); text-decoration: none; font-size: 14px;
+  display: flex; align-items: center; gap: 10px; padding: 11px 16px;
+  border-bottom: 1px solid var(--line); color: var(--text); text-decoration: none; font-size: 13.5px;
 }
-.todo a::before { content: '○ '; color: var(--faint); }
-.todo a:hover { border-color: var(--accent); }
+.todo li:last-child a { border-bottom: none; }
+.todo a::before { content: '☐'; color: var(--faint); font-family: var(--mono); font-size: 12px; }
+.todo a:hover { background: var(--panel2); color: var(--accent); }
 </style>
