@@ -118,9 +118,18 @@ onMounted(() => {
   theme.value = document.documentElement.dataset.theme === 'light' ? 'light' : 'dark'
 })
 
-// Set the theme before paint so there is no flash on reload.
+// Set the theme before paint so there is no flash on reload, and load Umami
+// only when a website id is configured (so local dev stays out of the stats).
+// Analytics is for real visitors: dev serves nothing so localhost never lands
+// in the stats, and an empty id disables it entirely.
+const umami = useRuntimeConfig().public
+const umamiScript =
+  umami.umamiId && !import.meta.dev
+    ? [{ src: umami.umamiSrc, defer: true, 'data-website-id': umami.umamiId }]
+    : []
 useHead({
   script: [
+    ...umamiScript,
     {
       innerHTML: `(function(){try{var t=localStorage.getItem('tshono-theme')||'dark';document.documentElement.dataset.theme=t}catch(e){document.documentElement.dataset.theme='dark'}})()`,
     },

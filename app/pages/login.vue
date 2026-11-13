@@ -250,6 +250,7 @@ async function submit() {
         // on /jobseekers/profile afterwards.
         await $fetch('/api/jobseeker/profile', { method: 'POST', body: {} })
       }
+      track('signup', { role: role.value })
       window.location.href = '/dashboard'
     } else if (mode.value === 'otp-send') {
       await sendOtp('sign-in')

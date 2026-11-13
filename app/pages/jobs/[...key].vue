@@ -52,7 +52,7 @@
         <div class="applybox">
           <h2 class="applybox-title">how to apply</h2>
           <p>{{ job.applyInstructions || `Applications are handled by ${job.company} on their own site. Click below to open the application form.` }}</p>
-          <a class="applybtn" :href="job.url" target="_blank" rel="noopener">apply now ↗</a>
+          <a class="applybtn" :href="job.url" target="_blank" rel="noopener" @click="track('apply_click', { job: id, source: 'external' })">apply now ↗</a>
         </div>
       </div>
       <aside class="jobside">
@@ -72,7 +72,7 @@
             <div class="fact"><dt>posted</dt><dd>{{ postedLabel }}</dd></div>
             <div class="fact"><dt>closes</dt><dd>{{ job.closing || 'not stated' }}</dd></div>
           </dl>
-          <a class="applybtn" :href="job.url" target="_blank" rel="noopener">apply at source ↗</a>
+          <a class="applybtn" :href="job.url" target="_blank" rel="noopener" @click="track('apply_click', { job: id, source: 'external' })">apply at source ↗</a>
         </div>
         <div class="sidecard">
           <h2 class="sideh">similar roles</h2>
@@ -130,6 +130,7 @@ async function apply() {
       body: { jobId: id.value, note: note.value },
     })
     note.value = ''
+    track('application_sent', { job: id.value })
     await refreshApplications()
   } catch (e: any) {
     applyError.value = e?.data?.statusMessage || e?.message || 'could not apply'
@@ -152,6 +153,15 @@ watch(
 )
 
 const job = computed<SampleJob | JobHit | null | undefined>(() => remoteJob.value)
+
+// One view event per job visit, tagged so featured traffic can be compared.
+watch(
+  job,
+  (j) => {
+    if (j) track('job_view', { job: j.id, featured: isFeatured(j) ? 'yes' : 'no' })
+  },
+  { immediate: true },
+)
 const reqUrl = useRequestURL()
 const ogImage = computed(() => {
   const j = job.value

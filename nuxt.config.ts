@@ -36,6 +36,9 @@ export default defineNuxtConfig({
       searchProtocol: 'https',
       searchKey: '',
       searchCollection: 'jobs',
+      // Umami analytics. Empty id loads no script at all (local dev default).
+      umamiSrc: 'https://analytics.lubasiverse.com/script.js',
+      umamiId: 'a7029343-142f-456f-81d3-d7069bf68106',
     },
   },
   typescript: {
