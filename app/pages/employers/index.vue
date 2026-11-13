@@ -56,6 +56,9 @@
             ><span class="knob"></span></button>
             <span class="switchlabel">{{ featured(j) ? 'featured' : 'feature' }}</span>
           </template>
+          <NuxtLink :to="`/employers/jobs/${j.id}/applicants`" class="ilink">
+            applicants {{ j.applicants ?? 0 }}
+          </NuxtLink>
           <NuxtLink :to="`/employers/jobs/${j.id}/edit`" class="ilink">edit</NuxtLink>
           <button v-if="j.status === 'live'" class="ghostbtn" type="button" @click="close(j.id)">close</button>
           <button v-else class="ghostbtn" type="button" @click="reopen(j.id)">reopen</button>
@@ -79,6 +82,7 @@ interface Job {
   posted_at: string
   indexed_at: string | null
   featured_until: string | null
+  applicants: number
 }
 interface Payload {
   org: { name: string; plan: string; planUntil: string | null; verified: boolean; featuredCredits: number }

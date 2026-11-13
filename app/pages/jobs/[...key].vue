@@ -26,6 +26,28 @@
           </template>
         </div>
 
+        <div v-if="canApply" class="applybox">
+          <h2 class="applybox-title">apply through tshono</h2>
+          <template v-if="applied">
+            <p>Applied · {{ applied.status }}. {{ job.company }} can see your profile.</p>
+          </template>
+          <template v-else-if="role === 'jobseeker'">
+            <div class="field">
+              <label for="note">note (optional)</label>
+              <textarea id="note" v-model="note" rows="3" maxlength="1000" placeholder="Why you fit, in a line or two." />
+            </div>
+            <p v-if="applyError" class="formerr">{{ applyError }}</p>
+            <button class="applybtn" type="button" :disabled="applying" @click="apply">
+              {{ applying ? 'sending…' : 'apply with your profile' }}
+            </button>
+            <p>Your profile, work history and phone number go to {{ job.company }}.</p>
+          </template>
+          <template v-else>
+            <p>Sign in as a jobseeker to apply with your profile.</p>
+            <NuxtLink class="applybtn" to="/login">sign in to apply</NuxtLink>
+          </template>
+        </div>
+
         <div class="applybox">
           <h2 class="applybox-title">how to apply</h2>
           <p>{{ job.applyInstructions || `Applications are handled by ${job.company} on their own site. Click below to open the application form.` }}</p>
@@ -81,6 +103,38 @@ const keyParts = computed(() =>
 const id = computed(() => keyParts.value[0] ?? '')
 
 const { data: remoteJob } = await useAsyncData(`job-${id.value}`, async () => remoteGet(id.value))
+
+// Applications exist only for employer posts; scraped roles send you to source.
+const { data: me } = await useFetch<{ role: string }>('/api/me')
+const role = computed(() => me.value?.role ?? '')
+const canApply = computed(() => id.value.startsWith('emp-'))
+
+const { data: myApplications, refresh: refreshApplications } = await useFetch<{
+  applications: Array<{ jobId: string; status: string }>
+}>('/api/jobseeker/applications', { immediate: role.value === 'jobseeker' })
+const applied = computed(
+  () => myApplications.value?.applications.find((a) => a.jobId === id.value) ?? null,
+)
+
+const note = ref('')
+const applying = ref(false)
+const applyError = ref('')
+async function apply() {
+  applying.value = true
+  applyError.value = ''
+  try {
+    await $fetch('/api/jobseeker/apply', {
+      method: 'POST',
+      body: { jobId: id.value, note: note.value },
+    })
+    note.value = ''
+    await refreshApplications()
+  } catch (e: any) {
+    applyError.value = e?.data?.statusMessage || e?.message || 'could not apply'
+  } finally {
+    applying.value = false
+  }
+}
 
 // Canonicalise the slug once the job is known, so old id-only links and stale
 // slugs settle on the readable URL without a reload.

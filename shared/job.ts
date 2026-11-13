@@ -54,6 +54,14 @@ export function publicJobId(job: {
   return job.source === 'scraper' && job.external_id ? job.external_id : `emp-${job.id}`
 }
 
+// Reverse of publicJobId for applications: only employer posts can be applied
+// to on tshono, and their public id carries the Postgres uuid.
+export function employerJobUuid(publicId: string): string | null {
+  if (!publicId.startsWith('emp-')) return null
+  const id = publicId.slice(4)
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id) ? id : null
+}
+
 export interface JobInput {
   title: string
   sector: string

@@ -56,6 +56,25 @@
       <p>No live jobs on tshono yet.</p>
       <NuxtLink to="/" class="applybtn" style="display: inline-block">search jobs</NuxtLink>
     </div>
+
+    <h2 class="sect"><span>#</span> your applications</h2>
+    <ul v-if="applications.length" class="jobcards">
+      <li v-for="a in applications" :key="a.id" class="jobcard">
+        <NuxtLink :to="jobPath({ id: a.jobId, title: a.title })" class="jobcard-main ilink">
+          <div class="jobcard-title">
+            <strong>{{ a.title }}</strong>
+            <span class="status" :class="a.status === 'shortlisted' ? 'live' : a.status === 'rejected' ? 'closed' : ''">
+              {{ a.status }}
+            </span>
+          </div>
+          <div class="jobcard-meta">
+            {{ a.company || 'hiring firm' }} · applied {{ a.createdAt.slice(0, 10) }}
+            <template v-if="a.closing"> · closes {{ a.closing }}</template>
+          </div>
+        </NuxtLink>
+      </li>
+    </ul>
+    <p v-else class="formnote">No applications yet. Open a job and apply with your profile.</p>
   </section>
 </template>
 
@@ -83,6 +102,21 @@ if (matchError.value || profileError.value) await navigateTo('/login')
 
 const profile = computed<JobseekerInput>(() => profileData.value?.profile ?? emptyJobseeker)
 const jobs = computed(() => matches.value?.jobs ?? [])
+
+interface ApplicationRow {
+  id: string
+  jobId: string
+  title: string
+  company: string | null
+  status: string
+  closing: string | null
+  createdAt: string
+}
+
+const { data: applicationsData } = await useFetch<{ applications: ApplicationRow[] }>(
+  '/api/jobseeker/applications',
+)
+const applications = computed(() => applicationsData.value?.applications ?? [])
 
 // Only the steps that change how the profile matches or who can see it.
 const checks = computed(() => [

@@ -167,8 +167,9 @@ export async function closeJob(id: string, orgId: string) {
 }
 
 export async function listJobs(orgId: string) {
-  const { rows } = await pool.query<JobRow>(
-    `select * from jobs where organization_id = $1 order by created_at desc`,
+  const { rows } = await pool.query<JobRow & { applicants: number }>(
+    `select j.*, (select count(*)::int from applications a where a.job_id = j.id) as applicants
+       from jobs j where j.organization_id = $1 order by j.created_at desc`,
     [orgId],
   )
   return rows
