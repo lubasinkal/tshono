@@ -18,10 +18,30 @@
             <span>jump to…</span>
             <kbd>⌘K</kbd>
           </button>
-          <template v-if="user">
-            <NuxtLink to="/dashboard" class="navauth">Dashboard</NuxtLink>
-            <button class="navauth" type="button" @click="logout">Sign out</button>
-          </template>
+          <div v-if="user" ref="accountRef" class="account">
+            <button
+              class="navauth"
+              type="button"
+              aria-haspopup="menu"
+              :aria-expanded="accountOpen"
+              @click="accountOpen = !accountOpen"
+            >
+              Account
+            </button>
+            <ul v-if="accountOpen" class="accountmenu" role="menu">
+              <li><NuxtLink to="/dashboard" role="menuitem" @click="accountOpen = false">dashboard</NuxtLink></li>
+              <li v-if="role === 'jobseeker'">
+                <NuxtLink to="/jobseekers/profile" role="menuitem" @click="accountOpen = false">your profile</NuxtLink>
+              </li>
+              <li v-if="role === 'employer'">
+                <NuxtLink to="/employers/settings" role="menuitem" @click="accountOpen = false">company</NuxtLink>
+              </li>
+              <li v-if="role === 'employer'">
+                <NuxtLink to="/employers/billing" role="menuitem" @click="accountOpen = false">billing</NuxtLink>
+              </li>
+              <li><button type="button" role="menuitem" @click="logout">sign out</button></li>
+            </ul>
+          </div>
           <NuxtLink v-else to="/login" class="navauth">Sign in</NuxtLink>
         </div>
       </div>
@@ -61,6 +81,30 @@ const auth = useAuth()
 const requestFetch = useRequestFetch()
 const { data: session } = await useAsyncData('auth-session', () => requestFetch('/api/auth/get-session'))
 const user = computed(() => (session.value as { user?: { email: string } } | null)?.user ?? null)
+
+// Which account this is decides the menu entries; /dashboard routes by itself.
+const { data: account } = await useAsyncData('account', () => requestFetch('/api/me'), {
+  immediate: Boolean(user.value),
+})
+const role = computed(() => (account.value as { role?: string } | null)?.role ?? '')
+
+const accountOpen = ref(false)
+const accountRef = ref<HTMLElement | null>(null)
+function closeAccountMenu(e: Event) {
+  if (e instanceof MouseEvent && accountRef.value?.contains(e.target as Node)) return
+  accountOpen.value = false
+}
+function onAccountKey(e: KeyboardEvent) {
+  if (e.key === 'Escape') accountOpen.value = false
+}
+onMounted(() => {
+  document.addEventListener('click', closeAccountMenu)
+  document.addEventListener('keydown', onAccountKey)
+})
+onBeforeUnmount(() => {
+  document.removeEventListener('click', closeAccountMenu)
+  document.removeEventListener('keydown', onAccountKey)
+})
 
 const theme = ref<'dark' | 'light'>('dark')
 function toggleTheme() {
