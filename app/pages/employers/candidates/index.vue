@@ -1,6 +1,6 @@
 <template>
   <section class="wrap">
-    <p><NuxtLink to="/employers/dashboard">← your jobs</NuxtLink></p>
+    <p><NuxtLink to="/employers">← your jobs</NuxtLink></p>
 
     <div class="dashhead">
       <div>

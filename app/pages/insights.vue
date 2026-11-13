@@ -74,7 +74,7 @@
       <tbody>
         <tr v-for="(r, i) in bySector" :key="r.name">
           <td class="rank">{{ String(i + 1).padStart(2, '0') }}</td>
-          <td><NuxtLink :to="`/sectors/${encodeURIComponent(r.name)}`">{{ r.name.toLowerCase() }}</NuxtLink></td>
+          <td><NuxtLink :to="sectorPath(r.name)">{{ r.name.toLowerCase() }}</NuxtLink></td>
           <td>{{ r.count }}</td>
           <td>{{ total ? Math.round((r.count / total) * 100) : 0 }}%</td>
           <td :class="r.delta === null ? 'flat' : r.delta >= 0 ? 'up' : 'down'">
@@ -90,7 +90,7 @@
       <tbody>
         <tr v-for="(r, i) in topCompanies" :key="r.name">
           <td class="rank">{{ String(i + 1).padStart(2, '0') }}</td>
-          <td><NuxtLink :to="`/companies/${encodeURIComponent(r.name)}`">{{ r.name.toLowerCase() }}</NuxtLink></td>
+          <td><NuxtLink :to="companyPath(r.name)">{{ r.name.toLowerCase() }}</NuxtLink></td>
           <td>{{ r.count }}</td>
           <td>{{ companyBase(r.name) }}</td>
         </tr>
@@ -106,7 +106,7 @@
           <td class="rank">{{ String(i + 1).padStart(2, '0') }}</td>
           <td>{{ r.name.toLowerCase() }}</td>
           <td>{{ r.count }}</td>
-          <td><NuxtLink :to="`/jobs/${r.exampleId}`">{{ r.example.toLowerCase().slice(0, 42) }}</NuxtLink></td>
+          <td><NuxtLink :to="jobPath({ id: r.exampleId, title: r.example })">{{ r.example.toLowerCase().slice(0, 42) }}</NuxtLink></td>
         </tr>
       </tbody>
     </table>
@@ -121,7 +121,7 @@
     <h2 class="sect"><span>#</span> Closing Soon. Apply before they vanish.</h2>
     <ul class="list">
       <li v-for="j in closingSoon" :key="j.id" class="card">
-        <NuxtLink :to="`/jobs/${j.id}`" class="cardlink">
+        <NuxtLink :to="jobPath(j)" class="cardlink">
           <strong>{{ j.title }}</strong>
           <span class="co">{{ j.company }} · {{ j.closing ? `closes ${j.closing} · ${daysLeft(j.closing, nowDate)}d left` : 'fresh this week' }}</span>
         </NuxtLink>
@@ -135,6 +135,7 @@
 <script setup lang="ts">
 import { daysLeft } from '~/composables/useJobSearch'
 import { useJobData } from '~/composables/useJobData'
+import { companyPath, jobPath, sectorPath } from '~~/shared/url'
 
 const {
   liveDocs, loadState, load, nowDate,

@@ -34,7 +34,7 @@
         <tbody>
           <tr v-for="(r, i) in companies" :key="r.name">
             <td class="rank">{{ String(i + 1).padStart(2, '0') }}</td>
-            <td><NuxtLink :to="`/companies/${encodeURIComponent(r.name)}`">{{ r.name.toLowerCase() }}</NuxtLink></td>
+            <td><NuxtLink :to="companyPath(r.name)">{{ r.name.toLowerCase() }}</NuxtLink></td>
             <td>{{ r.count }}</td>
             <td>{{ entryByCompany(r.name) }}%</td>
           </tr>
@@ -51,7 +51,7 @@
       <h2 class="sect"><span>#</span> Recent Roles.</h2>
       <ul class="list">
         <li v-for="j in recentJobs" :key="j.id" class="card">
-          <NuxtLink :to="`/jobs/${j.id}`" class="cardlink">
+          <NuxtLink :to="jobPath(j)" class="cardlink">
             <strong>{{ j.title }}</strong>
             <span class="co">{{ j.company }} · {{ j.location }}</span>
           </NuxtLink>
@@ -65,9 +65,19 @@
 
 <script setup lang="ts">
 import { useJobData } from '~/composables/useJobData'
+import { SECTORS } from '~~/shared/constants'
+import { companyPath, jobPath, sectorPath, slugify } from '~~/shared/url'
 
 const route = useRoute()
-const name = computed(() => String(route.params.name))
+const rawSlug = String(route.params.slug)
+// Sectors are a fixed vocabulary, so the slug resolves locally and any other
+// spelling (legacy capitalised name) is redirected to the canonical one.
+const canonical = SECTORS.find((s) => slugify(s) === slugify(rawSlug))
+if (slugify(rawSlug) !== rawSlug) await navigateTo(sectorPath(rawSlug), { redirectCode: 301 })
+if (canonical && slugify(canonical) !== rawSlug) {
+  await navigateTo(sectorPath(canonical), { redirectCode: 301 })
+}
+const name = computed(() => canonical ?? rawSlug.replace(/-/g, ' '))
 const reqUrl = useRequestURL()
 const ogImage = computed(() => {
   const p = new URLSearchParams({ title: name.value, label: 'SECTOR', sub: 'jobs across botswana', blurb: 'Explore top employers, demand by place and recent roles.' })

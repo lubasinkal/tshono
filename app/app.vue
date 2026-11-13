@@ -34,11 +34,12 @@
                 <NuxtLink to="/jobseekers/profile" role="menuitem" @click="accountOpen = false">your profile</NuxtLink>
               </li>
               <li v-if="role === 'employer'">
-                <NuxtLink to="/employers/settings" role="menuitem" @click="accountOpen = false">company</NuxtLink>
+                <NuxtLink to="/employers/company" role="menuitem" @click="accountOpen = false">company</NuxtLink>
               </li>
               <li v-if="role === 'employer'">
                 <NuxtLink to="/employers/billing" role="menuitem" @click="accountOpen = false">billing</NuxtLink>
               </li>
+              <li><NuxtLink to="/account" role="menuitem" @click="accountOpen = false">account</NuxtLink></li>
               <li><button type="button" role="menuitem" @click="logout">sign out</button></li>
             </ul>
           </div>

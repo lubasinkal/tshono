@@ -38,7 +38,7 @@
     <h2 class="sect"><span>#</span> jobs for you</h2>
     <ul v-if="jobs.length" class="jobcards">
       <li v-for="j in jobs" :key="j.id" class="jobcard">
-        <NuxtLink :to="`/jobs/${j.id}`" class="jobcard-main ilink">
+        <NuxtLink :to="jobPath(j)" class="jobcard-main ilink">
           <div class="jobcard-title">
             <strong>{{ j.title }}</strong>
             <span v-if="j.matched" class="peak">★ matches you</span>
@@ -61,6 +61,7 @@
 
 <script setup lang="ts">
 import { emptyJobseeker, type JobseekerInput } from '~~/shared/jobseeker'
+import { jobPath } from '~~/shared/url'
 
 interface MatchJob {
   id: string

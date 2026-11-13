@@ -4,7 +4,7 @@
     <div v-if="job" class="jobgrid">
       <div class="jobmain">
         <h1 class="title">{{ job.title }}</h1>
-        <p class="sub"><NuxtLink :to="`/companies/${encodeURIComponent(job.company)}`">{{ job.company }}</NuxtLink> · {{ job.location }}</p>
+        <p class="sub"><NuxtLink :to="companyPath(job.company)">{{ job.company }}</NuxtLink> · {{ job.location }}</p>
 
         <p v-if="summary" class="jobsummary">{{ summary }}</p>
 
@@ -36,8 +36,8 @@
         <div class="sidecard">
           <h2 class="sideh">job facts</h2>
           <dl class="facts">
-            <div class="fact"><dt>company</dt><dd><NuxtLink :to="`/companies/${encodeURIComponent(job.company)}`">{{ job.company }}</NuxtLink></dd></div>
-            <div class="fact"><dt>sector</dt><dd><NuxtLink :to="`/sectors/${encodeURIComponent(job.sector)}`">{{ job.sector.toLowerCase() }}</NuxtLink></dd></div>
+            <div class="fact"><dt>company</dt><dd><NuxtLink :to="companyPath(job.company)">{{ job.company }}</NuxtLink></dd></div>
+            <div class="fact"><dt>sector</dt><dd><NuxtLink :to="sectorPath(job.sector)">{{ job.sector.toLowerCase() }}</NuxtLink></dd></div>
             <div class="fact"><dt>place</dt><dd>{{ job.location.toLowerCase() }}<template v-if="job.district"> · {{ job.district.toLowerCase() }} district</template></dd></div>
             <div v-if="job.occupation" class="fact"><dt>occupation</dt><dd>{{ job.occupation.toLowerCase() }}</dd></div>
             <div v-if="job.employmentType" class="fact"><dt>type</dt><dd>{{ pretty(job.employmentType) }}</dd></div>
@@ -55,7 +55,7 @@
           <h2 class="sideh">similar roles</h2>
           <ul class="sidelist">
             <li v-for="s in similar" :key="s.id">
-              <NuxtLink :to="`/jobs/${s.id}`">
+              <NuxtLink :to="jobPath(s)">
                 <strong>{{ s.title }}</strong>
                 <span>{{ s.company }}</span>
               </NuxtLink>
@@ -71,11 +71,29 @@
 <script setup lang="ts">
 import type { SampleJob } from '~/data/sampleJobs'
 import { remoteGet, liveRaw, toJobHit, type JobHit } from '~/composables/useJobSearch'
+import { companyPath, jobPath, sectorPath, slugify } from '~~/shared/url'
 
 const route = useRoute()
-const id = String(route.params.id)
+// /jobs/<id>/<title-slug>: the id is the key, the slug is for humans.
+const keyParts = computed(() =>
+  (Array.isArray(route.params.key) ? route.params.key : [route.params.key]).map(String).filter(Boolean),
+)
+const id = computed(() => keyParts.value[0] ?? '')
 
-const { data: remoteJob } = await useAsyncData(`job-${id}`, async () => remoteGet(id))
+const { data: remoteJob } = await useAsyncData(`job-${id.value}`, async () => remoteGet(id.value))
+
+// Canonicalise the slug once the job is known, so old id-only links and stale
+// slugs settle on the readable URL without a reload.
+watch(
+  [remoteJob, () => route.fullPath],
+  () => {
+    const j = remoteJob.value
+    if (!import.meta.client || !j) return
+    if (keyParts.value[1] === slugify(j.title)) return
+    navigateTo(jobPath(j), { replace: true })
+  },
+  { immediate: true },
+)
 
 const job = computed<SampleJob | JobHit | null | undefined>(() => remoteJob.value)
 const reqUrl = useRequestURL()

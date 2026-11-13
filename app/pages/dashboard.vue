@@ -4,7 +4,7 @@
 const { data } = await useFetch<{ role: string }>('/api/me')
 await navigateTo(
   data.value?.role === 'employer'
-    ? '/employers/dashboard'
+    ? '/employers'
     : data.value?.role === 'jobseeker'
       ? '/jobseekers'
       : '/login',

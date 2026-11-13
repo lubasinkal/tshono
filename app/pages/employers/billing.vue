@@ -1,6 +1,6 @@
 <template>
   <section class="wrap narrow">
-    <p><NuxtLink to="/employers/dashboard">← your jobs</NuxtLink></p>
+    <p><NuxtLink to="/employers">← your jobs</NuxtLink></p>
 
     <div class="dhead">
       <span class="chip">◉ {{ activePaid ? `${data?.org.plan} until ${untilLabel}` : 'free plan' }}</span>
@@ -82,7 +82,8 @@
 interface Payload {
   org: { plan: string; planUntil: string | null; featuredCredits: number }
 }
-const { data } = await useFetch<Payload>('/api/employer/jobs')
+const { data, error: loadError } = await useFetch<Payload>('/api/employer/jobs')
+if (loadError.value) await navigateTo('/login')
 const error = ref('')
 const busy = ref(false)
 
@@ -97,7 +98,7 @@ async function buy(slug: string) {
   try {
     const res = await $fetch<{ url: string }>('/api/employer/checkout', {
       method: 'POST',
-      body: { slug, successUrl: `${window.location.origin}/employers/dashboard?purchased=1` },
+      body: { slug, successUrl: `${window.location.origin}/employers?purchased=1` },
     })
     if (res?.url) window.location.href = res.url
     else throw new Error('no checkout url')

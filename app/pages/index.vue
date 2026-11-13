@@ -42,11 +42,11 @@
 
     <ul class="list">
       <li v-for="j in results" :key="j.id" class="card">
-        <NuxtLink :to="`/jobs/${j.id}`" class="cardlink">
+        <NuxtLink :to="jobPath(j)" class="cardlink">
           <strong>{{ j.title }}</strong>
-          <span class="co"><NuxtLink :to="`/companies/${encodeURIComponent(j.company)}`" class="ilink">{{ j.company }}</NuxtLink> · {{ j.location }}</span>
+          <span class="co"><NuxtLink :to="companyPath(j.company)" class="ilink">{{ j.company }}</NuxtLink> · {{ j.location }}</span>
           <span class="tags">
-            <em><NuxtLink :to="`/sectors/${encodeURIComponent(j.sector)}`" class="ilink">{{ j.sector }}</NuxtLink></em>
+            <em><NuxtLink :to="sectorPath(j.sector)" class="ilink">{{ j.sector }}</NuxtLink></em>
             <em>{{ j.minYears === 0 ? 'entry' : j.minYears + ' yrs+' }}</em>
             <em :class="{ hot: j.closing !== '' && left(j) <= 7 }">{{ j.closing === '' ? 'open' : left(j) <= 0 ? 'closed' : left(j) + 'd left' }}</em>
           </span>
@@ -66,6 +66,7 @@
 
 <script setup lang="ts">
 import { SECTORS, LOCATIONS, type SampleJob } from '~/data/sampleJobs'
+import { companyPath, jobPath, sectorPath } from '~~/shared/url'
 import { remoteSearch, daysLeft, liveRawCached } from '~/composables/useJobSearch'
 
 const PER_PAGE = 20

@@ -54,7 +54,7 @@
       <h2 class="sect"><span>#</span> Open Roles.</h2>
       <ul class="list">
         <li v-for="j in recentJobs" :key="j.id" class="card">
-          <NuxtLink :to="`/jobs/${j.id}`" class="cardlink">
+          <NuxtLink :to="jobPath(j)" class="cardlink">
             <strong>{{ j.title }}</strong>
             <span class="co">{{ j.location }} · {{ j.minYears === 0 ? 'entry' : j.minYears + ' yrs+' }}</span>
           </NuxtLink>
@@ -64,7 +64,7 @@
       <h2 class="sect"><span>#</span> Similar Companies.</h2>
       <ul class="list">
         <li v-for="c in similar" :key="c.name" class="card">
-          <NuxtLink :to="`/companies/${encodeURIComponent(c.name)}`" class="cardlink">
+          <NuxtLink :to="companyPath(c.name)" class="cardlink">
             <strong>{{ c.name.toLowerCase() }}</strong>
             <span class="co">{{ c.count }} roles</span>
           </NuxtLink>
@@ -78,6 +78,7 @@
 
 <script setup lang="ts">
 import { useJobData } from '~/composables/useJobData'
+import { companyPath, jobPath, slugify } from '~~/shared/url'
 
 interface CompanyProfile {
   website: string
@@ -91,7 +92,16 @@ interface CompanyProfile {
 }
 
 const route = useRoute()
-const name = computed(() => String(route.params.name))
+const rawSlug = String(route.params.slug)
+// Old links used the company name itself; the slug is canonical now.
+if (slugify(rawSlug) !== rawSlug) await navigateTo(companyPath(rawSlug), { redirectCode: 301 })
+
+// Names change, so the URL key is a slug that resolves to the current name;
+// the name is only used for display and matching.
+const { data: resolved } = await useFetch<{ name: string | null }>(
+  () => `/api/companies/by-slug/${encodeURIComponent(rawSlug)}`,
+)
+const name = computed(() => resolved.value?.name || rawSlug.replace(/-/g, ' '))
 const reqUrl = useRequestURL()
 const ogImage = computed(() => {
   const p = new URLSearchParams({ title: name.value, label: 'COMPANY', sub: 'hiring in botswana', blurb: 'Explore their roles, hiring trend and more.' })

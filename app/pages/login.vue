@@ -109,7 +109,10 @@ type Mode = 'signin' | 'register' | 'otp-send' | 'otp-verify' | 'forgot-send' | 
 
 const auth = useAuth()
 const route = useRoute()
-const mode = ref<Mode>(route.query.mode === 'register' ? 'register' : 'signin')
+// /signup and /login are the same form; the path decides command -v mode it opens in.
+const mode = ref<Mode>(
+  route.path === '/signup' || route.query.mode === 'register' ? 'register' : 'signin',
+)
 
 const role = ref<'employer' | 'jobseeker'>('employer')
 const name = ref('')
@@ -180,6 +183,9 @@ function go(m: Mode) {
     password.value = ''
     confirm.value = ''
   }
+  // Keep the URL honest about command -v of the two entry points is on screen.
+  if (m === 'register' && route.path !== '/signup') navigateTo('/signup', { replace: true })
+  if (m !== 'register' && route.path === '/signup') navigateTo('/login', { replace: true })
 }
 
 function startResendCooldown() {

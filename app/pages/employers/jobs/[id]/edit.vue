@@ -1,6 +1,6 @@
 <template>
   <section class="wrap narrow">
-    <p><NuxtLink to="/employers/dashboard">← your jobs</NuxtLink></p>
+    <p><NuxtLink to="/employers">← your jobs</NuxtLink></p>
     <template v-if="job">
       <h1 class="title">Edit job.</h1>
       <p class="sub">Changes re-index the job in search.</p>
@@ -30,7 +30,7 @@
         @submit="save"
       />
     </template>
-    <p v-else class="empty">job not found. <NuxtLink to="/employers/dashboard">back to your jobs</NuxtLink>.</p>
+    <p v-else class="empty">job not found. <NuxtLink to="/employers">back to your jobs</NuxtLink>.</p>
   </section>
 </template>
 
@@ -71,7 +71,7 @@ async function save(input: JobInput) {
   error.value = ''
   try {
     await $fetch(`/api/employer/jobs/${route.params.id}`, { method: 'PATCH', body: input })
-    await navigateTo('/employers/dashboard')
+    await navigateTo('/employers')
   } catch (e: any) {
     error.value = e?.data?.statusMessage || e?.statusMessage || 'could not save'
   } finally {

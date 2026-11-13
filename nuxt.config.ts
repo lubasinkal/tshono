@@ -1,8 +1,17 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import { resolve } from 'node:path'
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
   css: ['~/assets/css/main.css'],
+  // /signup is the same form as /login, started in register mode; two URLs so
+  // sign-up is shareable and /login stays the sign-in page.
+  hooks: {
+    'pages:extend'(pages) {
+      pages.push({ name: 'signup', path: '/signup', file: resolve('app/pages/login.vue') })
+    },
+  },
   app: {
     viewTransition: true,
     head: {

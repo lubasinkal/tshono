@@ -18,7 +18,7 @@
       <tbody>
         <tr v-for="(r, i) in bySector" :key="r.name">
           <td class="rank">{{ String(i + 1).padStart(2, '0') }}</td>
-          <td><NuxtLink :to="`/sectors/${encodeURIComponent(r.name)}`">{{ r.name.toLowerCase() }}</NuxtLink></td>
+          <td><NuxtLink :to="sectorPath(r.name)">{{ r.name.toLowerCase() }}</NuxtLink></td>
           <td>{{ r.count }}</td>
           <td>{{ total ? Math.round((r.count / total) * 100) : 0 }}%</td>
           <td :class="r.delta === null ? 'flat' : r.delta >= 0 ? 'up' : 'down'">
@@ -34,6 +34,7 @@
 
 <script setup lang="ts">
 import { useJobData } from '~/composables/useJobData'
+import { sectorPath } from '~~/shared/url'
 
 const { load, loadState, bySector, total } = useJobData()
 onMounted(() => load())

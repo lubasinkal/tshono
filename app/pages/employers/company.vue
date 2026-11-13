@@ -1,6 +1,6 @@
 <template>
   <section class="wrap narrow">
-    <p><NuxtLink to="/employers/dashboard">← your jobs</NuxtLink></p>
+    <p><NuxtLink to="/employers">← your jobs</NuxtLink></p>
 
     <div class="dhead">
       <span class="chip">◉ company profile</span>
@@ -73,7 +73,10 @@
 <script setup lang="ts">
 import { LOCATIONS, SECTORS } from '~/data/sampleJobs'
 
-const { data } = await useFetch<{ org: { id: string; name: string }; profile: Record<string, string | null> }>('/api/employer/profile')
+const { data, error: loadError } = await useFetch<{ org: { id: string; name: string }; profile: Record<string, string | null> }>(
+  '/api/employer/profile',
+)
+if (loadError.value) await navigateTo('/login')
 
 const form = reactive({
   name: String(data.value?.org.name ?? ''),
