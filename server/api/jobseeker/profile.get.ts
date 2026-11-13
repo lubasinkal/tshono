@@ -9,7 +9,7 @@ import {
 // Returns the signed-in jobseeker's profile and CV sections so the page can
 // pre-fill the form.
 export default defineEventHandler(async (event) => {
-  const session = await sessionUser(event)
+  const session = await requireJobseeker(event)
   const userId = session.user.id
   const [profile, experience, education] = await Promise.all([
     pool.query('select * from jobseeker_profiles where user_id = $1', [userId]),

@@ -5,7 +5,7 @@ import { publicJobId } from '~~/shared/job'
 // ranking engine: profile matches first, then featured, then recency. The
 // profile fields are compared as-is because jobs use the same vocabulary.
 export default defineEventHandler(async (event) => {
-  const session = await sessionUser(event)
+  const session = await requireJobseeker(event)
   const { rows: profile } = await pool.query(
     'select occupation, sector, location from jobseeker_profiles where user_id = $1',
     [session.user.id],

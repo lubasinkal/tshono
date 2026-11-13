@@ -5,7 +5,7 @@ import { parseApply } from '~~/shared/application'
 // Applies the signed-in jobseeker to one of the employer's jobs. Re-applying
 // updates the note rather than creating a second row.
 export default defineEventHandler(async (event) => {
-  const session = await sessionUser(event)
+  const session = await requireJobseeker(event)
   const parsed = parseApply(await readBody(event))
   if ('error' in parsed) throw createError({ statusCode: 422, statusMessage: parsed.error })
 

@@ -6,7 +6,7 @@ import { parseJobseeker } from '~~/shared/jobseeker'
 // previous CV intact. Called with an empty body right after sign-up; the form
 // fills the rest in later.
 export default defineEventHandler(async (event) => {
-  const session = await sessionUser(event)
+  const session = await requireJobseeker(event)
   const userId = session.user.id
   const parsed = parseJobseeker(await readBody(event))
   if ('error' in parsed) throw createError({ statusCode: 422, statusMessage: parsed.error })

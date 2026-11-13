@@ -41,3 +41,17 @@ export async function requireEmployer(event: any): Promise<{ user: any; org: Emp
   }
   return { user: session.user, org: rows[0] as EmployerOrg }
 }
+
+// Jobseeker APIs belong to accounts without an employer workspace. Signing in
+// is not enough: an employer applying to jobs would be its own customer.
+export async function requireJobseeker(event: any) {
+  const session = await sessionUser(event)
+  const { rows } = await pool.query('select 1 from member where "userId" = $1 limit 1', [session.user.id])
+  if (rows.length) {
+    throw createError({
+      statusCode: 403,
+      statusMessage: 'this account is an employer; use the employer workspace',
+    })
+  }
+  return session
+}

@@ -4,7 +4,7 @@ import { publicJobId } from '~~/shared/job'
 // The signed-in jobseeker's applications, newest first, with enough job detail
 // to link back to the role.
 export default defineEventHandler(async (event) => {
-  const session = await sessionUser(event)
+  const session = await requireJobseeker(event)
   const { rows } = await pool.query(
     `select a.id, a.status, a.note, a.created_at as "createdAt",
             j.title, coalesce(j.company, o.name) as company, j.closing,
