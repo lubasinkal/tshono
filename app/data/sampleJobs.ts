@@ -19,6 +19,8 @@ export interface SampleJob {
   salaryPeriod?: string
   district?: string
   applyInstructions?: string
+  // seconds since epoch, 0 when not featured
+  featuredUntil?: number
 }
 
 export { SECTORS, LOCATIONS } from '~~/shared/constants'

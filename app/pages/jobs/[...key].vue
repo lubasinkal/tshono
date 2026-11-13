@@ -3,6 +3,7 @@
     <p><NuxtLink to="/">← back to search</NuxtLink></p>
     <div v-if="job" class="jobgrid">
       <div class="jobmain">
+        <div v-if="isFeatured(job)" class="dhead"><span class="chip accent">★ featured</span></div>
         <h1 class="title">{{ job.title }}</h1>
         <p class="sub"><NuxtLink :to="companyPath(job.company)">{{ job.company }}</NuxtLink> · {{ job.location }}</p>
 
@@ -94,6 +95,7 @@
 import type { SampleJob } from '~/data/sampleJobs'
 import { remoteGet, liveRaw, toJobHit, type JobHit } from '~/composables/useJobSearch'
 import { companyPath, jobPath, sectorPath, slugify } from '~~/shared/url'
+import { isFeatured } from '~~/shared/job'
 
 const route = useRoute()
 // /jobs/<id>/<title-slug>: the id is the key, the slug is for humans.

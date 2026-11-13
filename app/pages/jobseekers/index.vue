@@ -41,6 +41,7 @@
         <NuxtLink :to="jobPath(j)" class="jobcard-main ilink">
           <div class="jobcard-title">
             <strong>{{ j.title }}</strong>
+            <span v-if="j.featured" class="peak">★ featured</span>
             <span v-if="j.matched" class="peak">★ matches you</span>
           </div>
           <div class="jobcard-meta">
@@ -90,6 +91,7 @@ interface MatchJob {
   location: string
   closing: string | null
   matched: boolean
+  featured: boolean
 }
 
 const { data: matches, error: matchError } = await useFetch<{ jobs: MatchJob[] }>(

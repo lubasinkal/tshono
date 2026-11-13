@@ -239,6 +239,7 @@ kbd, .kbd span {
 .tags { grid-area: tags; display: flex; gap: 6px; font-size: 11px; font-family: var(--mono); flex-wrap: wrap; align-self: start; justify-content: flex-end; }
 .tags em { font-style: normal; background: transparent; border: 1px solid var(--line); padding: 2px 7px; border-radius: 3px; color: var(--muted); }
 .tags .hot { color: var(--warn); border-color: color-mix(in oklab, var(--warn) 45%, transparent); }
+.tags .feat { color: var(--accent); border-color: color-mix(in oklab, var(--accent) 45%, transparent); }
 .blurb { grid-area: blurb; color: var(--muted); font-size: 13.5px; margin-top: 3px; }
 .empty { color: var(--faint); text-align: left; padding: 28px 0; font-family: var(--mono); font-size: 12.5px; border-bottom: 1px solid var(--line); }
 
@@ -285,6 +286,7 @@ kbd, .kbd span {
   border-radius: var(--radius-sm); padding: 4px 9px;
   text-transform: uppercase; letter-spacing: 0.06em;
 }
+.chip.accent { color: var(--accent); border-color: color-mix(in oklab, var(--accent) 45%, transparent); }
 .updated { font-family: var(--mono); font-size: 11px; color: var(--faint); margin-left: auto; }
 .sect {
   display: flex; align-items: baseline; gap: 10px;

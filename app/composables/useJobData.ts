@@ -16,6 +16,7 @@ interface RawDoc {
   salary_max?: number
   salary_period?: string
   employment_type?: string
+  featured_until?: number
   work_mode?: string
 }
 
@@ -59,7 +60,7 @@ export function useJobData() {
       }
     } catch {}
     try {
-      const fields = 'id,title,company,sector,location,url,closing,posted,min_years,salary_min,salary_max,salary_period,employment_type,work_mode'
+      const fields = 'id,title,company,sector,location,url,closing,posted,min_years,salary_min,salary_max,salary_period,employment_type,work_mode,featured_until'
       const perPage = 250
       const first = (await liveRaw({ q: '', query_by: 'title', per_page: String(perPage), page: '1', include_fields: fields })) as { hits?: Array<{ document: RawDoc }>; found?: number }
       const hits0 = first.hits ?? []

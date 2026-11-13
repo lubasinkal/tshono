@@ -53,7 +53,7 @@
         <li v-for="j in recentJobs" :key="j.id" class="card">
           <NuxtLink :to="jobPath(j)" class="cardlink">
             <strong>{{ j.title }}</strong>
-            <span class="co">{{ j.company }} · {{ j.location }}</span>
+            <span class="co">{{ j.company }} · {{ j.location }}<template v-if="isFeatured(j)"> · ★ featured</template></span>
           </NuxtLink>
         </li>
       </ul>
@@ -67,6 +67,7 @@
 import { useJobData } from '~/composables/useJobData'
 import { SECTORS } from '~~/shared/constants'
 import { companyPath, jobPath, sectorPath, slugify } from '~~/shared/url'
+import { isFeatured } from '~~/shared/job'
 
 const route = useRoute()
 const rawSlug = String(route.params.slug)

@@ -139,3 +139,11 @@ export function validateJob(input: Partial<JobInput>): JobErrors {
   if ((input.applyInstructions ?? '').length > 2000) e.applyInstructions = 'instructions max 2000 characters'
   return e
 }
+
+// A featured boost expires: seconds since epoch in the index, 0 when off.
+export function isFeatured(
+  job: { featuredUntil?: number } | null | undefined,
+  now = Date.now(),
+): boolean {
+  return Boolean(job?.featuredUntil && job.featuredUntil * 1000 > now)
+}

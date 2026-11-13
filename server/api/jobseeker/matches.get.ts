@@ -14,6 +14,7 @@ export default defineEventHandler(async (event) => {
   const { rows } = await pool.query(
     `select j.id, j.source, j.external_id, j.title, coalesce(j.company, o.name) as company,
             j.sector, j.location, j.closing,
+            (j.featured_until > now()) as featured,
             (coalesce(j.occupation = nullif($1, ''), false)
              or coalesce(j.sector = nullif($2, ''), false)
              or coalesce(j.location = nullif($3, ''), false)) as matched

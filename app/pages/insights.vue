@@ -136,6 +136,7 @@
 import { daysLeft } from '~/composables/useJobSearch'
 import { useJobData } from '~/composables/useJobData'
 import { companyPath, jobPath, sectorPath } from '~~/shared/url'
+import { isFeatured } from '~~/shared/job'
 
 const {
   liveDocs, loadState, load, nowDate,

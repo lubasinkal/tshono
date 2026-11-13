@@ -56,7 +56,7 @@
         <li v-for="j in recentJobs" :key="j.id" class="card">
           <NuxtLink :to="jobPath(j)" class="cardlink">
             <strong>{{ j.title }}</strong>
-            <span class="co">{{ j.location }} · {{ j.minYears === 0 ? 'entry' : j.minYears + ' yrs+' }}</span>
+            <span class="co">{{ j.location }} · {{ j.minYears === 0 ? 'entry' : j.minYears + ' yrs+' }}<template v-if="isFeatured(j)"> · ★ featured</template></span>
           </NuxtLink>
         </li>
       </ul>
@@ -79,6 +79,7 @@
 <script setup lang="ts">
 import { useJobData } from '~/composables/useJobData'
 import { companyPath, jobPath, slugify } from '~~/shared/url'
+import { isFeatured } from '~~/shared/job'
 
 interface CompanyProfile {
   website: string

@@ -32,6 +32,7 @@ export function toJobHit(d: Record<string, unknown>): JobHit {
     salaryPeriod: typeof d.salary_period === 'string' && d.salary_period ? d.salary_period : undefined,
     district: typeof d.district === 'string' && d.district ? d.district : undefined,
     applyInstructions: typeof d.apply_instructions === 'string' && d.apply_instructions ? d.apply_instructions : undefined,
+    featuredUntil: typeof d.featured_until === 'number' ? d.featured_until : 0,
   }
 }
 
@@ -68,7 +69,7 @@ export async function remoteSearch(
     sort_by: 'featured_until:desc,posted:desc',
     page: String(page),
     per_page: String(perPage),
-    include_fields: 'id,title,company,sector,location,blurb,url,closing,posted,min_years',
+    include_fields: 'id,title,company,sector,location,blurb,url,closing,posted,min_years,featured_until',
     ...(sector || location || maxYears !== null
       ? {
           filter_by: [

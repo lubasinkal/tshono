@@ -72,9 +72,11 @@ export function toJobDoc(job: IndexableJob) {
     closing: job.closing ?? '',
     posted: Math.floor(posted),
     min_years: job.min_years,
-    featured_until: job.featured_until
-      ? Math.floor(new Date(job.featured_until).getTime() / 1000)
-      : 0,
+    // Only an active boost is written; a past timestamp still sorts above 0.
+    featured_until:
+      job.featured_until && new Date(job.featured_until).getTime() > Date.now()
+        ? Math.floor(new Date(job.featured_until).getTime() / 1000)
+        : 0,
   }
 }
 
