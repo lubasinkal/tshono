@@ -25,6 +25,12 @@
       <div class="stat"><b>{{ entryShare }}%</b><span>entry level share</span></div>
     </div>
 
+    <h2 class="sect"><span>#</span> Registered Accounts.</h2>
+    <div class="grid two">
+      <div class="stat"><b>{{ accounts.jobseekers.toLocaleString('en-BW') }}</b><span>jobseeker accounts</span></div>
+      <div class="stat"><b>{{ accounts.employers.toLocaleString('en-BW') }}</b><span>employer accounts</span></div>
+    </div>
+
     <h2 class="sect"><span>#</span> Top Sectors. Daily postings by sector, last 60 days. <span class="peak">peak {{ maxTotal }}/day</span></h2>
     <div ref="chartEl" class="chartscroll">
     <div class="weekaxis"><span v-for="(day, i) in daily" :key="day.label"><b v-if="isTick(i)" :class="i % 14 === 3 ? 'tick' : 'tick tick--minor'">{{ fmtDay(day.label) }}</b></span></div>
@@ -144,6 +150,13 @@ const {
   bySectorRaw, byPlace, topCompanies, bySector, entryBySector,
   closingSoon, daily, maxTotal, companyBase, sectorColor, fmtDay,
 } = useJobData()
+
+// Registered accounts are counts of our own rows, not of the job index.
+const { data: accountsData } = await useFetch<{ jobseekers: number; employers: number }>(
+  '/api/stats',
+  { default: () => ({ jobseekers: 0, employers: 0 }) },
+)
+const accounts = computed(() => accountsData.value ?? { jobseekers: 0, employers: 0 })
 
 onMounted(() => load())
 
