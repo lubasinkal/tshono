@@ -31,6 +31,9 @@ export const auth = betterAuth({
     requireEmailVerification: false,
   },
   trustedOrigins: [process.env.BETTER_AUTH_URL ?? 'http://localhost:3000'],
+  // Without this every signed-in request does a session SELECT. Five minutes of
+  // staleness is fine: roles are read from the member table, not the session.
+  session: { cookieCache: { enabled: true, maxAge: 300 } },
   // organization = employer account (owner/admin/member + invitations)
   // admin = staff moderation queue
   plugins: [
