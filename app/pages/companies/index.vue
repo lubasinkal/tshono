@@ -18,7 +18,7 @@
       <tbody>
         <tr v-for="(c, i) in companies" :key="c.name">
           <td class="rank">{{ String(i + 1).padStart(2, '0') }}</td>
-          <td><NuxtLink :to="`/companies/${encodeURIComponent(c.name)}`">{{ c.name.toLowerCase() }}</NuxtLink></td>
+          <td><NuxtLink :to="companyPath(c.name)">{{ c.name.toLowerCase() }}</NuxtLink></td>
           <td>{{ c.count }}</td>
           <td>{{ c.base.toLowerCase() }}</td>
           <td>{{ c.entry }}%</td>
@@ -32,6 +32,7 @@
 
 <script setup lang="ts">
 import { useJobData } from '~/composables/useJobData'
+import { companyPath } from '~~/shared/url'
 
 const { allDocs, load, loadState } = useJobData()
 onMounted(() => load())

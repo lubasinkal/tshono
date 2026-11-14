@@ -25,6 +25,12 @@
       <div class="stat"><b>{{ entryShare }}%</b><span>entry level share</span></div>
     </div>
 
+    <h2 class="sect"><span>#</span> Registered Accounts.</h2>
+    <div class="grid two">
+      <div class="stat"><b>{{ accounts.jobseekers.toLocaleString('en-BW') }}</b><span>jobseeker accounts</span></div>
+      <div class="stat"><b>{{ accounts.employers.toLocaleString('en-BW') }}</b><span>employer accounts</span></div>
+    </div>
+
     <h2 class="sect"><span>#</span> Top Sectors. Daily postings by sector, last 60 days. <span class="peak">peak {{ maxTotal }}/day</span></h2>
     <div ref="chartEl" class="chartscroll">
     <div class="weekaxis"><span v-for="(day, i) in daily" :key="day.label"><b v-if="isTick(i)" :class="i % 14 === 3 ? 'tick' : 'tick tick--minor'">{{ fmtDay(day.label) }}</b></span></div>
@@ -74,7 +80,7 @@
       <tbody>
         <tr v-for="(r, i) in bySector" :key="r.name">
           <td class="rank">{{ String(i + 1).padStart(2, '0') }}</td>
-          <td><NuxtLink :to="`/sectors/${encodeURIComponent(r.name)}`">{{ r.name.toLowerCase() }}</NuxtLink></td>
+          <td><NuxtLink :to="sectorPath(r.name)">{{ r.name.toLowerCase() }}</NuxtLink></td>
           <td>{{ r.count }}</td>
           <td>{{ total ? Math.round((r.count / total) * 100) : 0 }}%</td>
           <td :class="r.delta === null ? 'flat' : r.delta >= 0 ? 'up' : 'down'">
@@ -90,7 +96,7 @@
       <tbody>
         <tr v-for="(r, i) in topCompanies" :key="r.name">
           <td class="rank">{{ String(i + 1).padStart(2, '0') }}</td>
-          <td><NuxtLink :to="`/companies/${encodeURIComponent(r.name)}`">{{ r.name.toLowerCase() }}</NuxtLink></td>
+          <td><NuxtLink :to="companyPath(r.name)">{{ r.name.toLowerCase() }}</NuxtLink></td>
           <td>{{ r.count }}</td>
           <td>{{ companyBase(r.name) }}</td>
         </tr>
@@ -106,7 +112,7 @@
           <td class="rank">{{ String(i + 1).padStart(2, '0') }}</td>
           <td>{{ r.name.toLowerCase() }}</td>
           <td>{{ r.count }}</td>
-          <td><NuxtLink :to="`/jobs/${r.exampleId}`">{{ r.example.toLowerCase().slice(0, 42) }}</NuxtLink></td>
+          <td><NuxtLink :to="jobPath({ id: r.exampleId, title: r.example })">{{ r.example.toLowerCase().slice(0, 42) }}</NuxtLink></td>
         </tr>
       </tbody>
     </table>
@@ -121,7 +127,7 @@
     <h2 class="sect"><span>#</span> Closing Soon. Apply before they vanish.</h2>
     <ul class="list">
       <li v-for="j in closingSoon" :key="j.id" class="card">
-        <NuxtLink :to="`/jobs/${j.id}`" class="cardlink">
+        <NuxtLink :to="jobPath(j)" class="cardlink">
           <strong>{{ j.title }}</strong>
           <span class="co">{{ j.company }} · {{ j.closing ? `closes ${j.closing} · ${daysLeft(j.closing, nowDate)}d left` : 'fresh this week' }}</span>
         </NuxtLink>
@@ -135,6 +141,8 @@
 <script setup lang="ts">
 import { daysLeft } from '~/composables/useJobSearch'
 import { useJobData } from '~/composables/useJobData'
+import { companyPath, jobPath, sectorPath } from '~~/shared/url'
+import { isFeatured } from '~~/shared/job'
 
 const {
   liveDocs, loadState, load, nowDate,
@@ -142,6 +150,13 @@ const {
   bySectorRaw, byPlace, topCompanies, bySector, entryBySector,
   closingSoon, daily, maxTotal, companyBase, sectorColor, fmtDay,
 } = useJobData()
+
+// Registered accounts are counts of our own rows, not of the job index.
+const { data: accountsData } = await useFetch<{ jobseekers: number; employers: number }>(
+  '/api/stats',
+  { default: () => ({ jobseekers: 0, employers: 0 }) },
+)
+const accounts = computed(() => accountsData.value ?? { jobseekers: 0, employers: 0 })
 
 onMounted(() => load())
 

@@ -33,6 +33,7 @@
           <option value="5">up to 5 yrs</option>
         </select>
       </div>
+
     </div>
 
     <p class="stats">
@@ -42,11 +43,12 @@
 
     <ul class="list">
       <li v-for="j in results" :key="j.id" class="card">
-        <NuxtLink :to="`/jobs/${j.id}`" class="cardlink">
+        <NuxtLink :to="jobPath(j)" class="cardlink">
           <strong>{{ j.title }}</strong>
-          <span class="co"><NuxtLink :to="`/companies/${encodeURIComponent(j.company)}`" class="ilink">{{ j.company }}</NuxtLink> · {{ j.location }}</span>
+          <span class="co"><NuxtLink :to="companyPath(j.company)" class="ilink">{{ j.company }}</NuxtLink> · {{ j.location }}</span>
           <span class="tags">
-            <em><NuxtLink :to="`/sectors/${encodeURIComponent(j.sector)}`" class="ilink">{{ j.sector }}</NuxtLink></em>
+            <em v-if="isFeatured(j)" class="feat">★ featured</em>
+            <em><NuxtLink :to="sectorPath(j.sector)" class="ilink">{{ j.sector }}</NuxtLink></em>
             <em>{{ j.minYears === 0 ? 'entry' : j.minYears + ' yrs+' }}</em>
             <em :class="{ hot: j.closing !== '' && left(j) <= 7 }">{{ j.closing === '' ? 'open' : left(j) <= 0 ? 'closed' : left(j) + 'd left' }}</em>
           </span>
@@ -66,9 +68,12 @@
 
 <script setup lang="ts">
 import { SECTORS, LOCATIONS, type SampleJob } from '~/data/sampleJobs'
+import { companyPath, jobPath, sectorPath } from '~~/shared/url'
+import { isFeatured } from '~~/shared/job'
 import { remoteSearch, daysLeft, liveRawCached } from '~/composables/useJobSearch'
 
 const PER_PAGE = 20
+
 
 const route = useRoute()
 const router = useRouter()
@@ -132,7 +137,7 @@ let t: ReturnType<typeof setTimeout> | null = null
 async function runRemote() {
   const t0 = performance.now()
   // serve stale cache instantly so UI never blanks
-  const stale = liveRawCached({ q: query.value.trim() || '', query_by: 'title,company,sector,location,blurb', sort_by: 'posted:desc', page: String(page.value), per_page: String(PER_PAGE), ...(sector.value || location.value || maxYears.value !== null ? { filter_by: [ ...(sector.value ? [`sector:=${sector.value}`] : []), ...(location.value ? [`location:=${location.value}`] : []), ...(maxYears.value !== null ? [`min_years:<=${maxYears.value}`] : []) ].join(' && ') } : {}), include_fields: 'id,title,company,sector,location,blurb,url,closing,posted,min_years' }) as { hits?: Array<{ document: Record<string, unknown> }>; found?: number; search_time_ms?: number } | null
+  const stale = liveRawCached({ q: query.value.trim() || '', query_by: 'title,company,sector,location,blurb', sort_by: 'featured_until:desc,posted:desc', page: String(page.value), per_page: String(PER_PAGE), ...(sector.value || location.value || maxYears.value !== null ? { filter_by: [ ...(sector.value ? [`sector:=${sector.value}`] : []), ...(location.value ? [`location:=${location.value}`] : []), ...(maxYears.value !== null ? [`min_years:<=${maxYears.value}`] : []) ].join(' && ') } : {}), include_fields: 'id,title,company,sector,location,blurb,url,closing,posted,min_years,featured_until' }) as { hits?: Array<{ document: Record<string, unknown> }>; found?: number; search_time_ms?: number } | null
   if (stale?.hits) {
     const { toJobHit } = await import('~/composables/useJobSearch')
     remoteHits.value = stale.hits.map((h) => toJobHit(h.document))
