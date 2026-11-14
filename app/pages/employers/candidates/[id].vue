@@ -37,6 +37,7 @@
                   <strong>{{ r.qualification }}</strong> · {{ r.institution }}
                   <template v-if="r.field"> · {{ r.field }}</template>
                   <template v-if="r.year"> · {{ r.year }}</template>
+                  <template v-if="r.grade"> · {{ r.grade }}</template>
                 </li>
               </ul>
             </template>

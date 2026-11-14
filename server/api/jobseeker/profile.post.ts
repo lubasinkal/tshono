@@ -66,9 +66,9 @@ export default defineEventHandler(async (event) => {
     await client.query('delete from jobseeker_education where user_id = $1', [userId])
     for (const r of input.education) {
       await client.query(
-        `insert into jobseeker_education (user_id, institution, qualification, field, year)
-         values ($1,$2,$3,$4,$5)`,
-        [userId, r.institution, r.qualification, r.field, r.year],
+        `insert into jobseeker_education (user_id, institution, qualification, field, year, grade)
+         values ($1,$2,$3,$4,$5,$6)`,
+        [userId, r.institution, r.qualification, r.field, r.year, r.grade],
       )
     }
 

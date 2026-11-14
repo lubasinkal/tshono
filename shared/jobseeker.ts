@@ -51,6 +51,7 @@ const educationEntry = z.object({
   qualification: text(120, 'qualification max 120 characters'),
   field: text(120, 'field max 120 characters'),
   year: optionalInt(1950, THIS_YEAR + 10, 'qualification year is not valid'),
+  grade: text(40, 'grade max 40 characters'),
 })
 
 export const emptyExperience: ExperienceEntry = experienceEntry.parse({})
@@ -189,5 +190,6 @@ export function educationFromRow(row: any): EducationEntry {
     qualification: row.qualification ?? '',
     field: row.field ?? '',
     year: row.year ?? null,
+    grade: row.grade ?? '',
   }
 }

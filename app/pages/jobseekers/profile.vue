@@ -205,6 +205,17 @@
             <input :id="`edu-year-${i}`" v-model.number="r.year" type="number" min="1950" max="2100" placeholder="optional" />
           </div>
         </div>
+        <div class="rowfields">
+          <div class="field">
+            <label :for="`edu-grade-${i}`">grade / result</label>
+            <input
+              :id="`edu-grade-${i}`"
+              v-model="r.grade"
+              maxlength="40"
+              placeholder="e.g. 3.6/4.0, upper second, BGCSE 38 points"
+            />
+          </div>
+        </div>
         <div class="cvrow-actions">
           <button class="ghostbtn" type="button" @click="form.education.splice(i, 1)">remove</button>
         </div>
