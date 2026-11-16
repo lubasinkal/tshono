@@ -76,11 +76,12 @@ body { margin: 0; }
 <script setup lang="ts">
 const palette = ref<{ open: () => void } | null>(null)
 
-const auth = useAuth()
-// Read the session through the documented endpoint with the incoming cookie
-// forwarded during SSR. Plain useSession did not forward it from app.vue.
 const requestFetch = useRequestFetch()
-const { data: session } = await useAsyncData('auth-session', () => requestFetch('/api/auth/get-session'))
+// Almost every visit is anonymous, and a server hop for them is pure latency.
+const signedIn = useHasSession()
+const { data: session } = await useAsyncData<{ user?: { email: string } } | null>('auth-session', async () =>
+  signedIn ? requestFetch('/api/auth/get-session') : null,
+)
 const user = computed(() => (session.value as { user?: { email: string } } | null)?.user ?? null)
 
 // Which account this is decides the menu entries; /dashboard routes by itself.
@@ -137,7 +138,9 @@ useHead({
 })
 
 async function logout() {
-  await auth.signOut()
+  // Loaded on click only: the auth client is ~90KB and the header needs none of it.
+  const { signOut } = await import('~~/lib/auth-client')
+  await signOut()
   window.location.href = '/login'
 }
 

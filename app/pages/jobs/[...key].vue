@@ -107,7 +107,8 @@ const id = computed(() => keyParts.value[0] ?? '')
 const { data: remoteJob } = await useAsyncData(`job-${id.value}`, async () => remoteGet(id.value))
 
 // Applications exist only for employer posts; scraped roles send you to source.
-const { data: me } = await useFetch<{ role: string }>('/api/me')
+// No session cookie means no role to read, so anonymous views skip the call.
+const { data: me } = await useFetch<{ role: string }>('/api/me', { immediate: useHasSession() })
 const role = computed(() => me.value?.role ?? '')
 const canApply = computed(() => id.value.startsWith('emp-'))
 
