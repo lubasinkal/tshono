@@ -1,5 +1,6 @@
 <template>
   <div class="page">
+    <AsciiBackdrop />
     <header class="topbar">
       <div class="topbar-inner">
         <NuxtLink to="/" class="brand">tshono<b>.</b></NuxtLink>
