@@ -1,15 +1,22 @@
 <template>
   <section class="wrap">
-    <p><NuxtLink to="/employers">← your jobs</NuxtLink></p>
+    <p>
+      <NuxtLink to="/employers">← your jobs</NuxtLink>
+      <template v-if="filters.jobId">
+        · <NuxtLink to="/employers/applicants">all applications</NuxtLink>
+      </template>
+    </p>
 
     <div class="dashhead">
       <div>
-        <h1 class="title">Applicants.</h1>
+        <h1 class="title">{{ jobName || 'Applications' }}.</h1>
         <p class="sub">
-          {{ applicants.length }} application{{ applicants.length === 1 ? '' : 's' }} across your jobs
+          {{ applicants.length }} application{{ applicants.length === 1 ? '' : 's' }}
+          <template v-if="jobName">to this job</template><template v-else>across your jobs</template>
         </p>
       </div>
       <div class="dashhead-actions">
+        <NuxtLink v-if="filters.jobId" :to="`/employers/jobs/${filters.jobId}/edit`" class="ghostbtn">edit job</NuxtLink>
         <a :href="exportUrl" class="ghostbtn">export csv</a>
       </div>
     </div>
@@ -46,9 +53,17 @@
         </div>
 
         <div class="jobcard-actions">
-          <NuxtLink :to="`/employers/candidates/${a.userId}`" class="ilink">profile</NuxtLink>
+          <NuxtLink :to="`/employers/candidates/${a.userId}?from=applications`" class="ilink">profile</NuxtLink>
           <a v-if="a.phone" :href="`tel:${a.phone}`" class="ilink">call</a>
-          <NuxtLink :to="`/employers/jobs/${a.jobId}/applicants`" class="ilink">job</NuxtLink>
+          <NuxtLink :to="`/employers/applicants?job=${a.jobId}`" class="ilink">job</NuxtLink>
+          <button
+            v-for="s in STATUSES"
+            :key="s"
+            class="ghostbtn"
+            type="button"
+            :disabled="busy === a.id || a.status === s"
+            @click="setStatus(a.id, s)"
+          >{{ s }}</button>
         </div>
       </li>
     </ul>
@@ -84,14 +99,34 @@ interface Payload {
 }
 
 const STATUSES = APPLICATION_STATUSES
-const filters = reactive({ jobId: '', status: '' })
+const route = useRoute()
+const router = useRouter()
+// The job filter is the same page either way: the dashboard links here with
+// ?job=<id> instead of owning a second, separate applicants route.
+const filters = reactive({ jobId: String(route.query.job ?? ''), status: '' })
 
 // The fetcher watches the filters, so the list narrows as you pick.
-const { data, error } = await useFetch<Payload>('/api/employer/applicants', { query: filters })
+const { data, error, refresh } = await useFetch<Payload>('/api/employer/applicants', { query: filters })
 if (error.value) await navigateTo('/login')
 
 const applicants = computed(() => data.value?.applicants ?? [])
 const jobs = computed(() => data.value?.jobs ?? [])
+const jobName = computed(() => jobs.value.find((j) => j.id === filters.jobId)?.title ?? '')
+
+// Keep the filter in the URL so a filtered list is linkable and the back button
+// undoes it.
+watch(() => filters.jobId, (id) => router.replace({ query: id ? { job: id } : {} }))
+
+const busy = ref('')
+async function setStatus(id: string, status: string) {
+  busy.value = id
+  try {
+    await $fetch(`/api/employer/applications/${id}`, { method: 'POST', body: { status } })
+    await refresh()
+  } finally {
+    busy.value = ''
+  }
+}
 
 // Same rows, same filters, spreadsheet instead of page.
 const exportUrl = computed(() => {
@@ -103,5 +138,5 @@ const exportUrl = computed(() => {
 
 const statusClass = (s: string) => (s === 'shortlisted' ? 'live' : s === 'rejected' ? 'closed' : '')
 
-useHead({ title: 'applicants · tshono' })
+useHead({ title: 'applications · tshono' })
 </script>

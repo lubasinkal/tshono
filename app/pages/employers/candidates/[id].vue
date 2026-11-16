@@ -1,6 +1,6 @@
 <template>
   <section class="wrap">
-    <p><NuxtLink to="/employers/candidates">← candidates</NuxtLink></p>
+    <p><NuxtLink :to="backTo">{{ backLabel }}</NuxtLink></p>
 
     <template v-if="candidate">
       <div class="dhead">
@@ -80,7 +80,7 @@
 
     <p v-else class="empty">
       candidate not found or no longer visible.
-      <NuxtLink to="/employers/candidates">back to candidates</NuxtLink>
+      <NuxtLink :to="backTo">{{ backLabel.replace('← ', 'back to ') }}</NuxtLink>
     </p>
   </section>
 </template>
@@ -94,6 +94,10 @@ interface Payload {
 }
 
 const route = useRoute()
+// A profile is reachable from applications and from the pool; go back where you
+// came from instead of always dumping the reader in the pool.
+const backTo = computed(() => (route.query.from === 'applications' ? '/employers/applicants' : '/employers/candidates'))
+const backLabel = computed(() => (route.query.from === 'applications' ? '← applications' : '← candidate pool'))
 const { data, error } = await useFetch<Payload>(`/api/employer/candidates/${route.params.id}`)
 if (error.value) {
   await navigateTo(error.value.statusCode === 404 ? '/employers/candidates' : '/login')

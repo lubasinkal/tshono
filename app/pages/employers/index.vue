@@ -9,8 +9,8 @@
       </div>
       <div class="dashhead-actions">
         <NuxtLink to="/employers/jobs/new" class="applybtn">+ post a job</NuxtLink>
-        <NuxtLink to="/employers/applicants" class="ghostbtn">applicants</NuxtLink>
-        <NuxtLink to="/employers/candidates" class="ghostbtn">candidates</NuxtLink>
+        <NuxtLink to="/employers/applicants" class="ghostbtn">applications</NuxtLink>
+        <NuxtLink to="/employers/candidates" class="ghostbtn">candidate pool</NuxtLink>
         <NuxtLink to="/employers/company" class="ghostbtn">company</NuxtLink>
         <NuxtLink to="/employers/billing" class="ghostbtn">billing</NuxtLink>
         <button class="ghostbtn" type="button" @click="logout">sign out</button>
@@ -57,8 +57,8 @@
             ><span class="knob"></span></button>
             <span class="switchlabel">{{ featured(j) ? 'featured' : 'feature' }}</span>
           </template>
-          <NuxtLink :to="`/employers/jobs/${j.id}/applicants`" class="ilink">
-            applicants {{ j.applicants ?? 0 }}
+          <NuxtLink :to="`/employers/applicants?job=${j.id}`" class="ilink">
+            applications {{ j.applicants ?? 0 }}
           </NuxtLink>
           <NuxtLink :to="`/employers/jobs/${j.id}/edit`" class="ilink">edit</NuxtLink>
           <button v-if="j.status === 'live'" class="ghostbtn" type="button" @click="close(j.id)">close</button>

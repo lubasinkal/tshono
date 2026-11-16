@@ -4,13 +4,11 @@
 
     <div class="dashhead">
       <div>
-        <h1 class="title">Candidates.</h1>
+        <h1 class="title">Candidate pool.</h1>
         <p class="sub">
-          {{ candidates.length }} jobseeker{{ candidates.length === 1 ? '' : 's' }} visible · newest first
+          {{ candidates.length }} jobseeker{{ candidates.length === 1 ? '' : 's' }} with visibility on
+          · everyone who opted in, whether or not they applied to you
         </p>
-      </div>
-      <div class="dashhead-actions">
-        <NuxtLink to="/employers/jobs/new" class="ghostbtn">post a job</NuxtLink>
       </div>
     </div>
 
@@ -44,7 +42,7 @@
 
     <ul v-if="candidates.length" class="jobcards">
       <li v-for="c in candidates" :key="c.id" class="jobcard">
-        <NuxtLink :to="`/employers/candidates/${c.id}`" class="jobcard-main ilink">
+        <NuxtLink :to="`/employers/candidates/${c.id}?from=candidates`" class="jobcard-main ilink">
           <div class="jobcard-title">
             <strong>{{ c.headline || c.name || 'jobseeker' }}</strong>
           </div>
@@ -95,5 +93,5 @@ if (error.value) await navigateTo('/login')
 const candidates = computed(() => data.value?.candidates ?? [])
 const preview = (s: string) => s.split('\n').map((v) => v.trim()).filter(Boolean).join(', ').slice(0, 90)
 
-useHead({ title: 'candidates · tshono' })
+useHead({ title: 'candidate pool · tshono' })
 </script>
