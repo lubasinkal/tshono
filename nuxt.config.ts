@@ -22,10 +22,19 @@ export default defineNuxtConfig({
       link: [
         { rel: 'icon', type: 'image/png', href: '/tshono.png' },
         { rel: 'apple-touch-icon', href: '/tshono.png' },
+        // Both faces are used above the fold; preload so text never waits on CSS.
+        { rel: 'preload', as: 'font', type: 'font/woff2', href: '/fonts/SpaceMono-Regular.woff2', crossorigin: '' },
+        { rel: 'preload', as: 'font', type: 'font/woff2', href: '/fonts/SpaceMono-Bold.woff2', crossorigin: '' },
         { rel: 'dns-prefetch', href: 'https://ts.lubasiverse.com' },
         { rel: 'preconnect', href: 'https://ts.lubasiverse.com', crossorigin: '' },
+        { rel: 'preconnect', href: 'https://analytics.lubasiverse.com' },
       ],
     },
+  },
+  nitro: {
+    // The node server sends public assets raw unless they are precompressed.
+    // Cloudflare Pages compresses on its own, so this is a no-op there.
+    compressPublicAssets: { gzip: true, brotli: true },
   },
   runtimeConfig: {
     public: {

@@ -1,29 +1,17 @@
+/* Latin woff2 subsets: 33KB total instead of 400KB of full TTF. No italics are
+   used anywhere, so those faces are gone. */
 @font-face {
   font-family: 'SpaceMono';
-  src: url('/fonts/SpaceMono-Regular.ttf') format('truetype');
+  src: url('/fonts/SpaceMono-Regular.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'SpaceMono';
-  src: url('/fonts/SpaceMono-Italic.ttf') format('truetype');
-  font-weight: 400;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'SpaceMono';
-  src: url('/fonts/SpaceMono-Bold.ttf') format('truetype');
+  src: url('/fonts/SpaceMono-Bold.woff2') format('woff2');
   font-weight: 700;
   font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'SpaceMono';
-  src: url('/fonts/SpaceMono-BoldItalic.ttf') format('truetype');
-  font-weight: 700;
-  font-style: italic;
   font-display: swap;
 }
 
