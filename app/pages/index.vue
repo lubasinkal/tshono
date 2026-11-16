@@ -70,7 +70,7 @@
 import { SECTORS, LOCATIONS, type SampleJob } from '~/data/sampleJobs'
 import { companyPath, jobPath, sectorPath } from '~~/shared/url'
 import { isFeatured } from '~~/shared/job'
-import { remoteSearch, daysLeft, liveRawCached } from '~/composables/useJobSearch'
+import { remoteSearch, daysLeft, liveRawCached, isRemote } from '~/composables/useJobSearch'
 
 const PER_PAGE = 20
 
@@ -89,13 +89,21 @@ const page = ref(Number(route.query.page ?? 1) || 1)
 
 const sectors = SECTORS
 const locations = LOCATIONS
-const remoteHits = ref<SampleJob[]>([])
-const remoteFound = ref(0)
-const remoteTook = ref<number | null>(null)
 const ms = ref<number | null>(null)
-const showMs = computed(() => (remoteTook.value ?? ms.value))
 
 const maxYears = computed(() => (exp.value === '' ? null : Number(exp.value)))
+
+// Search on the server too: the list is in the HTML, so the first paint shows
+// jobs instead of an empty page waiting for JS plus a round trip to Typesense.
+// Filters still go client side (watchers below) so typing stays instant.
+const initial = await useAsyncData<{ hits: SampleJob[]; found: number; took: number } | null>(
+  `search:${route.fullPath}`,
+  async () => (isRemote() ? remoteSearch(query.value, sector.value, location.value, maxYears.value, page.value, PER_PAGE) : null),
+)
+const remoteHits = ref<SampleJob[]>(initial.data.value?.hits ?? [])
+const remoteFound = ref(initial.data.value?.found ?? 0)
+const remoteTook = ref<number | null>(initial.data.value?.took ?? null)
+const showMs = computed(() => (remoteTook.value ?? ms.value))
 
 const results = computed(() => remoteHits.value)
 const totalCount = computed(() => remoteFound.value)
@@ -165,7 +173,7 @@ function queueRemote(immediate = false) {
 }
 
 onMounted(() => {
-  queueRemote(true)
+  if (!remoteHits.value.length) queueRemote(true)
   window.addEventListener('keydown', (e) => {
     if (e.key === '/' && document.activeElement?.tagName !== 'INPUT') {
       e.preventDefault()

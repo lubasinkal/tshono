@@ -95,15 +95,28 @@ export async function liveRaw(params: Record<string, string>): Promise<unknown> 
   const ck = cacheKey(params)
   const hit = Q_CACHE.get(ck)
   if (hit && Date.now() - hit.at < Q_TTL) return hit.data
-  if (abort) abort.abort()
-  abort = new AbortController()
+  // One in-flight search per browser tab. On the server the module is shared by
+  // every request, so there a new search must never cancel another visitor's.
+  let signal: AbortSignal | undefined
+  if (import.meta.client) {
+    if (abort) abort.abort()
+    abort = new AbortController()
+    signal = abort.signal as unknown as AbortSignal
+  }
   const data = await $fetch(`${base}/search`, {
     params,
     headers: { 'X-TYPESENSE-API-KEY': key },
-    signal: abort.signal as unknown as AbortSignal,
+    signal,
     timeout: 10000,
   })
   Q_CACHE.set(ck, { at: Date.now(), data })
+  // The server shares this map between visitors and keys are user input, so it
+  // must not grow without bound. Entries expire after Q_TTL anyway.
+  if (Q_CACHE.size > 500) {
+    const now = Date.now()
+    for (const [k, v] of Q_CACHE) if (now - v.at >= Q_TTL) Q_CACHE.delete(k)
+    while (Q_CACHE.size > 500) Q_CACHE.delete(Q_CACHE.keys().next().value as string)
+  }
   return data
 }
 export function liveRawCached(params: Record<string, string>): unknown | null {
