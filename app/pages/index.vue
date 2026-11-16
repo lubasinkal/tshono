@@ -43,8 +43,11 @@
 
     <ul class="list">
       <li v-for="j in results" :key="j.id" class="card">
-        <NuxtLink :to="jobPath(j)" class="cardlink">
-          <strong>{{ j.title }}</strong>
+        <!-- One card, one job link, and the company/sector links sit above it.
+             Anchors cannot nest, so the job link is the title and its ::after
+             covers the row. -->
+        <div class="cardlink">
+          <NuxtLink :to="jobPath(j)" class="joblink"><strong>{{ j.title }}</strong></NuxtLink>
           <span class="co"><NuxtLink :to="companyPath(j.company)" class="ilink">{{ j.company }}</NuxtLink> · {{ j.location }}</span>
           <span class="tags">
             <em v-if="isFeatured(j)" class="feat">★ featured</em>
@@ -53,15 +56,15 @@
             <em :class="{ hot: j.closing !== '' && left(j) <= 7 }">{{ j.closing === '' ? 'open' : left(j) <= 0 ? 'closed' : left(j) + 'd left' }}</em>
           </span>
           <span class="blurb">{{ j.blurb }}</span>
-        </NuxtLink>
+        </div>
       </li>
     </ul>
     <p v-if="!results.length" class="empty">no match. loosen a filter or try one word like nurse.</p>
 
     <div v-if="pages > 1" class="pager">
-      <button :disabled="page <= 1" @click="goPage(page - 1)">← newer</button>
+      <button type="button" :disabled="page <= 1" @click="goPage(page - 1)">← newer</button>
       <span>{{ page }} / {{ pages }}</span>
-      <button :disabled="page >= pages" @click="goPage(page + 1)">older →</button>
+      <button type="button" :disabled="page >= pages" @click="goPage(page + 1)">older →</button>
     </div>
   </section>
 </template>

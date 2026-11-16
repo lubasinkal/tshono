@@ -22,25 +22,26 @@
             <button
               class="navauth"
               type="button"
-              aria-haspopup="menu"
               :aria-expanded="accountOpen"
               @click="accountOpen = !accountOpen"
             >
               Account
             </button>
-            <ul v-if="accountOpen" class="accountmenu" role="menu">
-              <li><NuxtLink to="/dashboard" role="menuitem" @click="accountOpen = false">dashboard</NuxtLink></li>
+            <!-- A disclosure list, not an ARIA menu: every item is a plain link,
+                 so Tab/Enter is the whole contract and nothing promises arrows. -->
+            <ul v-if="accountOpen" class="accountmenu">
+              <li><NuxtLink to="/dashboard" @click="accountOpen = false">dashboard</NuxtLink></li>
               <li v-if="role === 'jobseeker'">
-                <NuxtLink to="/jobseekers/profile" role="menuitem" @click="accountOpen = false">your profile</NuxtLink>
+                <NuxtLink to="/jobseekers/profile" @click="accountOpen = false">your profile</NuxtLink>
               </li>
               <li v-if="role === 'employer'">
-                <NuxtLink to="/employers/company" role="menuitem" @click="accountOpen = false">company</NuxtLink>
+                <NuxtLink to="/employers/company" @click="accountOpen = false">company</NuxtLink>
               </li>
               <li v-if="role === 'employer'">
-                <NuxtLink to="/employers/billing" role="menuitem" @click="accountOpen = false">billing</NuxtLink>
+                <NuxtLink to="/employers/billing" @click="accountOpen = false">billing</NuxtLink>
               </li>
-              <li><NuxtLink to="/account" role="menuitem" @click="accountOpen = false">account</NuxtLink></li>
-              <li><button type="button" role="menuitem" @click="logout">sign out</button></li>
+              <li><NuxtLink to="/account" @click="accountOpen = false">account</NuxtLink></li>
+              <li><button type="button" @click="logout">sign out</button></li>
             </ul>
           </div>
           <NuxtLink v-else to="/login" class="navauth">Sign in</NuxtLink>
@@ -97,7 +98,10 @@ function closeAccountMenu(e: Event) {
   accountOpen.value = false
 }
 function onAccountKey(e: KeyboardEvent) {
-  if (e.key === 'Escape') accountOpen.value = false
+  if (e.key !== 'Escape' || !accountOpen.value) return
+  accountOpen.value = false
+  // Focus stays useful: Escape puts the caret back on the button that opened it.
+  accountRef.value?.querySelector('button')?.focus()
 }
 onMounted(() => {
   document.addEventListener('click', closeAccountMenu)

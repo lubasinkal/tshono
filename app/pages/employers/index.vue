@@ -51,6 +51,7 @@
               :class="{ on: featured(j) }"
               :disabled="!featured(j) && (data?.org.featuredCredits ?? 0) < 1"
               :aria-pressed="featured(j)"
+              :aria-label="switchTitle(j)"
               :title="switchTitle(j)"
               type="button"
               @click="toggleFeature(j)"

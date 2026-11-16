@@ -10,6 +10,7 @@
           placeholder="type a command…"
           spellcheck="false"
           autocomplete="off"
+          aria-label="Search commands"
           @keydown="onKey"
         />
         <ul class="cmdk-list">
@@ -45,6 +46,7 @@ const open = ref(false)
 const q = ref('')
 const sel = ref(0)
 const input = ref<HTMLInputElement | null>(null)
+let opener: HTMLElement | null = null
 
 const filtered = computed(() => {
   const t = q.value.trim().toLowerCase()
@@ -58,13 +60,20 @@ function reset() {
 }
 
 function openPalette() {
+  opener = document.activeElement as HTMLElement | null
   open.value = true
   reset()
   nextTick(() => input.value?.focus())
 }
 function close() {
+  if (!open.value) return
   open.value = false
+  // Hand focus back to whatever opened the palette.
+  opener?.focus()
 }
+
+// Typing narrows the list, so a selection made before that is meaningless.
+watch(q, () => { sel.value = 0 })
 
 function run(c: Cmd) {
   close()

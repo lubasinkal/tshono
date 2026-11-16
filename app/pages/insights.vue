@@ -65,7 +65,7 @@
     </div>
     <div v-if="hovered" class="sheet">
       <div class="sheetcard">
-        <button class="sheetx" @click="hoverDay = null" aria-label="Close">✕</button>
+        <button class="sheetx" type="button" @click="hoverDay = null" aria-label="Close">✕</button>
         <div class="tipdate">{{ fmtDay(hovered.label) }}</div>
         <div class="tiptotal">{{ hovered.total }} total</div>
         <div v-for="s in hovered.segs" :key="s.name" class="tiprow">
