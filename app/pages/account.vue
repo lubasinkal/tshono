@@ -44,6 +44,17 @@
       </button>
     </form>
 
+    <h2 class="sect"><span>#</span> delete account</h2>
+
+    <DangerAction
+      label="delete my account"
+      hint="Removes your login, profile, CV and applications. If no one else is in your company, that company and its job posts are deleted with it. This cannot be undone."
+      :word="email"
+      :busy="deleting"
+      @confirm="deleteAccount"
+    />
+    <p v-if="deleteError" class="formerr">{{ deleteError }}</p>
+
     <h2 class="sect"><span>#</span> sections</h2>
     <ul class="todo">
       <li><NuxtLink to="/dashboard">dashboard</NuxtLink></li>
@@ -120,6 +131,22 @@ async function savePassword() {
 async function logout() {
   await auth.signOut()
   window.location.href = '/login'
+}
+
+const deleting = ref(false)
+const deleteError = ref('')
+
+async function deleteAccount() {
+  deleting.value = true
+  deleteError.value = ''
+  try {
+    await $fetch('/api/account/delete', { method: 'POST' })
+    // Full reload: the session cookies are gone and so is every cached state.
+    window.location.href = '/'
+  } catch (e: any) {
+    deleteError.value = e?.data?.statusMessage || e?.message || 'could not delete the account'
+    deleting.value = false
+  }
 }
 
 useHead({ title: 'account · tshono' })

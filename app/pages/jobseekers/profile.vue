@@ -229,6 +229,14 @@
       <p v-if="saved" class="formnote">saved.</p>
       <button class="applybtn" type="submit" :disabled="busy">{{ busy ? 'saving…' : 'save profile' }}</button>
     </form>
+
+    <DangerAction
+      label="delete my profile"
+      hint="Removes your CV, experience, education and the applications you sent. Your account stays and you can build a profile again from this page."
+      :busy="deleting"
+      @confirm="deleteProfile"
+    />
+    <p v-if="deleteError" class="formerr">{{ deleteError }}</p>
   </section>
 </template>
 
@@ -279,6 +287,22 @@ async function save() {
     error.value = e?.data?.statusMessage || e?.message || 'could not save'
   } finally {
     busy.value = false
+  }
+}
+
+const deleting = ref(false)
+const deleteError = ref('')
+
+async function deleteProfile() {
+  deleting.value = true
+  deleteError.value = ''
+  try {
+    await $fetch('/api/jobseeker/profile', { method: 'DELETE' })
+    // Reload so the header, role and dashboard all see the empty account.
+    window.location.href = '/'
+  } catch (e: any) {
+    deleteError.value = e?.data?.statusMessage || e?.message || 'could not delete the profile'
+    deleting.value = false
   }
 }
 

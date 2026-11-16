@@ -7,7 +7,12 @@ export default defineNuxtRouteMiddleware(async (to) => {
   if (!isJobseekerArea && !isEmployerArea) return
 
   const { data } = await useFetch<{ role: string }>('/api/me')
-  const role = data.value?.role ?? 'none'
+  // 401 here means no session at all.
+  if (!data.value) return navigateTo('/login')
+  const role = data.value.role
+  // An account with no company or no profile still needs the form that creates
+  // one: deleting either must not lock the account out of rebuilding it.
+  if (role === 'none' && (to.path === '/jobseekers/profile' || to.path === '/employers/company')) return
   if (role === 'none') return navigateTo('/login')
   // /dashboard resolves to the account's own home, so this never loops.
   if (isJobseekerArea && role !== 'jobseeker') return navigateTo('/dashboard')
