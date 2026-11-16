@@ -73,6 +73,7 @@
       label="delete this company"
       hint="Removes the company, its job posts and its profile, and drops those posts out of search. Your account stays, and you can start another company from this page."
       :word="form.name"
+      confirm="type the company name to confirm"
       :busy="deleting"
       @confirm="deleteCompany"
     />

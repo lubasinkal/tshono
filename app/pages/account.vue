@@ -50,6 +50,7 @@
       label="delete my account"
       hint="Removes your login, profile, CV and applications. If no one else is in your company, that company and its job posts are deleted with it. This cannot be undone."
       :word="email"
+      confirm="type your email to confirm"
       :busy="deleting"
       @confirm="deleteAccount"
     />
