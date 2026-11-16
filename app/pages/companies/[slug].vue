@@ -110,6 +110,8 @@ const ogImage = computed(() => {
 })
 
 const { allDocs, load, loadState, maxPosted, countBy, dailySeries } = useJobData()
+// Render the list on the server; onMounted keeps the skeleton for client nav.
+if (import.meta.server) await load()
 onMounted(() => load())
 
 const { data: companyData } = await useFetch<{ company: CompanyProfile | null }>(

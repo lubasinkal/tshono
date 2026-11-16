@@ -37,6 +37,8 @@ import { useJobData } from '~/composables/useJobData'
 import { sectorPath } from '~~/shared/url'
 
 const { load, loadState, bySector, total } = useJobData()
+// Render the list on the server; onMounted keeps the skeleton for client nav.
+if (import.meta.server) await load()
 onMounted(() => load())
 
 useHead({ title: 'sectors · tshono' })

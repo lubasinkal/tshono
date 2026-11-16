@@ -35,6 +35,8 @@ import { useJobData } from '~/composables/useJobData'
 import { companyPath } from '~~/shared/url'
 
 const { allDocs, load, loadState } = useJobData()
+// Render the list on the server; onMounted keeps the skeleton for client nav.
+if (import.meta.server) await load()
 onMounted(() => load())
 
 const total = computed(() => allDocs.value.length)

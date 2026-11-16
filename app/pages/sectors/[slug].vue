@@ -86,6 +86,8 @@ const ogImage = computed(() => {
 })
 
 const { allDocs, load, loadState, maxPosted, total, bySector, countBy, dailySeries } = useJobData()
+// Render the list on the server; onMounted keeps the skeleton for client nav.
+if (import.meta.server) await load()
 onMounted(() => load())
 
 const jobs = computed(() => allDocs.value.filter((j) => j.sector.toLowerCase() === name.value.toLowerCase()))

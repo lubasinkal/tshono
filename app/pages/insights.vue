@@ -158,6 +158,8 @@ const { data: accountsData } = await useFetch<{ jobseekers: number; employers: n
 )
 const accounts = computed(() => accountsData.value ?? { jobseekers: 0, employers: 0 })
 
+// Render the list on the server; onMounted keeps the skeleton for client nav.
+if (import.meta.server) await load()
 onMounted(() => load())
 
 const hoverDay = ref<number | null>(null)
