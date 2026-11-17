@@ -1,8 +1,17 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import { resolve } from 'node:path'
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
   css: ['~/assets/css/main.css'],
+  // /signup is the same form as /login, started in register mode; two URLs so
+  // sign-up is shareable and /login stays the sign-in page.
+  hooks: {
+    'pages:extend'(pages) {
+      pages.push({ name: 'signup', path: '/signup', file: resolve('app/pages/login.vue') })
+    },
+  },
   app: {
     viewTransition: true,
     head: {
@@ -13,10 +22,19 @@ export default defineNuxtConfig({
       link: [
         { rel: 'icon', type: 'image/png', href: '/tshono.png' },
         { rel: 'apple-touch-icon', href: '/tshono.png' },
+        // Both faces are used above the fold; preload so text never waits on CSS.
+        { rel: 'preload', as: 'font', type: 'font/woff2', href: '/fonts/SpaceMono-Regular.woff2', crossorigin: '' },
+        { rel: 'preload', as: 'font', type: 'font/woff2', href: '/fonts/SpaceMono-Bold.woff2', crossorigin: '' },
         { rel: 'dns-prefetch', href: 'https://ts.lubasiverse.com' },
         { rel: 'preconnect', href: 'https://ts.lubasiverse.com', crossorigin: '' },
+        { rel: 'preconnect', href: 'https://analytics.lubasiverse.com' },
       ],
     },
+  },
+  nitro: {
+    // The node server sends public assets raw unless they are precompressed.
+    // Cloudflare Pages compresses on its own, so this is a no-op there.
+    compressPublicAssets: { gzip: true, brotli: true },
   },
   runtimeConfig: {
     public: {
@@ -27,15 +45,10 @@ export default defineNuxtConfig({
       searchProtocol: 'https',
       searchKey: '',
       searchCollection: 'jobs',
+      // Umami analytics. Empty id loads no script at all (local dev default).
+      umamiSrc: 'https://analytics.lubasiverse.com/script.js',
+      umamiId: 'a7029343-142f-456f-81d3-d7069bf68106',
     },
-  },
-  nitro: {
-    // Static friendly output for Cloudflare Pages. Typesense stays on the VPS.
-    preset: 'cloudflare_pages',
-  },
-  routeRules: {
-    '/': { prerender: true },
-    '/insights': { prerender: true },
   },
   typescript: {
     typeCheck: true,

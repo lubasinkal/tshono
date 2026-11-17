@@ -33,6 +33,7 @@
           <option value="5">up to 5 yrs</option>
         </select>
       </div>
+
     </div>
 
     <p class="stats">
@@ -42,33 +43,40 @@
 
     <ul class="list">
       <li v-for="j in results" :key="j.id" class="card">
-        <NuxtLink :to="`/jobs/${j.id}`" class="cardlink">
-          <strong>{{ j.title }}</strong>
-          <span class="co"><NuxtLink :to="`/companies/${encodeURIComponent(j.company)}`" class="ilink">{{ j.company }}</NuxtLink> · {{ j.location }}</span>
+        <!-- One card, one job link, and the company/sector links sit above it.
+             Anchors cannot nest, so the job link is the title and its ::after
+             covers the row. -->
+        <div class="cardlink">
+          <NuxtLink :to="jobPath(j)" class="joblink"><strong>{{ j.title }}</strong></NuxtLink>
+          <span class="co"><NuxtLink :to="companyPath(j.company)" class="ilink">{{ j.company }}</NuxtLink> · {{ j.location }}</span>
           <span class="tags">
-            <em><NuxtLink :to="`/sectors/${encodeURIComponent(j.sector)}`" class="ilink">{{ j.sector }}</NuxtLink></em>
+            <em v-if="isFeatured(j)" class="feat">★ featured</em>
+            <em><NuxtLink :to="sectorPath(j.sector)" class="ilink">{{ j.sector }}</NuxtLink></em>
             <em>{{ j.minYears === 0 ? 'entry' : j.minYears + ' yrs+' }}</em>
             <em :class="{ hot: j.closing !== '' && left(j) <= 7 }">{{ j.closing === '' ? 'open' : left(j) <= 0 ? 'closed' : left(j) + 'd left' }}</em>
           </span>
           <span class="blurb">{{ j.blurb }}</span>
-        </NuxtLink>
+        </div>
       </li>
     </ul>
     <p v-if="!results.length" class="empty">no match. loosen a filter or try one word like nurse.</p>
 
     <div v-if="pages > 1" class="pager">
-      <button :disabled="page <= 1" @click="goPage(page - 1)">← newer</button>
+      <button type="button" :disabled="page <= 1" @click="goPage(page - 1)">← newer</button>
       <span>{{ page }} / {{ pages }}</span>
-      <button :disabled="page >= pages" @click="goPage(page + 1)">older →</button>
+      <button type="button" :disabled="page >= pages" @click="goPage(page + 1)">older →</button>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
 import { SECTORS, LOCATIONS, type SampleJob } from '~/data/sampleJobs'
-import { remoteSearch, daysLeft, liveRawCached } from '~/composables/useJobSearch'
+import { companyPath, jobPath, sectorPath } from '~~/shared/url'
+import { isFeatured } from '~~/shared/job'
+import { remoteSearch, daysLeft, liveRawCached, isRemote } from '~/composables/useJobSearch'
 
 const PER_PAGE = 20
+
 
 const route = useRoute()
 const router = useRouter()
@@ -84,13 +92,21 @@ const page = ref(Number(route.query.page ?? 1) || 1)
 
 const sectors = SECTORS
 const locations = LOCATIONS
-const remoteHits = ref<SampleJob[]>([])
-const remoteFound = ref(0)
-const remoteTook = ref<number | null>(null)
 const ms = ref<number | null>(null)
-const showMs = computed(() => (remoteTook.value ?? ms.value))
 
 const maxYears = computed(() => (exp.value === '' ? null : Number(exp.value)))
+
+// Search on the server too: the list is in the HTML, so the first paint shows
+// jobs instead of an empty page waiting for JS plus a round trip to Typesense.
+// Filters still go client side (watchers below) so typing stays instant.
+const initial = await useAsyncData<{ hits: SampleJob[]; found: number; took: number } | null>(
+  `search:${route.fullPath}`,
+  async () => (isRemote() ? remoteSearch(query.value, sector.value, location.value, maxYears.value, page.value, PER_PAGE) : null),
+)
+const remoteHits = ref<SampleJob[]>(initial.data.value?.hits ?? [])
+const remoteFound = ref(initial.data.value?.found ?? 0)
+const remoteTook = ref<number | null>(initial.data.value?.took ?? null)
+const showMs = computed(() => (remoteTook.value ?? ms.value))
 
 const results = computed(() => remoteHits.value)
 const totalCount = computed(() => remoteFound.value)
@@ -132,7 +148,7 @@ let t: ReturnType<typeof setTimeout> | null = null
 async function runRemote() {
   const t0 = performance.now()
   // serve stale cache instantly so UI never blanks
-  const stale = liveRawCached({ q: query.value.trim() || '', query_by: 'title,company,sector,location,blurb', sort_by: 'posted:desc', page: String(page.value), per_page: String(PER_PAGE), ...(sector.value || location.value || maxYears.value !== null ? { filter_by: [ ...(sector.value ? [`sector:=${sector.value}`] : []), ...(location.value ? [`location:=${location.value}`] : []), ...(maxYears.value !== null ? [`min_years:<=${maxYears.value}`] : []) ].join(' && ') } : {}), include_fields: 'id,title,company,sector,location,blurb,url,closing,posted,min_years' }) as { hits?: Array<{ document: Record<string, unknown> }>; found?: number; search_time_ms?: number } | null
+  const stale = liveRawCached({ q: query.value.trim() || '', query_by: 'title,company,sector,location,blurb', sort_by: 'featured_until:desc,posted:desc', page: String(page.value), per_page: String(PER_PAGE), ...(sector.value || location.value || maxYears.value !== null ? { filter_by: [ ...(sector.value ? [`sector:=${sector.value}`] : []), ...(location.value ? [`location:=${location.value}`] : []), ...(maxYears.value !== null ? [`min_years:<=${maxYears.value}`] : []) ].join(' && ') } : {}), include_fields: 'id,title,company,sector,location,blurb,url,closing,posted,min_years,featured_until' }) as { hits?: Array<{ document: Record<string, unknown> }>; found?: number; search_time_ms?: number } | null
   if (stale?.hits) {
     const { toJobHit } = await import('~/composables/useJobSearch')
     remoteHits.value = stale.hits.map((h) => toJobHit(h.document))
@@ -160,7 +176,7 @@ function queueRemote(immediate = false) {
 }
 
 onMounted(() => {
-  queueRemote(true)
+  if (!remoteHits.value.length) queueRemote(true)
   window.addEventListener('keydown', (e) => {
     if (e.key === '/' && document.activeElement?.tagName !== 'INPUT') {
       e.preventDefault()

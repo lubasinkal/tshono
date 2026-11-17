@@ -9,50 +9,18 @@ export interface SampleJob {
   minYears: number
   blurb: string
   url: string
+  occupation?: string
+  employmentType?: string
+  vacancies?: number
+  workMode?: string
+  educationLevel?: string
+  salaryMin?: number
+  salaryMax?: number
+  salaryPeriod?: string
+  district?: string
+  applyInstructions?: string
+  // seconds since epoch, 0 when not featured
+  featuredUntil?: number
 }
 
-export const SECTORS = [
-  'Finance',
-  'Education',
-  'Engineering',
-  'Mining',
-  'Security',
-  'Healthcare',
-  'Technology',
-  'Marketing',
-  'Retail',
-  'Maintenance',
-  'Human Resources',
-  'Construction',
-  'Administration',
-  'Science',
-  'Logistics',
-  'Hospitality',
-  'Legal',
-  'Agriculture',
-  'Manufacturing',
-  'Government',
-  'NGO',
-  'General',
-] as const
-
-export const LOCATIONS = [
-  'Gaborone',
-  'Francistown',
-  'Maun',
-  'Jwaneng',
-  'Letlhakane',
-  'Palapye',
-  'Kasane',
-  'Serowe',
-  'Ramotswa',
-  'Ghanzi',
-  'Molepolole',
-  'Mogoditshane',
-  'Tonota',
-  'Mochudi',
-  'Remote',
-  'Botswana',
-] as const
-
-
+export { SECTORS, LOCATIONS } from '~~/shared/constants'

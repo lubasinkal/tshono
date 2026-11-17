@@ -2,6 +2,8 @@ import type { SampleJob } from '~/data/sampleJobs'
 
 export interface JobHit extends SampleJob {
   content?: string
+  responsibilities?: string
+  requirements?: string
 }
 
 // Typesense stores snake_case. UI reads camelCase. Normalize every live doc here.
@@ -18,6 +20,19 @@ export function toJobHit(d: Record<string, unknown>): JobHit {
     posted: typeof d.posted === 'number' ? new Date(d.posted * 1000).toISOString().slice(0, 10) : String(d.posted ?? ''),
     minYears: typeof d.min_years === 'number' ? d.min_years : 0,
     content: typeof d.content === 'string' ? d.content : undefined,
+    responsibilities: typeof d.responsibilities === 'string' ? d.responsibilities : undefined,
+    requirements: typeof d.requirements === 'string' ? d.requirements : undefined,
+    occupation: typeof d.occupation === 'string' && d.occupation ? d.occupation : undefined,
+    employmentType: typeof d.employment_type === 'string' && d.employment_type ? d.employment_type : undefined,
+    vacancies: typeof d.vacancies === 'number' && d.vacancies > 0 ? d.vacancies : undefined,
+    workMode: typeof d.work_mode === 'string' && d.work_mode ? d.work_mode : undefined,
+    educationLevel: typeof d.education_level === 'string' && d.education_level ? d.education_level : undefined,
+    salaryMin: typeof d.salary_min === 'number' && d.salary_min > 0 ? d.salary_min : undefined,
+    salaryMax: typeof d.salary_max === 'number' && d.salary_max > 0 ? d.salary_max : undefined,
+    salaryPeriod: typeof d.salary_period === 'string' && d.salary_period ? d.salary_period : undefined,
+    district: typeof d.district === 'string' && d.district ? d.district : undefined,
+    applyInstructions: typeof d.apply_instructions === 'string' && d.apply_instructions ? d.apply_instructions : undefined,
+    featuredUntil: typeof d.featured_until === 'number' ? d.featured_until : 0,
   }
 }
 
@@ -51,10 +66,10 @@ export async function remoteSearch(
   const res = await liveRaw({
     q: query.trim() || '',
     query_by: 'title,company,sector,location,blurb',
-    sort_by: 'posted:desc',
+    sort_by: 'featured_until:desc,posted:desc',
     page: String(page),
     per_page: String(perPage),
-    include_fields: 'id,title,company,sector,location,blurb,url,closing,posted,min_years',
+    include_fields: 'id,title,company,sector,location,blurb,url,closing,posted,min_years,featured_until',
     ...(sector || location || maxYears !== null
       ? {
           filter_by: [
@@ -80,15 +95,28 @@ export async function liveRaw(params: Record<string, string>): Promise<unknown> 
   const ck = cacheKey(params)
   const hit = Q_CACHE.get(ck)
   if (hit && Date.now() - hit.at < Q_TTL) return hit.data
-  if (abort) abort.abort()
-  abort = new AbortController()
+  // One in-flight search per browser tab. On the server the module is shared by
+  // every request, so there a new search must never cancel another visitor's.
+  let signal: AbortSignal | undefined
+  if (import.meta.client) {
+    if (abort) abort.abort()
+    abort = new AbortController()
+    signal = abort.signal as unknown as AbortSignal
+  }
   const data = await $fetch(`${base}/search`, {
     params,
     headers: { 'X-TYPESENSE-API-KEY': key },
-    signal: abort.signal as unknown as AbortSignal,
+    signal,
     timeout: 10000,
   })
   Q_CACHE.set(ck, { at: Date.now(), data })
+  // The server shares this map between visitors and keys are user input, so it
+  // must not grow without bound. Entries expire after Q_TTL anyway.
+  if (Q_CACHE.size > 500) {
+    const now = Date.now()
+    for (const [k, v] of Q_CACHE) if (now - v.at >= Q_TTL) Q_CACHE.delete(k)
+    while (Q_CACHE.size > 500) Q_CACHE.delete(Q_CACHE.keys().next().value as string)
+  }
   return data
 }
 export function liveRawCached(params: Record<string, string>): unknown | null {
