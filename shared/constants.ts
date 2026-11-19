@@ -1,3 +1,5 @@
+export const CONTACT_EMAIL = 'tshono@mail.lubasiverse.com'
+
 export const SECTORS = [
   'Finance', 'Education', 'Engineering', 'Mining', 'Security', 'Healthcare',
   'Technology', 'Marketing', 'Retail', 'Maintenance', 'Human Resources',
