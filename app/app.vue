@@ -54,8 +54,35 @@
     </main>
     <footer class="foot">
       <div class="foot-inner">
-        <span>tshono. every opportunity in bw, one fast search.</span>
-        <span>built in gaborone</span>
+        <div class="foot-brand">
+          <NuxtLink to="/" class="brand">tshono<b>.</b></NuxtLink>
+          <p>every opportunity in bw, one fast search.</p>
+          <p>built in gaborone</p>
+        </div>
+        <nav class="footcol" aria-label="Explore">
+          <h2>explore</h2>
+          <NuxtLink to="/">search jobs</NuxtLink>
+          <NuxtLink to="/companies">companies</NuxtLink>
+          <NuxtLink to="/sectors">sectors</NuxtLink>
+          <NuxtLink to="/insights">hiring insights</NuxtLink>
+        </nav>
+        <nav class="footcol" aria-label="Employers">
+          <h2>employers</h2>
+          <NuxtLink to="/employers/jobs/new">post a job</NuxtLink>
+          <NuxtLink to="/employers/billing">plans &amp; billing</NuxtLink>
+          <NuxtLink to="/account">your account</NuxtLink>
+        </nav>
+        <nav class="footcol" aria-label="About and legal">
+          <h2>about</h2>
+          <NuxtLink to="/about">about tshono</NuxtLink>
+          <NuxtLink to="/contact">contact</NuxtLink>
+          <NuxtLink to="/privacy">privacy &amp; your data</NuxtLink>
+          <NuxtLink to="/terms">terms of use</NuxtLink>
+        </nav>
+      </div>
+      <div class="foot-bottom">
+        <span>© {{ year }} tshono. all rights reserved.</span>
+        <span>made for the botswana job market</span>
       </div>
     </footer>
     <CommandPalette ref="palette" />
@@ -77,6 +104,7 @@ body { margin: 0; }
 
 <script setup lang="ts">
 const palette = ref<{ open: () => void } | null>(null)
+const year = new Date().getFullYear()
 
 const requestFetch = useRequestFetch()
 // Almost every visit is anonymous, and a server hop for them is pure latency.

@@ -166,11 +166,27 @@ main.shell { flex: 1; padding-bottom: 56px; }
 
 .foot { border-top: 1px solid var(--line); }
 .foot-inner {
-  max-width: var(--frame); margin: 0 auto; padding: 16px var(--pad);
-  display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+  max-width: var(--frame); margin: 0 auto; padding: 28px var(--pad);
+  display: grid; grid-template-columns: 1.6fr repeat(3, minmax(0, 1fr)); gap: 24px;
   color: var(--faint); font-size: 11px; font-family: var(--mono);
   letter-spacing: 0.02em; border-inline: 1px solid var(--line);
 }
+.foot-brand .brand { font-size: 18px; color: var(--text); text-decoration: none; }
+.foot-brand p { margin: 8px 0 0; }
+.footcol { display: grid; align-content: start; gap: 7px; }
+.footcol h2 {
+  margin: 0 0 3px; font: inherit; color: var(--text);
+  text-transform: uppercase; letter-spacing: 0.08em;
+}
+.foot a { color: var(--faint); text-decoration: none; }
+.foot a:hover { color: var(--accent); text-decoration: underline; }
+.foot-bottom {
+  max-width: var(--frame); margin: 0 auto; padding: 12px var(--pad);
+  display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+  border-top: 1px solid var(--line); border-inline: 1px solid var(--line);
+}
+@media (max-width: 800px) { .foot-inner { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 520px) { .foot-inner { grid-template-columns: 1fr; } }
 
 kbd, .kbd span {
   font-family: var(--mono); font-size: 11px; color: var(--faint);
