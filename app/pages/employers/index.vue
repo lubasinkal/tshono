@@ -101,7 +101,7 @@ const jobs = computed(() => data.value?.jobs ?? [])
 const liveCount = computed(() => jobs.value.filter((j) => j.status === 'live').length)
 const featuredCount = computed(() => jobs.value.filter((j) => featured(j)).length)
 
-const message = ref(route.query.purchased ? 'Payment received. Credits appear once Polar confirms the order (a few seconds).' : '')
+const message = ref(route.query.purchased ? 'Payment received. Credits appear once Ledger confirms the order (a few seconds).' : '')
 
 const planLabel = computed(() => {
   const o = data.value?.org

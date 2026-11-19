@@ -23,7 +23,7 @@ async function publish(input: JobInput) {
   error.value = ''
   try {
     const res = await $fetch<{ indexed: boolean }>('/api/employer/jobs', { method: 'POST', body: input })
-    if (!res.indexed) error.value = 'saved, but the search index rejected it. Check TYPESENSE_ADMIN_KEY on the server.'
+    if (!res.indexed) error.value = 'saved, but Radar rejected it. Contact support if it stays hidden.'
     else await navigateTo('/employers')
   } catch (e: any) {
     error.value = e?.data?.statusMessage || e?.statusMessage || 'could not publish the job'

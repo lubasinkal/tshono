@@ -70,7 +70,7 @@
     </div>
 
     <p class="formnote">
-      Pula prices; USD is charged outside Botswana. Payments, invoices and cancellations are handled by Polar.
+      Pula prices; USD is charged outside Botswana. Payments, invoices and cancellations are handled by Ledger.
       <button class="ghostbtn" type="button" style="margin-left: 8px" @click="portal">manage billing</button>
     </p>
     <p v-if="error" class="formerr">{{ error }}</p>

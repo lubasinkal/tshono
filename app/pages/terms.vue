@@ -34,7 +34,7 @@
         <li>Post only real vacancies you're allowed to advertise, and keep them accurate.</li>
         <li>Close roles that are filled and keep your contact details current.</li>
         <li>You are responsible for what happens to applications after you receive them, including handling candidates' personal data under Botswana's Data Protection Act, 2024.</li>
-        <li>Featured placement and plans are optional. Checkout and invoices are handled by Polar; manage them from your billing portal or <NuxtLink to="/contact">contact us</NuxtLink>.</li>
+        <li>Featured placement and plans are optional. Checkout and invoices are handled by Ledger; manage them from your billing portal or <NuxtLink to="/contact">contact us</NuxtLink>.</li>
       </ul>
 
       <h3>For jobseekers</h3>

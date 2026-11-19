@@ -25,7 +25,7 @@
       <ul>
         <li>
           <b>Browsing and search.</b> We record page views, searches and job views so we know what works and
-          can report hiring trends. Analytics runs on our own self-hosted Umami instance and uses no cookies.
+          can report hiring trends. Analytics runs on our own Pulse component and uses no cookies.
           Basis: our legitimate interest in running and improving the service (s.26(f)).
         </li>
         <li>
@@ -49,7 +49,7 @@
           be checked. Basis: legitimate interest in giving jobseekers one place to search.
         </li>
         <li>
-          <b>Payments.</b> Polar handles checkout, invoices and cancellations. We receive your plan and order
+          <b>Payments.</b> Ledger handles checkout, invoices and cancellations. We receive your plan and order
           status, but we never see or store your card details. Basis: contract and legal obligations around
           accounting records.
         </li>
@@ -70,10 +70,11 @@
         do not see employer contact data beyond what is published on a job ad. We don't sell personal data.
       </p>
       <p>
-        Service providers process data on our behalf: Cloudflare Pages (hosting), Neon (database), Typesense
-        (search), Resend (sign-in and reset emails), Polar (payments) and Umami (analytics). Some of these may
-        process data outside Botswana. Cross-border transfers are covered by Part XIV of the Act (ss.74–78);
-        email us if you want the safeguards that apply to a particular provider.
+        Service providers process data on our behalf: Ground (hosting service), Vault (database), Radar
+        (search engine), Courier (sign-in and reset emails), Ledger (payment provider) and Pulse
+        (analytics processor). Some of these may process data outside Botswana. Cross-border transfers
+        are covered by Part XIV of the Act (ss.74–78); email us if you want the safeguards that apply to
+        a particular provider.
       </p>
 
       <h3>Cookies and local storage</h3>
