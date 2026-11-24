@@ -10,7 +10,7 @@
     <h1 class="title">Your data.</h1>
     <p class="sub">
       What Tshono collects about you, why, who we share it with, and what you can do about it. This notice
-      follows Botswana's Data Protection Act, 2024. Questions? <NuxtLink to="/contact">Ask us</NuxtLink>.
+      follows Botswana's Data Protection Act, 2018. Questions? <NuxtLink to="/contact">Ask us</NuxtLink>.
     </p>
 
     <div class="jobbody">
@@ -66,7 +66,7 @@
       <ul>
         <li><b>To provide the service you asked for</b>, such as your account, your applications and your job posts.</li>
         <li><b>Our legitimate interests</b> in running, securing and improving Tshono, and in keeping listings useful, where that does not outweigh your rights.</li>
-        <li><b>Your consent</b>, for example when you make your profile visible to employers. You can withdraw consent at any time.</li>
+        <li><b>Your written consent</b>, for example when you make your profile visible to employers. You can withdraw it in writing; the Act ties withdrawal to legitimate, reasonable and compelling grounds, so tell us your reason.</li>
         <li><b>Legal obligations</b>, such as keeping accounting records.</li>
       </ul>
 
@@ -110,37 +110,31 @@
       <h3 id="your-rights">Your rights</h3>
       <p>Under the Act you can ask us to:</p>
       <ul>
-        <li>give you a copy of the personal data we hold about you;</li>
-        <li>correct data that is wrong;</li>
-        <li>delete your data;</li>
-        <li>limit how we use it;</li>
-        <li>send you a copy in a portable format;</li>
-        <li>stop using it for direct marketing or for purposes based on our legitimate interests.</li>
+        <li>confirm whether we hold personal data about you, and give you a copy within a reasonable time;</li>
+        <li>tell you the reason if we refuse a request;</li>
+        <li>challenge the data we hold, and have it corrected, completed or deleted if the challenge succeeds.</li>
       </ul>
       <p>
         To use any of these, email <a :href="`mailto:${CONTACT_EMAIL}`">{{ CONTACT_EMAIL }}</a> from the address on
-        your account and say what you want. We may ask you to confirm your identity first. We aim to reply within
-        one month. We don't charge a fee unless a request is clearly unfounded or excessive.
+        your account and say what you want. We may ask you to confirm your identity first. Any charge will be
+        reasonable, and we will tell you before charging anything.
       </p>
       <p>
-        You can also complain to the Information and Data Protection Commission if you think we have handled your
-        data unlawfully. We would appreciate the chance to fix the problem first.
-      </p>
-      <p>
-        We do not make decisions about you that have legal or similar significant effects using automated means.
-        Job matches are search results. A person decides who to hire.
+        You can also complain to the Information and Data Protection Commission. We'd appreciate the chance to
+        fix the problem first.
       </p>
 
       <h3>Security and breaches</h3>
       <p>
         We protect personal data with access controls, encrypted connections and limits on who can see what. If
-        a breach puts your data at real risk, we will tell the Commission and the people affected, as the Act requires.
+        a breach affects your data, we will notify the Information and Data Protection Commission without delay,
+        as section 33 of the Act requires, and tell the people affected.
       </p>
 
       <h3>Children</h3>
       <p>
-        Tshono is for work and hiring. We do not knowingly collect personal data from children. If you believe a
-        child has given us their data, email us and we will delete it.
+        The Act treats personal data of minors as sensitive. Tshono is for work and hiring, and we do not knowingly
+        collect personal data from minors. If you believe a minor has given us their data, email us and we will delete it.
       </p>
 
       <h3>Changes to this notice</h3>

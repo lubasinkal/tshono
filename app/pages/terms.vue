@@ -33,7 +33,7 @@
       <ul>
         <li>Post only real vacancies that you are allowed to advertise, and keep them accurate.</li>
         <li>Close roles once they are filled, and keep your contact details up to date.</li>
-        <li>Once you receive applications, you are responsible for handling candidates' personal data in line with the Data Protection Act, 2024.</li>
+        <li>Once you receive applications, you are responsible for handling candidates' personal data in line with the Data Protection Act, 2018.</li>
         <li>Featured placement and paid plans are optional. Polar handles checkout and invoices. Manage them from your billing portal, or <NuxtLink to="/contact">contact us</NuxtLink>.</li>
       </ul>
 
