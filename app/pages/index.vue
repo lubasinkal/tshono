@@ -113,16 +113,19 @@ const totalCount = computed(() => remoteFound.value)
 const pages = computed(() => Math.max(1, Math.ceil(totalCount.value / PER_PAGE)))
 const left = (j: { closing: string }) => (j.closing ? daysLeft(j.closing) : 9999)
 
+// Canonical key so a URL we wrote can be recognised when the router reports it back.
+const keyOf = (q: Record<string, unknown>) => JSON.stringify(Object.entries(q).map(([k, v]) => [k, String(v)]).sort())
+const ownUrls = new Set<string>()
 function syncUrl() {
-  router.replace({
-    query: {
-      ...(query.value ? { q: query.value } : {}),
-      ...(sector.value ? { sector: sector.value } : {}),
-      ...(location.value ? { location: location.value } : {}),
-      ...(exp.value ? { exp: exp.value } : {}),
-      ...(page.value > 1 ? { page: String(page.value) } : {}),
-    },
-  })
+  const q = {
+    ...(query.value ? { q: query.value } : {}),
+    ...(sector.value ? { sector: sector.value } : {}),
+    ...(location.value ? { location: location.value } : {}),
+    ...(exp.value ? { exp: exp.value } : {}),
+    ...(page.value > 1 ? { page: String(page.value) } : {}),
+  }
+  if (keyOf(q) !== keyOf(route.query)) ownUrls.add(keyOf(q))
+  router.replace({ query: q })
 }
 
 function goPage(p: number) {
@@ -132,12 +135,34 @@ function goPage(p: number) {
 }
 
 // Keep every view shareable through the URL. Filter edits reset to page one.
+// True while a URL change is being copied into state, so the reset below leaves the page number alone.
+let fromRoute = false
 watch([query, sector, location, exp], () => {
-  page.value = 1
+  if (!fromRoute) page.value = 1
   queueRemote()
 })
 watch(page, () => {
   queueRemote()
+})
+
+// Navbar links to "/" reuse this page, so mirror any URL we did not write (e.g. back to the bare search).
+watch(() => route.query, (rq) => {
+  if (ownUrls.delete(keyOf(rq))) return
+  const next = {
+    q: String(rq.q ?? ''),
+    sector: String(rq.sector ?? ''),
+    location: String(rq.location ?? ''),
+    exp: String(rq.exp ?? ''),
+    page: Number(rq.page ?? 1) || 1,
+  }
+  if (keyOf(next) === keyOf({ q: query.value, sector: sector.value, location: location.value, exp: exp.value, page: page.value })) return
+  fromRoute = true
+  query.value = next.q
+  sector.value = next.sector
+  location.value = next.location
+  exp.value = next.exp
+  page.value = next.page
+  nextTick(() => { fromRoute = false })
 })
 
 // Live fetch against Typesense. First paint fires at once, typing waits 160ms.
