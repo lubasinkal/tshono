@@ -9,122 +9,144 @@
 
     <h1 class="title">Your data.</h1>
     <p class="sub">
-      A plain-language notice explaining what Tshono does with personal data, under Botswana's Data
-      Protection Act, 2024. If anything here is unclear, <NuxtLink to="/contact">ask us</NuxtLink>.
+      What Tshono collects about you, why, who we share it with, and what you can do about it. This notice
+      follows Botswana's Data Protection Act, 2024. Questions? <NuxtLink to="/contact">Ask us</NuxtLink>.
     </p>
 
     <div class="jobbody">
-      <h3>Who is responsible</h3>
+      <h3>Who we are</h3>
       <p>
-        Tshono is operated from Gaborone, Botswana. For the Data Protection Act, we are the data controller
-        for the personal data described here. Reach us at
+        Tshono is run from Gaborone, Botswana. For the personal data described here, we are the data controller:
+        we decide why and how it is used. Contact us at
         <a :href="`mailto:${CONTACT_EMAIL}`">{{ CONTACT_EMAIL }}</a>.
       </p>
 
-      <h3>What we collect, and why</h3>
+      <h3>What we collect and why</h3>
       <ul>
         <li>
-          <b>Browsing and search.</b> We record page views, searches and job views so we know what works and
-          can report hiring trends. Analytics runs on our own Pulse component and uses no cookies.
-          Basis: our legitimate interest in running and improving the service (s.26(f)).
+          <b>Visits and searches.</b> Pages you view, searches you run and jobs you open. We use this to see what
+          works and to publish hiring trends. Our analytics (self-hosted Umami) sets no cookies.
         </li>
         <li>
-          <b>Accounts.</b> Name, email, a hashed password (or one-time sign-in codes), and a session cookie
-          that keeps you signed in. Basis: performing our contract with you (s.26(b)).
+          <b>Accounts.</b> Your name, email address, and a password stored as a hash (or a one-time sign-in code
+          if you use one). A session cookie keeps you signed in. We need these to run your account.
         </li>
         <li>
-          <b>Employers.</b> Company details, contact name, phone, email, address, job ads and the applications
-          you receive. Some company contact details are shown publicly on job and company pages so candidates
-          know who they are dealing with. Basis: contract, and legitimate interest in keeping listings useful.
+          <b>Employers.</b> Company name and details, your contact name, phone, email and address, the jobs you
+          post, and the applications you receive. Some company contact details appear on public job and company
+          pages so candidates know who they are dealing with.
         </li>
         <li>
-          <b>Jobseekers.</b> Your headline, CV details (experience, education, skills, languages, phone) and
-          any note you attach to an application. This is private by default. Only if you switch on
-          "visible to employers" can employers see your profile and phone in candidate search. Basis:
-          contract; for that optional visibility, your consent (s.26(a)), which you can withdraw in your profile.
+          <b>Jobseekers.</b> Your headline, CV details (experience, education, skills, languages, phone), and any
+          note you attach to an application. Your profile is private by default. It is shown to employers only if
+          you switch on "visible to employers", and you can switch that off at any time.
         </li>
         <li>
-          <b>Listings from public sources.</b> Some job ads come from public advertisements on other sites.
-          We keep the employer's published contact details and a link back to the source, so the listing can
-          be checked. Basis: legitimate interest in giving jobseekers one place to search.
+          <b>Listings from other sites.</b> Some jobs are copied from public adverts. We keep the employer's
+          published contact details and a link to the original advert so the listing can be checked.
         </li>
         <li>
-          <b>Payments.</b> Ledger handles checkout, invoices and cancellations. We receive your plan and order
-          status, but we never see or store your card details. Basis: contract and legal obligations around
-          accounting records.
+          <b>Payments.</b> Polar handles checkout, invoices and cancellations. We receive your plan and order
+          status. We never see or store your card details.
         </li>
         <li>
-          <b>Messages.</b> If you email us, we keep the message and our reply so we can help you and keep a
-          record of the request. Basis: legitimate interest and, where relevant, legal obligation.
+          <b>Messages.</b> If you email us, we keep your message and our reply so we can help you and keep a record
+          of the request.
         </li>
       </ul>
       <p>
-        An email and password (or sign-in code) are needed for an account, and company and contact details are
-        needed to publish a job. Without them we can't provide those features. There is no other legal requirement
-        for you to give us personal data.
+        Some information is required to do what you ask. For example, you need an email address to create an
+        account, and you need company details to post a job. If you don't provide it, we can't offer that feature.
       </p>
 
-      <h3>Who else can see it</h3>
+      <h3>Why we can use it</h3>
       <p>
-        Employers see applications to their own jobs and, if you opted in, your candidate profile. Jobseekers
-        do not see employer contact data beyond what is published on a job ad. We don't sell personal data.
+        We rely on the lawful grounds set out in the Act. Mostly that is:
       </p>
+      <ul>
+        <li><b>To provide the service you asked for</b>, such as your account, your applications and your job posts.</li>
+        <li><b>Our legitimate interests</b> in running, securing and improving Tshono, and in keeping listings useful, where that does not outweigh your rights.</li>
+        <li><b>Your consent</b>, for example when you make your profile visible to employers. You can withdraw consent at any time.</li>
+        <li><b>Legal obligations</b>, such as keeping accounting records.</li>
+      </ul>
+
+      <h3>Who we share it with</h3>
       <p>
-        Service providers process data on our behalf: Ground (hosting service), Vault (database), Radar
-        (search engine), Courier (sign-in and reset emails), Ledger (payment provider) and Pulse
-        (analytics processor). Some of these may process data outside Botswana. Cross-border transfers
-        are covered by Part XIV of the Act (ss.74–78); email us if you want the safeguards that apply to
-        a particular provider.
+        Employers see the applications they receive and, if you have made your profile visible, your candidate
+        profile. Jobseekers see employer contact details only where they are published on a job. We do not sell
+        personal data.
+      </p>
+      <p>We use these service providers to run Tshono. They process data only on our instructions:</p>
+      <ul>
+        <li><b>Cloudflare Pages</b>: website hosting.</li>
+        <li><b>Neon</b>: our database.</li>
+        <li><b>Typesense</b>: job search.</li>
+        <li><b>Resend</b>: sign-in and password reset emails.</li>
+        <li><b>Polar</b>: payments, invoices and billing portal.</li>
+        <li><b>Umami</b>: privacy-friendly website analytics, hosted by us.</li>
+      </ul>
+      <p>
+        Some providers store or process data outside Botswana. Where that happens, we choose providers that offer
+        appropriate safeguards for the transfer. Email us if you want to know how a specific provider is covered.
       </p>
 
       <h3>Cookies and local storage</h3>
+      <ul>
+        <li><b>Session cookie</b>: keeps you signed in. Needed for accounts.</li>
+        <li><b>Local storage</b>: remembers your light or dark theme.</li>
+      </ul>
       <p>
-        We use a session cookie for signed-in accounts, and store your light/dark theme choice in your
-        browser's local storage. Our analytics tracker is cookieless: it does not set cookies, and your IP is
-        used only to calculate a rotating anonymous session identifier. No advertising or cross-site tracking
-        cookies are used.
+        We do not use advertising or cross-site tracking cookies. Our analytics does not set cookies.
       </p>
 
       <h3>How long we keep it</h3>
       <ul>
-        <li>Live jobs and public company pages: until the job is closed or the company is removed.</li>
-        <li>Account, profile and application data: until you delete them or delete your account. Deleted records may persist briefly in backups before they are overwritten.</li>
-        <li>Payment and billing records: for as long as tax and accounting rules require.</li>
-        <li>Analytics: kept in aggregate on our own analytics server.</li>
+        <li><b>Job listings and company pages</b>: until the job closes or the company is removed.</li>
+        <li><b>Accounts, profiles and applications</b>: until you delete them, or your account, yourself. Deleted data may remain in backups for a short time before they are overwritten.</li>
+        <li><b>Billing records</b>: for as long as tax and accounting rules require.</li>
+        <li><b>Analytics</b>: kept as aggregate statistics.</li>
       </ul>
 
       <h3 id="your-rights">Your rights</h3>
+      <p>Under the Act you can ask us to:</p>
+      <ul>
+        <li>give you a copy of the personal data we hold about you;</li>
+        <li>correct data that is wrong;</li>
+        <li>delete your data;</li>
+        <li>limit how we use it;</li>
+        <li>send you a copy in a portable format;</li>
+        <li>stop using it for direct marketing or for purposes based on our legitimate interests.</li>
+      </ul>
       <p>
-        Under Part VIII of the Act (ss.37–49) you can ask us to give you access to your personal data, correct
-        it, erase it, restrict how we use it, or provide a portable copy. You can object to processing
-        (including direct marketing) and withdraw consent where we rely on it. Email
-        <a :href="`mailto:${CONTACT_EMAIL}`">{{ CONTACT_EMAIL }}</a> with the email on your account and what
-        you want us to do. We may ask for information to confirm it's you. We respond within one month unless
-        the Act allows more time, and there is no fee unless a request is unfounded or excessive. You can also
-        complain to the Information and Data Protection Commission (s.80).
+        To use any of these, email <a :href="`mailto:${CONTACT_EMAIL}`">{{ CONTACT_EMAIL }}</a> from the address on
+        your account and say what you want. We may ask you to confirm your identity first. We aim to reply within
+        one month. We don't charge a fee unless a request is clearly unfounded or excessive.
       </p>
       <p>
-        We don't make automated decisions about you that have legal or similarly significant effects. Job
-        matches are just search results; a human decides whether to hire.
+        You can also complain to the Information and Data Protection Commission if you think we have handled your
+        data unlawfully. We would appreciate the chance to fix the problem first.
+      </p>
+      <p>
+        We do not make decisions about you that have legal or similar significant effects using automated means.
+        Job matches are search results. A person decides who to hire.
       </p>
 
       <h3>Security and breaches</h3>
       <p>
-        We use appropriate technical and organisational measures to protect personal data, including access
-        controls and encrypted connections. If a breach occurs, we assess the risk, notify the Commission
-        where the Act requires (normally within 72 hours) and tell affected people where required (ss.62–64).
+        We protect personal data with access controls, encrypted connections and limits on who can see what. If
+        a breach puts your data at real risk, we will tell the Commission and the people affected, as the Act requires.
       </p>
 
       <h3>Children</h3>
       <p>
-        Tshono is a work and hiring service, not aimed at children. We don't knowingly collect personal data
-        from anyone under 16 without a parent or guardian's authorisation.
+        Tshono is for work and hiring. We do not knowingly collect personal data from children. If you believe a
+        child has given us their data, email us and we will delete it.
       </p>
 
       <h3>Changes to this notice</h3>
       <p>
-        If we change how we handle personal data, we'll update this page and the date at the top. Material
-        changes will be called out on the site.
+        If we change how we use personal data, we will update this page and the date at the top. Significant
+        changes will be flagged on the site.
       </p>
     </div>
   </section>
