@@ -54,19 +54,21 @@ export const auth = betterAuth({
         }
         const html = `<p>Your tshono code is <strong>${otp}</strong>. It expires in 5 minutes.</p>`
         if (!apiKey) {
+          // Never log codes in production: anyone with log access could sign in.
+          if (process.env.NODE_ENV === 'production') throw new Error('RESEND_API_KEY is not set')
           // Local dev without a mail provider: read the code from server logs.
           console.log(`[auth] ${type} OTP for ${email}: ${otp}`)
           return
         }
-        try {
-          const res = await fetch('https://api.resend.com/emails', {
-            method: 'POST',
-            headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ from, to: [email], subject: subject[type] ?? 'Your tshono code', html }),
-          })
-          if (!res.ok) console.error('[auth] resend failed', res.status, await res.text())
-        } catch (e) {
-          console.error('[auth] resend error', e)
+        // Throw on failure so the UI does not report a code that was never sent.
+        const res = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ from, to: [email], subject: subject[type] ?? 'Your tshono code', html }),
+        })
+        if (!res.ok) {
+          console.error('[auth] resend failed', res.status, await res.text())
+          throw new Error('failed to send code')
         }
       },
     }),
