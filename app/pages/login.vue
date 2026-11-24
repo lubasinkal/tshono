@@ -220,6 +220,19 @@ async function resend() {
   }
 }
 
+// Sign-in never routes an account without a company or profile into sign-up:
+// that account is signed out and told it has no tshono account.
+async function enterOrRefuse() {
+  const me = await $fetch<{ role: string }>('/api/me')
+  if (me.role === 'none') {
+    await auth.signOut()
+    throw new Error('no tshono account for this sign-in')
+  }
+  // Full-page navigation after auth so the session cookie is read on the next
+  // request (same approach as the fees app).
+  window.location.href = '/dashboard'
+}
+
 // Full-page navigation after auth so the session cookie is read on the next
 // request (same approach as the fees app).
 async function submit() {
@@ -229,7 +242,7 @@ async function submit() {
     if (mode.value === 'signin') {
       const { error: err } = await auth.signIn.email({ email: email.value, password: password.value })
       if (err) throw new Error(err.message || 'sign in failed')
-      window.location.href = '/dashboard'
+      await enterOrRefuse()
     } else if (mode.value === 'register') {
       const { error: upErr } = await auth.signUp.email({
         email: email.value,
@@ -257,7 +270,7 @@ async function submit() {
     } else if (mode.value === 'otp-verify') {
       const { error: err } = await auth.signIn.emailOtp({ email: email.value, otp: otp.value })
       if (err) throw new Error(err.message || 'invalid code')
-      window.location.href = '/dashboard'
+      await enterOrRefuse()
     } else if (mode.value === 'forgot-send') {
       await sendOtp('forget-password')
     } else if (mode.value === 'forgot-verify') {

@@ -1,3 +1,4 @@
+import { auth } from '~~/lib/auth'
 import { pool } from '~~/lib/db'
 
 // Deletes the signed-in account and everything that hangs off it. Profile, CV,
@@ -55,22 +56,11 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  // cookieCache keeps a signed cookie valid for its maxAge, so clear both: a
-  // deleted account must not look signed in for the next five minutes.
-  for (const name of [
-    'better-auth.session_token',
-    'better-auth.session_data',
-    '__Secure-better-auth.session_token',
-    '__Secure-better-auth.session_data',
-  ]) {
-    setCookie(event, name, '', {
-      path: '/',
-      maxAge: 0,
-      httpOnly: true,
-      sameSite: 'lax',
-      secure: name.startsWith('__Secure-'),
-    })
-  }
+  // Better Auth's own sign-out clears every session cookie it set (token, cache,
+  // dont_remember) with the right names and flags. cookieCache would otherwise
+  // keep a deleted account looking signed in for up to five minutes.
+  const signedOut = await auth.api.signOut({ headers: event.headers, returnHeaders: true })
+  for (const cookie of signedOut.headers.getSetCookie()) appendHeader(event, 'set-cookie', cookie)
 
   return { ok: true }
 })

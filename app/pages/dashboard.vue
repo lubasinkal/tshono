@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // Single post-auth landing point so sign-in does not have to guess the account
 // type: employers go to their jobs, jobseekers to their dashboard, and an
-// account with neither goes to the form that creates a profile.
+// account with neither is not a tshono account: send it back to sign-in.
 const { data } = await useFetch<{ role: string }>('/api/me')
 const role = data.value?.role
 await navigateTo(
@@ -11,7 +11,7 @@ await navigateTo(
       ? '/employers'
       : role === 'jobseeker'
         ? '/jobseekers'
-        : '/jobseekers/profile',
+        : '/login',
   { replace: true },
 )
 </script>
