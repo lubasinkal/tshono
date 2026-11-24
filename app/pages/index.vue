@@ -127,7 +127,6 @@ function syncUrl() {
 
 function goPage(p: number) {
   page.value = Math.min(Math.max(1, p), pages.value)
-  syncUrl()
   queueRemote()
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
@@ -135,11 +134,9 @@ function goPage(p: number) {
 // Keep every view shareable through the URL. Filter edits reset to page one.
 watch([query, sector, location, exp], () => {
   page.value = 1
-  syncUrl()
   queueRemote()
 })
 watch(page, () => {
-  syncUrl()
   queueRemote()
 })
 
@@ -172,7 +169,8 @@ function queueRemote(immediate = false) {
     runRemote()
     return
   }
-  t = setTimeout(runRemote, 160)
+  // URL follows the debounced search, not every keystroke.
+  t = setTimeout(() => { syncUrl(); runRemote() }, 160)
 }
 
 onMounted(() => {
