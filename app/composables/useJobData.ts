@@ -61,7 +61,9 @@ export function useJobData() {
       } catch {}
     }
     try {
-      const fields = 'id,title,company,sector,location,url,closing,posted,min_years,salary_min,salary_max,salary_period,employment_type,work_mode,featured_until'
+      // Only the fields the insight, sector and company pages read. Every doc is
+      // also serialized into the SSR payload, so extra fields cost on every visit.
+      const fields = 'id,title,company,sector,location,closing,posted,min_years'
       const perPage = 250
       const first = (await liveRaw({ q: '', query_by: 'title', per_page: String(perPage), page: '1', include_fields: fields })) as { hits?: Array<{ document: RawDoc }>; found?: number }
       const hits0 = first.hits ?? []
