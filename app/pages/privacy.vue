@@ -10,7 +10,7 @@
     <h1 class="title">Your data.</h1>
     <p class="sub">
       What Tshono collects about you, why, who we share it with, and what you can do about it. This notice
-      follows Botswana's Data Protection Act, 2018. Questions? <NuxtLink to="/contact">Ask us</NuxtLink>.
+      follows Botswana's Data Protection Act, 2024. Questions? <NuxtLink to="/contact">Ask us</NuxtLink>.
     </p>
 
     <div class="jobbody">
@@ -86,8 +86,9 @@
         <li><b>Umami</b>: privacy-friendly website analytics, hosted by us.</li>
       </ul>
       <p>
-        Some providers store or process data outside Botswana. Where that happens, we choose providers that offer
-        appropriate safeguards for the transfer. Email us if you want to know how a specific provider is covered.
+        Our database is hosted by Neon on Amazon Web Services in Ohio, United States, so your personal data is
+        transferred out of Botswana. Other providers listed above may also process data outside Botswana. Transfers
+        out of Botswana are governed by the Act. Email us for details on a specific provider.
       </p>
 
       <h3>Cookies and local storage</h3>
@@ -127,8 +128,8 @@
       <h3>Security and breaches</h3>
       <p>
         We protect personal data with access controls, encrypted connections and limits on who can see what. If
-        a breach affects your data, we will notify the Information and Data Protection Commission without delay,
-        as section 33 of the Act requires, and tell the people affected.
+        a breach affects your data, we will notify the Information and Data Protection Commission without delay and,
+        where feasible, within 72 hours, and tell the people affected.
       </p>
 
       <h3>Children</h3>
