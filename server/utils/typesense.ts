@@ -91,9 +91,10 @@ export async function indexJob(job: IndexableJob): Promise<boolean> {
   return true
 }
 
-export async function unindexJob(id: string): Promise<void> {
+// Takes the public document id (publicJobId), not a Postgres id.
+export async function unindexJob(publicId: string): Promise<void> {
   if (!key()) return
-  const res = await fetch(`https://${host()}/collections/jobs/documents/emp-${id}`, {
+  const res = await fetch(`https://${host()}/collections/jobs/documents/${encodeURIComponent(publicId)}`, {
     method: 'DELETE',
     headers: { 'X-TYPESENSE-API-KEY': key() },
   })

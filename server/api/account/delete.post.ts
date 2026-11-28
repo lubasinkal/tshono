@@ -1,5 +1,6 @@
 import { auth } from '~~/lib/auth'
 import { pool } from '~~/lib/db'
+import { publicJobId } from '~~/shared/job'
 
 // Deletes the signed-in account and everything that hangs off it. Profile, CV,
 // applications and sessions all cascade from "user". A company only goes with
@@ -19,11 +20,15 @@ export default defineEventHandler(async (event) => {
   const soloOrgs = memberships.filter((m) => m.members <= 1).map((m) => m.id)
   const owned = memberships.filter((m) => m.members > 1 && m.role === 'owner')
 
-  // Search is a separate index: dropping the rows leaves the jobs findable
-  // until they are removed from Typesense too.
+  // Search is a separate index. Unindex first so a Typesense failure cannot
+  // leave a deleted company's jobs findable.
   const { rows: indexed } = soloOrgs.length
-    ? await pool.query<{ id: string }>('select id from jobs where organization_id = any($1)', [soloOrgs])
-    : { rows: [] as { id: string }[] }
+    ? await pool.query<{ id: string; source: string; external_id: string | null }>(
+        'select id, source, external_id from jobs where organization_id = any($1)',
+        [soloOrgs],
+      )
+    : { rows: [] as { id: string; source: string; external_id: string | null }[] }
+  for (const job of indexed) await unindexJob(publicJobId(job))
 
   const client = await pool.connect()
   try {
@@ -46,14 +51,6 @@ export default defineEventHandler(async (event) => {
     throw e
   } finally {
     client.release()
-  }
-
-  for (const job of indexed) {
-    try {
-      await unindexJob(job.id)
-    } catch (e) {
-      console.error('typesense unindex failed', (e as Error).message)
-    }
   }
 
   // Better Auth's own sign-out clears every session cookie it set (token, cache,

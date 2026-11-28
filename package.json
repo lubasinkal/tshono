@@ -8,6 +8,7 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
+    "test": "bun test",
     "typecheck": "nuxt typecheck",
     "db:migrate": "bun run scripts/migrate.ts"
   },

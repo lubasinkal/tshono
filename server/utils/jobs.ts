@@ -1,5 +1,5 @@
 import { pool } from '~~/lib/db'
-import { districtFor, validateJob, type JobInput } from '~~/shared/job'
+import { districtFor, publicJobId, validateJob, type JobInput } from '~~/shared/job'
 import { indexJob, unindexJob } from './typesense'
 
 export interface JobRow {
@@ -153,17 +153,16 @@ export async function updateJob(id: string, orgId: string, company: string, inpu
 }
 
 export async function closeJob(id: string, orgId: string) {
-  const { rows } = await pool.query<{ id: string }>(
-    `update jobs set status='closed', closed_at=now(), updated_at=now()
-      where id=$1 and organization_id=$2 returning id`,
+  const { rows } = await pool.query<Pick<JobRow, 'id' | 'source' | 'external_id'>>(
+    `select id, source, external_id from jobs where id=$1 and organization_id=$2`,
     [id, orgId],
   )
   if (!rows.length) throw createError({ statusCode: 404, statusMessage: 'job not found' })
-  try {
-    await unindexJob(rows[0]!.id)
-  } catch (e) {
-    console.error('typesense unindex failed', (e as Error).message)
-  }
+  await unindexJob(publicJobId(rows[0]!))
+  await pool.query(
+    `update jobs set status='closed', closed_at=now(), updated_at=now() where id=$1 and organization_id=$2`,
+    [id, orgId],
+  )
 }
 
 export async function listJobs(orgId: string) {
